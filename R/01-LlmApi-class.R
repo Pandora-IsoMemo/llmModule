@@ -77,7 +77,7 @@ new_LlmApi <- function(api_key_path, provider) {
 
   # Validate key with test request
   is_valid <- tryCatch(
-    validate_api_key(api_key, url, provider),
+    validate_api_key(api_key, provider),
     error = function(e) e
   )
 
@@ -115,16 +115,14 @@ print.LlmApi <- function(x, ...) {
 
 
 # Function to validate API key via a test request
-validate_api_key <- function(api_key, url, provider) {
-  # Set test model based on provider
-  test_model <- if (provider == "OpenAI") "gpt-3.5-turbo" else "deepseek-chat"
-
+validate_api_key <- function(api_key, provider) {
+  url <- switch(
+    provider,
+    "OpenAI" = "https://api.openai.com/v1/models",
+    "DeepSeek" = "https://api.deepseek.com/v1/models"
+  )
   test_req <- request(url) |>
-    req_headers(
-      Authorization = paste("Bearer", api_key),
-      `Content-Type` = "application/json"
-    ) |>
-    req_body_json(list(model = test_model, messages = list(list(role = "user", content = "Hello"))))
+    req_headers(Authorization = paste("Bearer", api_key))
 
   res <- req_perform(test_req)  # Let error propagate
 

@@ -56,19 +56,23 @@ statusMessageServer <- function(id, object, ...) {
 
       output$error <-
         renderUI(tagList(lapply(
-          extractMessage(status, type = "error"), tags$p
+          extractMessage(status, type = "error"), function(msg) tags$p(strip_ansi(msg))
         )))
       output$warning <-
         renderUI(tagList(lapply(
-          extractMessage(status, type = "warning"), tags$p
+          extractMessage(status, type = "warning"), function(msg) tags$p(strip_ansi(msg))
         )))
       output$success <-
         renderUI(tagList(lapply(
-          extractMessage(status, type = "success"), tags$p
+          extractMessage(status, type = "success"), function(msg) tags$p(strip_ansi(msg))
         )))
     }) |>
       bindEvent(object())
   })
+}
+
+strip_ansi <- function(x) {
+  gsub("\033\\[[0-9;]*m", "", x)
 }
 
 # ---- Test App ----
