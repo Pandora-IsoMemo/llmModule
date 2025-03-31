@@ -31,6 +31,7 @@
 #' # Print the API object
 #' print(api)
 #' }
+#' @export
 new_LlmApi <- function(api_key_path, provider) {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 

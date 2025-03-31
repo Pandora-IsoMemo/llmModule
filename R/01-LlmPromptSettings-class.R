@@ -109,8 +109,12 @@ new_LlmPromptSettings <- function(prompt_content,
 print.LlmPromptSettings <- function(x, ...) {
   cat("LLM Promp Settings\n")
   cat("Model:", x$model, "\n")
-  cat("Prompt Role:", x$messages$role, "\n")
-  cat("Prompt Content:", x$messages$content, "\n")
+  if (!is.null(x$messages)) {
+    if (!is.null(x$messages$role))
+      cat("Prompt Role:", x$messages$role, "\n")
+    if (!is.null(x$messages$content))
+      cat("Prompt Content:", x$messages$content, "\n")
+  }
   cat("Max Tokens:", x$max_tokens, "\n")
   cat("Temperature:", x$temperature, "\n")
   cat("Top-P:", x$top_p, "\n")

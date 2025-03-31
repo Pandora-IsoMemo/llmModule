@@ -2,7 +2,7 @@
 
 S3method(print,LlmApi)
 S3method(print,LlmPromptSettings)
-S3method(print,LlmResponse)
+export(new_LlmApi)
 export(new_LlmPromptSettings)
 import(shiny)
 
