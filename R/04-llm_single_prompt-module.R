@@ -1,8 +1,9 @@
 # ---- UI Function ----
 
 llm_single_prompt_ui <- function(id,
-                                 prompt_beginning = "\"Write an SQL query to ...\"",
-                                 prompt_placeholder = "... your natural language instructions") {
+                                 prompt_beginning = "",
+                                 prompt_placeholder = "Ask me anything...",
+                                 theme = "xcode") {
   ns <- NS(id)
 
   tagList(
@@ -16,7 +17,7 @@ llm_single_prompt_ui <- function(id,
       ns("prompt"),
       value = NULL,
       mode = "text",
-      theme = "cobalt",
+      theme = theme,
       fontSize = 16,
       autoScrollEditorIntoView = TRUE,
       minLines = 3,
