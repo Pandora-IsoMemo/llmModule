@@ -2,8 +2,10 @@
 
 S3method(print,LlmApi)
 S3method(print,LlmPromptSettings)
+S3method(print,LlmResponse)
 export(new_LlmApi)
 export(new_LlmPromptSettings)
+export(new_LlmResponse)
 import(shiny)
 
 importFrom(httr2,req_body_json)
@@ -12,3 +14,5 @@ importFrom(httr2,req_perform)
 importFrom(httr2,request)
 importFrom(httr2,resp_body_json)
 importFrom(shinyAce,aceEditor)
+importFrom(shinyjs,disable)
+importFrom(shinyjs,enable)

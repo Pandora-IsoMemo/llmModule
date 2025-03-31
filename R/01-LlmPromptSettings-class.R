@@ -79,10 +79,17 @@ new_LlmPromptSettings <- function(prompt_content,
     logprobs = logprobs
   )
 
+  # Validate model
+  if (is.character(model) && model == "") {
+    settings <- list()
+    attr(settings, "error") <- "Model cannot be an empty string."
+    return(settings)
+  }
+
   # Validate temperature and n
   if (temperature == 0 & n > 1) {
     n <- 1
-    n_msg <- 'You are running the deterministic model, so `n` was set to 1 to avoid unnecessary token quota usage.'
+    n_msg <- "You are running the deterministic model, so `n` was set to 1 to avoid unnecessary token quota usage."
     prompt_settings <- append_attr(prompt_settings, n_msg, attr_name = "message")
     message(n_msg)
   }

@@ -75,9 +75,15 @@ new_LlmApi <- function(api_key_path, provider) {
     "DeepSeek" = "https://api.deepseek.com/v1/completion"
   )
 
+  url_models <- switch(
+    provider,
+    "OpenAI" = "https://api.openai.com/v1/models",
+    "DeepSeek" = "https://api.deepseek.com/v1/models"
+  )
+
   # Validate key with test request
   is_valid <- tryCatch(
-    validate_api_key(api_key, provider),
+    validate_api_key(api_key, url_models),
     error = function(e) e
   )
 
@@ -94,7 +100,7 @@ new_LlmApi <- function(api_key_path, provider) {
   }
 
   api_obj <- structure(
-    list(api_key = api_key, url = url, provider = provider),
+    list(api_key = api_key, provider = provider, url = url, url_models = url_models),
     class = "LlmApi"
   )
   return(api_obj)
@@ -111,17 +117,13 @@ print.LlmApi <- function(x, ...) {
   cat("Provider:", x$provider, "\n")
   cat("API Key: [hidden]\n")
   cat("Endpoint:", x$url, "\n")
+  cat("Models URL:", x$url_models, "\n")
 }
 
 
 # Function to validate API key via a test request
-validate_api_key <- function(api_key, provider) {
-  url <- switch(
-    provider,
-    "OpenAI" = "https://api.openai.com/v1/models",
-    "DeepSeek" = "https://api.deepseek.com/v1/models"
-  )
-  test_req <- request(url) |>
+validate_api_key <- function(api_key, url_models) {
+  test_req <- request(url_models) |>
     req_headers(Authorization = paste("Bearer", api_key))
 
   res <- req_perform(test_req)  # Let error propagate

@@ -23,7 +23,14 @@ llm_single_prompt_ui <- function(id,
       maxLines = 5,
       autoComplete = "live",
       placeholder = prompt_placeholder
-    )
+    ),
+    fluidRow(
+      column(4, actionButton(ns("generate"), "Generate Text")),
+      column(8, align = "right", status_message_ui(ns("response_status"))),
+
+    ),
+    hr(),
+    verbatimTextOutput(ns("generated_text"))
   )
 }
 
@@ -31,12 +38,42 @@ llm_single_prompt_ui <- function(id,
 
 llm_single_prompt_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    llm_api <- llm_api_server("api")
-    prompt_settings_reactive <- llm_prompt_settings_server("prompt_settings", llm_api, reactive(input$prompt))
+    ns <- session$ns
+    llm_api_reactive <- llm_api_server("api")
+    prompt_settings_reactive <- llm_prompt_settings_server("prompt_settings", llm_api_reactive, reactive(input$prompt))
 
-    reactive({
-      prompt_settings_reactive()
+    llm_response <- reactiveVal()
+
+    # disable generate button if no API key is available
+    observe({
+      if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_settings_reactive(), "LlmPromptSettings")) {
+        shinyjs::disable(ns("generate"), asis = TRUE)
+      } else {
+        shinyjs::enable(ns("generate"), asis = TRUE)
+      }
     })
+
+    observe({
+      new_response <- new_LlmResponse(llm_api_reactive(), prompt_settings_reactive())
+      llm_response(new_response)
+    }) |>
+      bindEvent(input$generate)
+
+    statusMessageServer(
+      "response_status",
+      object = llm_response,
+      success_message = "Response ready!",
+      warning_message = "Response incomplete.",
+      error_message   = "Response generation failed."
+    )
+
+    output$generated_text <- renderPrint({
+      validate(need(inherits(llm_response(), "LlmResponse"), "No response available."))
+
+      cat(llm_response()$choices[[1]]$message$content)
+    })
+
+    return(llm_response)
   })
 }
 
@@ -45,17 +82,13 @@ llm_single_prompt_server <- function(id) {
 # Please comment this code before building the package
 
 # ui <- fluidPage(
+#   shinyjs::useShinyjs(),
 #   titlePanel("LLM Prompt Module Test"),
-#   llm_single_prompt_ui("single_prompt"),
-#   verbatimTextOutput("out")
+#   llm_single_prompt_ui("single_prompt")
 # )
 #
 # server <- function(input, output, session) {
-#   result <- llm_single_prompt_server("single_prompt")
-#
-#   output$out <- renderPrint({
-#     result()
-#   })
+#   llm_single_prompt_server("single_prompt")
 # }
 #
 # shinyApp(ui, server)

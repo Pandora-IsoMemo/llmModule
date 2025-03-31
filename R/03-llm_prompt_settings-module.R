@@ -34,7 +34,9 @@ llm_prompt_settings_ui <- function(id) {
         lapply(fields_advanced_2, function(f) column(3, do.call(f$fun, f$args)))
       )
     ),
-    status_message_ui(ns("settings_status"))
+    fluidRow(
+      column(12, align = "right", status_message_ui(ns("settings_status")))
+    )
   )
 }
 

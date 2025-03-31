@@ -7,7 +7,7 @@ llm_api_ui <- function(id, title = NULL) {
     fluidRow(
       column(3, radioButtons(ns("provider"), "Choose Provider", choices = c("OpenAI", "DeepSeek"))),
       column(4, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt"))),
-      column(5, status_message_ui(ns("api_status")))
+      column(5, align = "right", status_message_ui(ns("api_status")))
     ),
   )
 }

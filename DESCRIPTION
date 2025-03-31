@@ -15,7 +15,8 @@ Depends: R (>= 3.5.0)
 Imports:
     httr2,
     shiny,
-    shinyAce
+    shinyAce,
+    shinyjs
 Suggests:
     lintr (>= 1.0.2),
     testthat (>= 2.0.0),

@@ -30,13 +30,7 @@
 get_llm_models <- function(api) {
   if (!inherits(api, "LlmApi")) return(list())
 
-  url <- switch(
-    api$provider,
-    "OpenAI" = "https://api.openai.com/v1/models",
-    "DeepSeek" = "https://api.deepseek.com/v1/models"
-  )
-
-  req <- request(url) |>
+  req <- request(api$url_models) |>
     req_headers(Authorization = paste("Bearer", api$api_key),
                 `Content-Type` = "application/json")
 
@@ -45,11 +39,9 @@ get_llm_models <- function(api) {
   # Extract categories
   categories <- vapply(content$data, function(x) categorize_model(x$id), character(1))
   models <- vapply(content$data, function(x) x$id, character(1))
+
   # format into named list
-  models_list <- split(
-    setNames(models, models),
-    categories
-  )
+  models_list <- split(models, categories)
 
   # order list by category, start with models "GPT*" in decreasing order of version then other categories
   models_list <- models_list[order_categories(categories)]
@@ -62,7 +54,7 @@ try_send_request <- function(request) {
     # Send request
     request |> req_perform()
   }, error = function(e) {
-    list(error = "API request failed", message = e$message)
+    return(list(error = "API request failed", message = e$message))
   })
 
   request_content <- tryCatch({
