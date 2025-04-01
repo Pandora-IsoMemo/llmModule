@@ -53,7 +53,7 @@ new_LlmApi <- function(api_key_path, provider) {
   # Define API URL
   url <- c(
     "OpenAI" = "https://api.openai.com/v1/chat/completions",
-    "DeepSeek" = "https://api.deepseek.com/v1/chat/completion"
+    "DeepSeek" = "https://api.deepseek.com/v1/chat/completions"
   )
 
   url_models <- c(
