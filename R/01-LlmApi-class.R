@@ -44,63 +44,60 @@ new_LlmApi <- function(api_key_path, provider) {
 
   api_key <- trimws(readLines(api_key_path, warn = FALSE))
 
-  # Determine expected provider from key pattern
-  key_provider <- if (grepl("^sk-", api_key)) {
-    "OpenAI"
-  } else if (grepl("^[a-zA-Z0-9]+$", api_key)) {
-    "DeepSeek"
-  } else {
-    api <- list()
-    attr(api, "error") <- sprintf("Unknown API key format. Ensure you are using a valid key for the provider '%s'.", provider)
-    return(api)
-  }
-
   if (nchar(api_key) < 20) {
     api <- list()
     attr(api, "error") <- "API key appears too short."
     return(api)
   }
 
-  # Ensure API key matches the correct provider
-  if (provider != key_provider) {
-    api <- list()
-    attr(api, "error") <- sprintf("API key appears to be for '%s', but '%s' was selected.", key_provider, provider)
-    return(api)
-  }
-
   # Define API URL
-  url <- switch(
-    provider,
+  url <- c(
     "OpenAI" = "https://api.openai.com/v1/chat/completions",
-    "DeepSeek" = "https://api.deepseek.com/v1/completion"
+    "DeepSeek" = "https://api.deepseek.com/v1/chat/completion"
   )
 
-  url_models <- switch(
-    provider,
+  url_models <- c(
     "OpenAI" = "https://api.openai.com/v1/models",
     "DeepSeek" = "https://api.deepseek.com/v1/models"
   )
 
-  # Validate key with test request
+  # Validate the key for selected provider with a request to the models endpoint
   is_valid <- tryCatch(
-    validate_api_key(api_key, url_models),
+    validate_api_key(api_key, url_models[provider]),
     error = function(e) e
   )
 
   if (inherits(is_valid, "error")) {
+    # set error message
+    err_msg <- is_valid$message
+
+    # test the other provider
+    other_provider <- ifelse(provider == "OpenAI", "DeepSeek", "OpenAI")
+
+    is_valid_other <- tryCatch(
+      validate_api_key(api_key, url_models[other_provider]),
+      error = function(e) e
+    )
+
+    if (!inherits(is_valid_other, "error")) {
+      # update error message
+      err_msg <- sprintf("API key does not match the selected provider. It appears to be for '%s'.", other_provider)
+    }
+
     api <- list()
-    attr(api, "error") <- is_valid$message
+    attr(api, "error") <- err_msg
     return(api)
   }
 
   if (!is_valid) {
+    # if invalid but error message is missing
     api <- list()
     attr(api, "error") <- "API key failed validation request."
     return(api)
   }
 
   api_obj <- structure(
-    list(api_key = api_key, provider = provider, url = url, url_models = url_models),
+    list(api_key = api_key, provider = provider, url = url[provider], url_models = url_models[provider]),
     class = "LlmApi"
   )
   return(api_obj)
@@ -126,7 +123,11 @@ validate_api_key <- function(api_key, url_models) {
   test_req <- request(url_models) |>
     req_headers(Authorization = paste("Bearer", api_key))
 
-  res <- req_perform(test_req)  # Let error propagate
+  res <- req_perform(test_req)
+
+  if (!is.null(res) && !is.null(res$status_code) && res$status_code != 200) {
+    stop(res$status_code)
+  }
 
   return(!is.null(res) && res$status_code == 200)
 }

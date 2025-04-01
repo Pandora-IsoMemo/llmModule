@@ -5,7 +5,7 @@ llm_api_ui <- function(id, title = NULL) {
   tagList(
     if (!is.null(title)) h3(title) else NULL,
     fluidRow(
-      column(3, radioButtons(ns("provider"), "Choose Provider", choices = c("OpenAI", "DeepSeek"))),
+      column(3, radioButtons(ns("provider"), "Choose Provider", choices = c("OpenAI", "DeepSeek"), selected = character(0))),
       column(4, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt"))),
       column(5, align = "right", status_message_ui(ns("api_status")))
     ),
@@ -29,8 +29,7 @@ llm_api_server <- function(id) {
 
       # Update reactive values
       api(result)
-    }) |>
-      bindEvent(input$api_key_file)
+    })
 
     statusMessageServer(
       "api_status",
