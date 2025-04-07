@@ -56,7 +56,13 @@ llm_single_prompt_server <- function(id) {
 
     observe({
       new_response <- new_LlmResponse(llm_api_reactive(), prompt_settings_reactive())
-      llm_response(new_response)
+      if (inherits(new_response, "LlmResponse")) {
+        # format result
+        llm_response(format(new_response, output_type = "text"))
+      } else {
+        # propagate error attributes
+        llm_response(new_response)
+      }
     }) |>
       bindEvent(input$generate)
 

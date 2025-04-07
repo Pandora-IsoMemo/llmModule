@@ -3,7 +3,8 @@ Type: Package
 Title: R Interface for Large Language Model APIs
 Version: 0.1.0
 Authors@R: c(
-            person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("cre", "aut"))
+            person("Ricardo", "Fernandes", email = "fernandes@gea.mpg.de", role = c("aut", "cre")),
+            person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
             )
 Description: Provides a structured interface for interacting with Large Language Model (LLM) APIs such
     as OpenAI and DeepSeek. Includes functions for sending requests and extracting structured responses.

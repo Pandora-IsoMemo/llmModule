@@ -94,3 +94,118 @@ send_prompt <- function(api, prompt_settings) {
     req_perform() |>
     resp_body_json()
 }
+
+#' Format an LlmResponse object
+#'
+#' @param x An LlmResponse object
+#' @param output_type A character string indicating the type of output to format.
+#'  Possible values are "text", "meta", "logprobs", or "complete".
+#'  @param ... Additional arguments
+#' @return A formatted character string
+#' @export
+format.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", "complete"), ...) {
+  output_type <- match.arg(output_type)
+
+  switch(
+    output_type,
+    text = list(core_output = get_core_output(x)),
+    meta = list(meta_output = get_meta_output(x)),
+    logprobs = list(logprobs_output = get_logprobs_output(x)),
+    complete = list(core_output = get_core_output(x),
+                    meta_output = get_meta_output(x),
+                    logprobs_output = get_logprobs_output(x))
+  )
+}
+
+get_core_output <- function(x) {
+  prompt_settings <- x$prompt_settings
+  request_content <- x$content
+  n <- length(request_content$choices)
+
+  core_output = data.table::data.table(
+    'n' = 1:n,
+    'prompt_role' = rep(prompt_settings$prompt_role, n),
+    'prompt_content' = rep(prompt_settings$prompt_content, n),
+    'gpt_role' = rep("", n),
+    'gpt_content' = rep("", n)
+  )
+
+  for (i in 1:n) {
+    core_output$gpt_role[i] = request_content$choices[[i]]$message$role
+    core_output$gpt_content[i] = request_content$choices[[i]]$message$content
+  }
+
+  return(core_output)
+}
+
+get_meta_output <- function(x) {
+  prompt_settings <- x$prompt_settings
+  request_content <- x$content
+
+  data.table::data.table(
+    'request_id' = request_content$id,
+    'object' = request_content$object,
+    'model' = request_content$model,
+    'param_prompt_role' = prompt_settings$prompt_role,
+    'param_prompt_content' = prompt_settings$prompt_content,
+    'param_seed' = prompt_settings$seed_info,
+    'param_model' = prompt_settings$model,
+    'param_max_tokens' = prompt_settings$max_tokens,
+    'param_temperature' = prompt_settings$temperature,
+    'param_top_p' = prompt_settings$top_p,
+    'param_n' = prompt_settings$n,
+    'param_stop' = prompt_settings$stop,
+    'param_logprobs' = prompt_settings$logprobs,
+    'param_presence_penalty' = prompt_settings$presence_penalty,
+    'param_frequency_penalty' = prompt_settings$frequency_penalty,
+    'tok_usage_prompt' = request_content$usage$prompt_tokens,
+    'tok_usage_completion' = request_content$usage$completion_tokens,
+    'tok_usage_total' = request_content$usage$total_tokens,
+    'system_fingerprint' = request_content$system_fingerprint
+  )
+}
+
+get_logprobs_output <- function(x) {
+  # Check if logprobs were requested before text generation
+  if (!x$prompt_settings$logprobs) {
+    return("'no logprobs requested'")
+  }
+
+  # Extract logprobs from the response
+  request_content <- x$content
+  n <- length(request_content$choices)
+
+  get_single_logprobs <- function(i) {
+    data_logprobs = request_content$choices[[i]]$logprobs[[1]]
+
+    logprobs_output = data.table::data.table(
+      'n' = i,
+      'token' = rep("", length(data_logprobs)),
+      'logprob' = rep(0, length(data_logprobs))
+    )
+
+    for (j in 1:length(data_logprobs)) {
+      logprobs_output$token[j] = data_logprobs[[j]]$token
+      logprobs_output$logprob[j] = data_logprobs[[j]]$logprob
+    }
+
+    logprobs_output
+  }
+
+  ## get logprobs
+  if (n == 1) {
+      logprobs_output <- get_single_logprobs(i = 1)
+  } else {
+    logprobs_output_list = list()
+
+    for (i in 1:n) {
+      logprobs_output_list[[i]] = get_single_logprobs(i)
+    }
+
+    logprobs_output = data.table::rbindlist(logprobs_output_list)
+  }
+
+  logprobs_output
+}
+
+

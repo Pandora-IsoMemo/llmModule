@@ -12,3 +12,4 @@
 ^pkgdown$
 ^\.github$
 ^inst/RScripts
+^tests/testthat/testdata_large/
