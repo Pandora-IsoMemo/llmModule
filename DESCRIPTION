@@ -1,9 +1,10 @@
 Package: llmModule
 Type: Package
 Title: R Interface for Large Language Model APIs
-Version: 0.1.0
+Version: 25.04.0
 Authors@R: c(
-            person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("cre", "aut"))
+            person("Ricardo", "Fernandes", email = "fernandes@gea.mpg.de", role = c("aut", "cre")),
+            person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
             )
 Description: Provides a structured interface for interacting with Large Language Model (LLM) APIs such
     as OpenAI and DeepSeek. Includes functions for sending requests and extracting structured responses.
@@ -13,6 +14,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.0)
 Imports:
+    data.table,
     httr2,
     shiny,
     shinyAce,
@@ -22,6 +24,6 @@ Suggests:
     testthat (>= 2.0.0),
     knitr,
     rmarkdown
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 URL: https://pandora-isomemo.github.io/llmModule/
