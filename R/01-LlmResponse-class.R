@@ -95,7 +95,7 @@ send_prompt <- function(api, prompt_settings) {
     resp_body_json()
 }
 
-#' Format an LlmResponse object
+#' Extract and format LLM response as a table
 #'
 #' @param x An LlmResponse object
 #' @param output_type A character string indicating the type of output to format.
@@ -103,7 +103,7 @@ send_prompt <- function(api, prompt_settings) {
 #' @param ... Additional arguments (not used)
 #' @return A formatted character string
 #' @export
-format.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", "complete"), ...) {
+as_table.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", "complete"), ...) {
   output_type <- match.arg(output_type)
 
   switch(
@@ -115,6 +115,13 @@ format.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", "c
                     meta_output = get_meta_output(x),
                     logprobs_output = get_logprobs_output(x))
   )
+}
+
+#' Generic extractor for LlmResponse outputs
+#'
+#' @export
+as_table <- function(x, ...) {
+  UseMethod("as_table")
 }
 
 get_core_output <- function(x) {
