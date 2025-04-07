@@ -10,8 +10,9 @@
 \item{x}{An LlmResponse object}
 
 \item{output_type}{A character string indicating the type of output to format.
-Possible values are "text", "meta", "logprobs", or "complete".
-@param ... Additional arguments}
+Possible values are "text", "meta", "logprobs", or "complete".}
+
+\item{...}{Additional arguments (not used)}
 }
 \value{
 A formatted character string

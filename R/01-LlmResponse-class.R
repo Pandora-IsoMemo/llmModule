@@ -100,7 +100,7 @@ send_prompt <- function(api, prompt_settings) {
 #' @param x An LlmResponse object
 #' @param output_type A character string indicating the type of output to format.
 #'  Possible values are "text", "meta", "logprobs", or "complete".
-#'  @param ... Additional arguments
+#' @param ... Additional arguments (not used)
 #' @return A formatted character string
 #' @export
 format.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", "complete"), ...) {
