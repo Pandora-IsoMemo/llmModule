@@ -119,6 +119,9 @@ as_table.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", 
 
 #' Generic extractor for LlmResponse outputs
 #'
+#' @param x An LlmResponse object
+#' @param ... Additional arguments (not used)
+#'
 #' @export
 as_table <- function(x, ...) {
   UseMethod("as_table")

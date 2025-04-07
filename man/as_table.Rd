@@ -6,6 +6,11 @@
 \usage{
 as_table(x, ...)
 }
+\arguments{
+\item{x}{An LlmResponse object}
+
+\item{...}{Additional arguments (not used)}
+}
 \description{
 Generic extractor for LlmResponse outputs
 }
