@@ -2,7 +2,7 @@
 
 ## New features
 
-- added method to format the API response
+- added method to format the API response (#1)
 
 # llmModule 0.1.0
 
