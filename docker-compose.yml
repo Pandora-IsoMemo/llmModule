@@ -5,7 +5,7 @@ services:
     ports:
       - "51134:11434"   # Host port 51134 → Container port 11434
     volumes:
-      - ollama_data:/root/.ollama
+      - ${OLLAMA_LOCAL_MODELS_PATH:-ollama_data}:/root/.ollama
     restart: unless-stopped
 
   shinyapp:
