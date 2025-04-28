@@ -1,7 +1,7 @@
 Package: llmModule
 Type: Package
 Title: R Interface for Large Language Model APIs
-Version: 25.04.0
+Version: 25.04.1
 Authors@R: c(
             person("Ricardo", "Fernandes", email = "ldv1452@gmail.com", role = c("aut", "cre")),
             person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
@@ -16,6 +16,7 @@ Depends: R (>= 3.5.0)
 Imports:
     data.table,
     httr2,
+    ollamar,
     shiny,
     shinyAce,
     shinyjs
