@@ -10,7 +10,7 @@
 # @export
 is_server_running <- function() {
   tryCatch({
-    res <- test_connection()
+    res <- test_connection(url = Sys.getenv("OLLAMA_BASE_URL"))
     return(isTRUE(res))
   }, error = function(e) {
     return(FALSE)
@@ -112,7 +112,7 @@ pull_model_if_needed <- function(manager, model_name) {
 
   # Try pulling the model
   pull_result <- tryCatch(
-    pull(model_name),
+    pull(model_name, host = Sys.getenv("OLLAMA_BASE_URL")),
     error = function(e) e
   )
 

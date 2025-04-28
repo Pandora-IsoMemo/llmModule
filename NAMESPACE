@@ -13,6 +13,7 @@ export(new_LlmPromptSettings)
 export(new_LlmResponse)
 export(new_OllamaModel)
 export(new_OllamaModelManager)
+export(startApplication)
 export(update)
 import(shiny)
 

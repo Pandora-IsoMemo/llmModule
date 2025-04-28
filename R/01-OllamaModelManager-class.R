@@ -39,7 +39,7 @@ print.OllamaModelManager <- function(x, ...) {
 #' @export
 update.OllamaModelManager <- function(x, ...) {
   models <- tryCatch(
-    list_models(),
+    list_models(host = Sys.getenv("OLLAMA_BASE_URL")),
     error = function(e) {
       warning("Could not fetch local models. Is the Ollama server running?")
       return(data.frame())
