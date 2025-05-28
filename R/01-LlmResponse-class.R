@@ -4,7 +4,7 @@
 #' It integrates the credentials from an LlmApi object and the prompt configuration from an LlmPromptSettings object,
 #' handles request errors gracefully, and returns the model-generated content along with associated metadata.
 #'
-#' @param api An object of class LlmApi, created using new_RemoteLlmApi(), containing the API key, endpoint, and provider name.
+#' @param api An object of class RemoteLlmApi or LocalLlmApi.
 #' @param prompt_settings An object of class LlmPromptSettings, containing prompt content, model, and tuning parameters
 #'   (e.g., temperature, max tokens).
 #'
@@ -35,9 +35,9 @@
 #' @seealso [new_RemoteLlmApi()], [new_LlmPromptSettings()]]
 #' @export
 new_LlmResponse <- function(api, prompt_settings) {
-  if (!inherits(api, "RemoteLlmApi")) {
+  if (!inherits(api, "LlmApi")) {
     response <- list()
-    attr(response, "error") <- "API not valid, must be an LlmApi object."
+    attr(response, "error") <- "LLM API not valid, must be an RemoteLlmApi or LocalLlmApi object."
     return(response)
   }
   if (!inherits(prompt_settings, "LlmPromptSettings")) {
@@ -84,7 +84,25 @@ print.LlmResponse <- function(x, ...) {
   cat(x$content$choices[[1]]$message$content, "\n")
 }
 
+#' Generic LLM prompt sender
+#' This function is a generic method for sending prompts to a remote or local LLM API.
+#' It dispatches to the appropriate method based on the class of the `api` argument.
+#' @param api An object of class RemoteLlmApi or LocalLlmApi, which contains the API key and URL for the remote LLM API.
+#' @param prompt_settings An object of class LlmPromptSettings, containing the prompt content and model parameters.
+#' @export
 send_prompt <- function(api, prompt_settings) {
+  UseMethod("send_prompt", api)
+}
+
+#' Send a prompt to a remote LLM API (e.g., OpenAI, DeepSeek)
+#' This function sends a prompt to the remote LLM API and returns the response in a structured format.
+#'
+#' @param api An object of class RemoteLlmApi, which contains the API key and URL for the remote LLM API.
+#' @param prompt_settings An object of class LlmPromptSettings, containing the prompt content and model parameters.
+#' @return A list containing the response from the LLM API, structured similarly to OpenAI responses.
+#' @seealso [new_LlmResponse()]
+#' @export
+send_prompt.RemoteLlmApi <- function(api, prompt_settings) {
   req <- request(api$url) |>
     req_headers(Authorization = paste("Bearer", api$api_key),
                 `Content-Type` = "application/json") |>
@@ -93,6 +111,37 @@ send_prompt <- function(api, prompt_settings) {
   req |>
     req_perform() |>
     resp_body_json()
+}
+
+#' Send a prompt to a local llm API (e.g., Ollama)
+#'
+#' This function sends a prompt to the local LLM API (Ollama) and returns the response in a structured format.
+#' @param api An object of class LocalLlmApi, which contains the URL and model name for the local LLM API.
+#' @param prompt_settings An object of class LlmPromptSettings, containing the prompt content and model parameters.
+#' @return A list containing the response from the Ollama API, structured similarly to OpenAI responses.
+#' @seealso [new_LlmResponse()]
+#' @export
+send_prompt.LocalLlmApi <- function(api, prompt_settings) {
+  body <- list(
+    model = api$model_name,
+    prompt = prompt_settings$prompt,
+    stream = FALSE
+  )
+
+  req <- httr2::request(paste0(api$url, "/api/generate")) |>
+    httr2::req_body_json(body) |>
+    httr2::req_perform()
+
+  resp <- httr2::resp_body_json(req)
+
+  list(
+    choices = list(
+      list(message = list(
+        role = "assistant",
+        content = resp$response
+      ))
+    )
+  )
 }
 
 #' Extract and format LLM response as a table
@@ -149,30 +198,38 @@ get_core_output <- function(x) {
 }
 
 get_meta_output <- function(x) {
-  prompt_settings <- x$prompt_settings
-  request_content <- x$content
+  content <- x$content
+  ps <- x$prompt_settings
 
-  data.table::data.table(
-    'request_id' = request_content$id,
-    'object' = request_content$object,
-    'model' = request_content$model,
-    'param_prompt_role' = prompt_settings$prompt_role,
-    'param_prompt_content' = prompt_settings$prompt_content,
-    'param_seed' = prompt_settings$seed_info,
-    'param_model' = prompt_settings$model,
-    'param_max_tokens' = prompt_settings$max_tokens,
-    'param_temperature' = prompt_settings$temperature,
-    'param_top_p' = prompt_settings$top_p,
-    'param_n' = prompt_settings$n,
-    'param_stop' = prompt_settings$stop,
-    'param_logprobs' = prompt_settings$logprobs,
-    'param_presence_penalty' = prompt_settings$presence_penalty,
-    'param_frequency_penalty' = prompt_settings$frequency_penalty,
-    'tok_usage_prompt' = request_content$usage$prompt_tokens,
-    'tok_usage_completion' = request_content$usage$completion_tokens,
-    'tok_usage_total' = request_content$usage$total_tokens,
-    'system_fingerprint' = request_content$system_fingerprint
+  dt <- data.table::data.table(
+    'param_prompt_content' = ps$prompt_content,
+    'param_model' = ps$model,
+    'param_temperature' = ps$temperature
   )
+
+  for (entry in c("prompt_role", "seed_info", "max_tokens", "top_p", "n", "stop", "logprobs", "presence_penalty", "frequency_penalty")) {
+    if (!is.null(ps[[entry]])) {
+      dt[[sprintf("param_%s", entry)]] <- ps[[entry]]
+    }
+  }
+
+  if (!is.null(content$id)) {
+    dt$request_id <- content$id
+  }
+
+  for (entry in c("system_fingerprint", "object")) {
+    if (!is.null(content[[entry]])) {
+      dt[[entry]] <- content[[entry]]
+    }
+  }
+
+  if (!is.null(content$usage)) {
+    dt$tok_usage_prompt <- content$usage$prompt_tokens
+    dt$tok_usage_completion <- content$usage$completion_tokens
+    dt$tok_usage_total <- content$usage$total_tokens
+  }
+
+  dt
 }
 
 get_logprobs_output <- function(x) {

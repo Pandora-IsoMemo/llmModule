@@ -9,7 +9,7 @@
 #' This function allows users to dynamically query OpenAI and DeepSeek to determine which models
 #' are accessible while ensuring valid authentication via the LlmApi class.
 #'
-#' @param api an object of class LlmApi, created using the new_RemoteLlmApi() function, containing the API key and endpoint URL.
+#' @param api An object of class RemoteLlmApi or LocalLlmApi.
 #'
 #' @return A response object containing a list of available models from the selected API. This includes model IDs, descriptions, and other metadata.
 #'

@@ -12,7 +12,7 @@ new_RemoteLlmApi(api_key_path, provider)
 \item{provider}{character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".}
 }
 \value{
-An object of class LlmApi, containing the API key, URL, and provider name (either "OpenAI" or "DeepSeek").
+An object of class RemoteLlmApi, containing the API key, URL, and provider name (either "OpenAI" or "DeepSeek").
 }
 \description{
 The new_RemoteLlmApi() function constructs an S3 object that stores API credentials for interacting

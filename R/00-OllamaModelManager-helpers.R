@@ -8,9 +8,9 @@
 #
 # @keywords internal
 # @export
-is_server_running <- function() {
+is_server_running <- function(url = Sys.getenv("OLLAMA_BASE_URL")) {
   tryCatch({
-    res <- test_connection(url = Sys.getenv("OLLAMA_BASE_URL"))
+    res <- test_connection(url = url)
     return(isTRUE(res))
   }, error = function(e) {
     return(FALSE)

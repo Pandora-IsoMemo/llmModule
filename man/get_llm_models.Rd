@@ -7,7 +7,7 @@
 get_llm_models(api)
 }
 \arguments{
-\item{api}{an object of class LlmApi, created using the new_RemoteLlmApi() function, containing the API key and endpoint URL.}
+\item{api}{An object of class RemoteLlmApi or LocalLlmApi.}
 }
 \value{
 A response object containing a list of available models from the selected API. This includes model IDs, descriptions, and other metadata.

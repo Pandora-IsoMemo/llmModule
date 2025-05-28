@@ -2,15 +2,15 @@
 % Please edit documentation in R/01-LlmApi-class.R
 \name{print.RemoteLlmApi}
 \alias{print.RemoteLlmApi}
-\title{Print method for LlmApi}
+\title{Print method for RemoteLlmApi}
 \usage{
 \method{print}{RemoteLlmApi}(x, ...)
 }
 \arguments{
-\item{x}{An LlmApi object}
+\item{x}{An RemoteLlmApi object}
 
 \item{...}{Additional arguments}
 }
 \description{
-Print method for LlmApi
+Print method for RemoteLlmApi
 }

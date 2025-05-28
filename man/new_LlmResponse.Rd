@@ -7,7 +7,7 @@
 new_LlmResponse(api, prompt_settings)
 }
 \arguments{
-\item{api}{An object of class LlmApi, created using new_RemoteLlmApi(), containing the API key, endpoint, and provider name.}
+\item{api}{An object of class RemoteLlmApi or LocalLlmApi.}
 
 \item{prompt_settings}{An object of class LlmPromptSettings, containing prompt content, model, and tuning parameters
 (e.g., temperature, max tokens).}
