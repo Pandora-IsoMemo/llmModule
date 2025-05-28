@@ -7,7 +7,7 @@
 new_LlmResponse(api, prompt_settings)
 }
 \arguments{
-\item{api}{An object of class LlmApi, created using new_LlmApi(), containing the API key, endpoint, and provider name.}
+\item{api}{An object of class LlmApi, created using new_RemoteLlmApi(), containing the API key, endpoint, and provider name.}
 
 \item{prompt_settings}{An object of class LlmPromptSettings, containing prompt content, model, and tuning parameters
 (e.g., temperature, max tokens).}
@@ -28,7 +28,7 @@ It integrates the credentials from an LlmApi object and the prompt configuration
 handles request errors gracefully, and returns the model-generated content along with associated metadata.
 }
 \examples{
-api <- new_LlmApi(api_key_path = "path/to/key.txt", provider = "OpenAI")
+api <- new_RemoteLlmApi(api_key_path = "path/to/key.txt", provider = "OpenAI")
 prompt <- new_LlmPromptSettings(
   prompt_content = "Explain entropy in simple terms.",
   model = "gpt-3.5-turbo",
@@ -44,5 +44,5 @@ if (!is.null(attr(response, "error"))) {
 
 }
 \seealso{
-[new_LlmApi()], [new_LlmPromptSettings()]]
+[new_RemoteLlmApi()], [new_LlmPromptSettings()]]
 }

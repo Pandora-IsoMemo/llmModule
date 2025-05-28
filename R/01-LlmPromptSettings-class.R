@@ -26,7 +26,7 @@
 #' @examples
 #' \dontrun{
 #' # Retrieve available models
-#' api <- new_LlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
 #' models <- get_llm_models(api)
 #' }
 #'

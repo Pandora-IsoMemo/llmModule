@@ -4,7 +4,7 @@
 #' It integrates the credentials from an LlmApi object and the prompt configuration from an LlmPromptSettings object,
 #' handles request errors gracefully, and returns the model-generated content along with associated metadata.
 #'
-#' @param api An object of class LlmApi, created using new_LlmApi(), containing the API key, endpoint, and provider name.
+#' @param api An object of class LlmApi, created using new_RemoteLlmApi(), containing the API key, endpoint, and provider name.
 #' @param prompt_settings An object of class LlmPromptSettings, containing prompt content, model, and tuning parameters
 #'   (e.g., temperature, max tokens).
 #'
@@ -18,7 +18,7 @@
 #' If an error occurs during validation or request sending, an empty list is returned with an error attribute containing the error message.
 #'
 #' @examples
-#' api <- new_LlmApi(api_key_path = "path/to/key.txt", provider = "OpenAI")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/key.txt", provider = "OpenAI")
 #' prompt <- new_LlmPromptSettings(
 #'   prompt_content = "Explain entropy in simple terms.",
 #'   model = "gpt-3.5-turbo",
@@ -32,10 +32,10 @@
 #'   cat("Model response:", response$generated_text, "\n")
 #' }
 #'
-#' @seealso [new_LlmApi()], [new_LlmPromptSettings()]]
+#' @seealso [new_RemoteLlmApi()], [new_LlmPromptSettings()]]
 #' @export
 new_LlmResponse <- function(api, prompt_settings) {
-  if (!inherits(api, "LlmApi")) {
+  if (!inherits(api, "RemoteLlmApi")) {
     response <- list()
     attr(response, "error") <- "API not valid, must be an LlmApi object."
     return(response)

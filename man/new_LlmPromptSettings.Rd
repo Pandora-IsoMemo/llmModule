@@ -58,7 +58,7 @@ making requests to Large Language Models (LLMs) such as OpenAI's GPT models and 
 \examples{
 \dontrun{
 # Retrieve available models
-api <- new_LlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
 models <- get_llm_models(api)
 }
 

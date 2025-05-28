@@ -9,26 +9,26 @@
 #' This function allows users to dynamically query OpenAI and DeepSeek to determine which models
 #' are accessible while ensuring valid authentication via the LlmApi class.
 #'
-#' @param api an object of class LlmApi, created using the new_LlmApi() function, containing the API key and endpoint URL.
+#' @param api an object of class LlmApi, created using the new_RemoteLlmApi() function, containing the API key and endpoint URL.
 #'
 #' @return A response object containing a list of available models from the selected API. This includes model IDs, descriptions, and other metadata.
 #'
 #' @examples
 #' \dontrun{
 #' # Create API credentials for DeepSeek
-#' api <- new_LlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
 #'
 #' # Retrieve available models from DeepSeek
 #' models <- get_llm_models(api)
 #'
 #' # Create API credentials for OpenAI
-#' api <- new_LlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
 #'
 #' # Retrieve available models from OpenAI
 #' models <- get_llm_models(api)
 #' }
 get_llm_models <- function(api) {
-  if (!inherits(api, "LlmApi")) return(list())
+  if (!inherits(api, "RemoteLlmApi")) return(list())
 
   req <- request(api$url_models) |>
     req_headers(Authorization = paste("Bearer", api$api_key),
@@ -116,16 +116,60 @@ order_categories <- function(categories) {
 # ---- UI Function ----
 llm_model_selector_ui <- function(id, label = "Select a Model") {
   ns <- NS(id)
-
-  selectInput(ns("model"), label, choices = c("Upload an API key..." = ""))
+  tagList(
+    # radioButtons(ns("source"), "Model source", choices = c("API", "Local"), inline = TRUE),
+    #
+    # re-organize UI for source <--> provider
+    # if API: -> API key file
+    # if local: check load models UI
+    # for both: select a model
+    # later: pass the selected model to the prompt settings module
+    # remove the selection from the prompt settings module
+    selectInput(ns("model"), label, choices = c("Upload an API key..." = ""))
+  )
 }
 
 # ---- Server Function ----
 llm_model_selector_server <- function(id, api_reactive) {
   moduleServer(id, function(input, output, session) {
+    get_local_models <- reactive({
+      manager <- new_OllamaModelManager()
+      manager <- update(manager)
+      manager$local_models
+    })
+
+    get_api_models <- reactive({
+      api <- api_reactive()
+      if (is.null(api)) return(character(0))
+      get_llm_models(api)
+    })
+
+    # observe({
+    #   models <- switch(input$source,
+    #                    "API" = get_api_models(api_reactive()),
+    #                    "Local" = get_local_models(),
+    #                    character(0)
+    #   )
+    #
+    #   choices <- if (length(models) == 0) {
+    #     c("No models found..." = "")
+    #   } else {
+    #     models
+    #   }
+    #
+    #   updateSelectInput(session, "model", choices = choices)
+    # }) |> bindEvent(input$source, api_reactive())
+    #
+    # # Output: selected model + source
+    # reactive(list(
+    #   source = input$source,
+    #   model = input$model
+    # ))
+
     observe({
       api <- api_reactive()
       models <- get_llm_models(api)
+      # or get models from local installation?
 
       choices <- if (length(models) == 0) {
         c("Check your API key..." = "")

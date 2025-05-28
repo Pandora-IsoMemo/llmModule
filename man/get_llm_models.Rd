@@ -7,7 +7,7 @@
 get_llm_models(api)
 }
 \arguments{
-\item{api}{an object of class LlmApi, created using the new_LlmApi() function, containing the API key and endpoint URL.}
+\item{api}{an object of class LlmApi, created using the new_RemoteLlmApi() function, containing the API key and endpoint URL.}
 }
 \value{
 A response object containing a list of available models from the selected API. This includes model IDs, descriptions, and other metadata.
@@ -24,13 +24,13 @@ are accessible while ensuring valid authentication via the LlmApi class.
 \examples{
 \dontrun{
 # Create API credentials for DeepSeek
-api <- new_LlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
+api <- new_RemoteLlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
 
 # Retrieve available models from DeepSeek
 models <- get_llm_models(api)
 
 # Create API credentials for OpenAI
-api <- new_LlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
 
 # Retrieve available models from OpenAI
 models <- get_llm_models(api)

@@ -21,8 +21,8 @@ llm_api_server <- function(id) {
     observe({
       req(input$provider, input$api_key_file)
 
-      # Call new_LlmApi with structured result
-      result <- new_LlmApi(
+      # Call new_RemoteLlmApi with structured result
+      result <- new_RemoteLlmApi(
         api_key_path = input$api_key_file$datapath,
         provider = input$provider
       )

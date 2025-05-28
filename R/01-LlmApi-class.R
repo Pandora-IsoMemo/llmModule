@@ -1,6 +1,6 @@
 #' Create and Validate LLM API Credentials
 #'
-#' The new_LlmApi() function constructs an S3 object that stores API credentials for interacting
+#' The new_RemoteLlmApi() function constructs an S3 object that stores API credentials for interacting
 #' with Large Language Models (LLMs) such as OpenAI's GPT models and DeepSeek models.
 #' It reads the API key from a specified file, validates its format, ensures it matches the correct provider,
 #' and checks if the key is valid by performing a test request.
@@ -23,16 +23,16 @@
 #' @examples
 #' \dontrun{
 #' # Create API credentials for OpenAI
-#' api <- new_LlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
 #'
 #' # Create API credentials for DeepSeek
-#' api <- new_LlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
 #'
 #' # Print the API object
 #' print(api)
 #' }
 #' @export
-new_LlmApi <- function(api_key_path, provider) {
+new_RemoteLlmApi <- function(api_key_path, provider) {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 
   # Early checks
@@ -98,7 +98,7 @@ new_LlmApi <- function(api_key_path, provider) {
 
   api_obj <- structure(
     list(api_key = api_key, provider = provider, url = url[provider], url_models = url_models[provider]),
-    class = "LlmApi"
+    class = "RemoteLlmApi"
   )
   return(api_obj)
 }
@@ -109,8 +109,8 @@ new_LlmApi <- function(api_key_path, provider) {
 #' @param ... Additional arguments
 #'
 #' @export
-print.LlmApi <- function(x, ...) {
-  cat("LLM API Credentials\n")
+print.RemoteLlmApi <- function(x, ...) {
+  cat("Remote LLM API Credentials\n")
   cat("Provider:", x$provider, "\n")
   cat("API Key: [hidden]\n")
   cat("Endpoint:", x$url, "\n")

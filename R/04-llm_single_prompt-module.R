@@ -47,7 +47,7 @@ llm_single_prompt_server <- function(id) {
 
     # disable generate button if no API key is available
     observe({
-      if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_settings_reactive(), "LlmPromptSettings")) {
+      if (!inherits(llm_api_reactive(), "RemoteLlmApi") || !inherits(prompt_settings_reactive(), "LlmPromptSettings")) {
         shinyjs::disable(ns("generate"), asis = TRUE)
       } else {
         shinyjs::enable(ns("generate"), asis = TRUE)
