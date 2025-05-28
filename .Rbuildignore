@@ -1,5 +1,6 @@
 ^.*\.Rproj$
 ^Dockerfile$
+^docker-compose.yml
 ^Jenkinsfile$
 ^JenkinsfileMPI$
 ^bin$

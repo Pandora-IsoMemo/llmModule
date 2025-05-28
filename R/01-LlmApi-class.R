@@ -10,7 +10,8 @@
 #' @param api_key_path character string specifying the path to a file containing the API key.
 #' @param provider character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
 #'
-#' @return An object of class RemoteLlmApi, containing the API key, URL, and provider name (either "OpenAI" or "DeepSeek").
+#' @return An object of class RemoteLlmApi, containing the API key, URL, and provider name
+#'  (either "OpenAI" or "DeepSeek"), or a list with an "error" attribute if construction fails.
 #'
 #' @details
 #' This function includes multiple validation steps:
@@ -83,7 +84,8 @@ new_RemoteLlmApi <- function(api_key_path, provider) {
 
     if (!inherits(is_valid_other, "error")) {
       # update error message
-      err_msg <- sprintf("API key does not match the selected provider. It appears to be for '%s'.", other_provider)
+      err_msg <-
+        sprintf("API key does not match the selected provider. It appears to be for '%s'.", other_provider)
     }
 
     api <- list()
@@ -143,14 +145,20 @@ validate_api_key <- function(api_key, url_models) {
 #' @param base_url Local Ollama base URL
 #' @param pull_if_needed Logical, whether to pull the model automatically
 #'
-#' @return An object of class LocalLlmApi
+#' @return An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
 #' @export
-new_LocalLlmApi <- function(model_name, manager, base_url = "http://localhost:11434", pull_if_needed = TRUE) {
-  if (!is_server_running(url = base_url)) {
-    api <- list()
-    attr(api, "error") <- "Ollama server does not appear to be running at the specified base URL."
-    return(api)
-  }
+new_LocalLlmApi <- function(
+    model_name,
+    manager,
+    base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
+    pull_if_needed = TRUE
+) {
+  # TO DO: fix check, this check is not working yet...
+  # if (!is_server_running(url = base_url)) {
+  #   api <- list()
+  #   attr(api, "error") <- "Ollama server does not appear to be running at the specified base URL."
+  #   return(api)
+  # }
 
   if (missing(manager)) {
     manager <- update(new_OllamaModelManager())
@@ -177,7 +185,8 @@ new_LocalLlmApi <- function(model_name, manager, base_url = "http://localhost:11
   } else {
     if (!is_model_available(manager, model_clean)) {
       api <- list()
-      attr(api, "error") <- sprintf("Model '%s' is not available locally and pull_if_needed = FALSE.", model_clean)
+      attr(api, "error") <-
+        sprintf("Model '%s' is not available locally and pull_if_needed = FALSE.", model_clean)
       return(api)
     }
   }

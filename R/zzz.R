@@ -21,6 +21,6 @@ running_in_shinyproxy <- function() {
     ollama_url <- Sys.getenv("OLLAMA_API_URL", unset = "http://localhost:11434")
     packageStartupMessage(sprintf("[%s] Docker detected: using OLLAMA_BASE_URL = '%s'.", pkgname, ollama_url))
   } else {
-    packageStartupMessage(sprintf("[%s] Default setup: using OLLAMA_BASE_URL = 'http://localhost'.", pkgname))
+    packageStartupMessage(sprintf("[%s] Default setup: using OLLAMA_BASE_URL = 'http://localhost:11434'.", pkgname))
   }
 }

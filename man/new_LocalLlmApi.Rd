@@ -7,7 +7,7 @@
 new_LocalLlmApi(
   model_name,
   manager,
-  base_url = "http://localhost:11434",
+  base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
   pull_if_needed = TRUE
 )
 }
@@ -21,7 +21,7 @@ new_LocalLlmApi(
 \item{pull_if_needed}{Logical, whether to pull the model automatically}
 }
 \value{
-An object of class LocalLlmApi
+An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
 }
 \description{
 Create a local LLM API object from model name and manager
