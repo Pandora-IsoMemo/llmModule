@@ -113,8 +113,8 @@ send_prompt.RemoteLlmApi <- function(api, prompt_settings) {
 #' @export
 send_prompt.LocalLlmApi <- function(api, prompt_settings) {
   body <- list(
-    model = api$model_name,
-    prompt = prompt_settings$prompt,
+    model = prompt_settings$model,
+    prompt = prompt_settings$messages$content,
     stream = FALSE
   )
 
@@ -165,13 +165,13 @@ get_core_output <- function(x) {
     'n' = 1:n,
     'prompt_role' = rep(prompt_settings$prompt_role, n),
     'prompt_content' = rep(prompt_settings$prompt_content, n),
-    'gpt_role' = rep("", n),
-    'gpt_content' = rep("", n)
+    'role' = rep("", n),
+    'content' = rep("", n)
   )
 
   for (i in 1:n) {
-    core_output$gpt_role[i] = request_content$choices[[i]]$message$role
-    core_output$gpt_content[i] = request_content$choices[[i]]$message$content
+    core_output$role[i] = request_content$choices[[i]]$message$role
+    core_output$content[i] = request_content$choices[[i]]$message$content
   }
 
   return(core_output)

@@ -8,6 +8,7 @@ llm_single_prompt_ui <- function(id,
 
   tagList(
     llm_api_ui(ns("api")),
+    tags$br(),
     llm_prompt_settings_ui(ns("prompt_settings")),
     div(style = "margin-bottom: 0.5em;",
         tags$html(
@@ -47,7 +48,7 @@ llm_single_prompt_server <- function(id) {
 
     # disable generate button if no API key is available
     observe({
-      if (!inherits(llm_api_reactive(), "RemoteLlmApi") || !inherits(prompt_settings_reactive(), "LlmPromptSettings")) {
+      if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_settings_reactive(), "LlmPromptSettings")) {
         shinyjs::disable(ns("generate"), asis = TRUE)
       } else {
         shinyjs::enable(ns("generate"), asis = TRUE)
@@ -56,13 +57,7 @@ llm_single_prompt_server <- function(id) {
 
     observe({
       new_response <- new_LlmResponse(llm_api_reactive(), prompt_settings_reactive())
-      if (inherits(new_response, "LlmResponse")) {
-        # format result
-        llm_response(as_table(new_response, output_type = "text"))
-      } else {
-        # propagate error attributes
-        llm_response(new_response)
-      }
+      llm_response(new_response)
     }) |>
       bindEvent(input$generate)
 
@@ -77,8 +72,8 @@ llm_single_prompt_server <- function(id) {
     output$generated_text <- renderPrint({
       validate(need(inherits(llm_response(), "LlmResponse"), "No response available."))
 
-      llm_response()$core_output$gpt_content |>
-        cat()
+      response_table <- llm_response() |> as_table(output_type = "text")
+      response_table$core_output$content |> cat()
     })
 
     return(llm_response)
