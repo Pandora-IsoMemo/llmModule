@@ -5,16 +5,16 @@
 \title{Create a local LLM API object from model name and manager}
 \usage{
 new_LocalLlmApi(
-  model_name,
   manager,
+  new_model = "",
   base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
   pull_if_needed = TRUE
 )
 }
 \arguments{
-\item{model_name}{Character, model name input from user (can be partial)}
-
 \item{manager}{An OllamaModelManager object}
+
+\item{new_model}{Character, model name input from user (can be partial) of the model to pull}
 
 \item{base_url}{Local Ollama base URL}
 

@@ -38,6 +38,12 @@
 new_RemoteLlmApi <- function(api_key_path, provider) {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 
+  if (missing(api_key_path) || !is.character(api_key_path) || nchar(api_key_path) == 0) {
+    api <- list()
+    attr(api, "error") <- "No valid API key path."
+    return(api)
+  }
+
   # Early checks
   if (!file.exists(api_key_path)) {
     api <- list()
@@ -121,7 +127,6 @@ print.RemoteLlmApi <- function(x, ...) {
   cat("Models URL:", x$url_models, "\n")
 }
 
-
 # Function to validate API key via a test request
 validate_api_key <- function(api_key, url_models) {
   test_req <- request(url_models) |>
@@ -140,16 +145,16 @@ validate_api_key <- function(api_key, url_models) {
 
 #' Create a local LLM API object from model name and manager
 #'
-#' @param model_name Character, model name input from user (can be partial)
 #' @param manager An OllamaModelManager object
+#' @param new_model Character, model name input from user (can be partial) of the model to pull
 #' @param base_url Local Ollama base URL
 #' @param pull_if_needed Logical, whether to pull the model automatically
 #'
 #' @return An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
 #' @export
 new_LocalLlmApi <- function(
-    model_name,
     manager,
+    new_model = "",
     base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
     pull_if_needed = TRUE
 ) {
@@ -170,9 +175,9 @@ new_LocalLlmApi <- function(
     return(api)
   }
 
-  model_clean <- clean_model_name(manager, model_name)
+  if (!is.null(new_model) && new_model != "") {
+    model_clean <- clean_model_name(manager, new_model)
 
-  if (pull_if_needed) {
     res <- pull_model_if_needed(manager, model_clean)
     manager <- res$manager
     model_obj <- res$model
@@ -182,24 +187,22 @@ new_LocalLlmApi <- function(
       attr(api, "error") <- sprintf("Failed to pull model '%s': %s", model_clean, model_obj$message)
       return(api)
     }
-  } else {
-    if (!is_model_available(manager, model_clean)) {
-      api <- list()
-      attr(api, "error") <-
-        sprintf("Model '%s' is not available locally and pull_if_needed = FALSE.", model_clean)
-      return(api)
-    }
   }
 
-  structure(
+  api <- structure(
     list(
-      model_name = model_clean,
       url = base_url,
       provider = "ollama",
       manager = manager
     ),
     class = c("LocalLlmApi", "LlmApi")
   )
+
+  if (!is.null(new_model) && new_model != "" && model_obj$status == "ready") {
+    attr(api, "message") <- sprintf("Model '%s' is already ready.", model_clean)
+  }
+
+  return(api)
 }
 
 #' Print method for LocalLlmApi
@@ -211,6 +214,5 @@ new_LocalLlmApi <- function(
 print.LocalLlmApi <- function(x, ...) {
   cat("Local LLM API Credentials\n")
   cat("Provider:", x$provider, "\n")
-  cat("Model Name:", x$model_name, "\n")
   cat("Endpoint:", x$url, "\n")
 }
