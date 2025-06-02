@@ -84,16 +84,6 @@ print.LlmResponse <- function(x, ...) {
   cat(x$content$choices[[1]]$message$content, "\n")
 }
 
-#' Generic LLM prompt sender
-#' This function is a generic method for sending prompts to a remote or local LLM API.
-#' It dispatches to the appropriate method based on the class of the `api` argument.
-#' @param api An object of class RemoteLlmApi or LocalLlmApi, which contains the API key and URL for the remote LLM API.
-#' @param prompt_settings An object of class LlmPromptSettings, containing the prompt content and model parameters.
-#' @export
-send_prompt <- function(api, prompt_settings) {
-  UseMethod("send_prompt", api)
-}
-
 #' Send a prompt to a remote LLM API (e.g., OpenAI, DeepSeek)
 #' This function sends a prompt to the remote LLM API and returns the response in a structured format.
 #'
@@ -164,16 +154,6 @@ as_table.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", 
                     meta_output = get_meta_output(x),
                     logprobs_output = get_logprobs_output(x))
   )
-}
-
-#' Generic extractor for LlmResponse outputs
-#'
-#' @param x An LlmResponse object
-#' @param ... Additional arguments (not used)
-#'
-#' @export
-as_table <- function(x, ...) {
-  UseMethod("as_table")
 }
 
 get_core_output <- function(x) {

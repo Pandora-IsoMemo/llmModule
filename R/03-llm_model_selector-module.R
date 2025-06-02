@@ -2,14 +2,14 @@
 
 #' Retrieve Available LLM Models
 #'
-#' The get_llm_models() function fetches a list of available models from a specified
+#' The get_llm_models() method fetches a list of available models from a specified remote
 #' Large Language Model (LLM) API, such as OpenAI's GPT models or DeepSeek models.
-#' It requires an LlmApi object for authentication and returns the available model options.
+#' It requires an RemoteLlmApi object for authentication and returns the available model options.
 #'
 #' This function allows users to dynamically query OpenAI and DeepSeek to determine which models
 #' are accessible while ensuring valid authentication via the LlmApi class.
 #'
-#' @param api An object of class RemoteLlmApi or LocalLlmApi.
+#' @param x An object of class RemoteLlmApi
 #'
 #' @return A response object containing a list of available models from the selected API. This includes model IDs, descriptions, and other metadata.
 #'
@@ -27,11 +27,11 @@
 #' # Retrieve available models from OpenAI
 #' models <- get_llm_models(api)
 #' }
-get_llm_models <- function(api) {
-  if (!inherits(api, "RemoteLlmApi")) return(list())
+get_llm_models.RemoteLlmApi <- function(x, ...) {
+  if (!inherits(x, "RemoteLlmApi")) return(list())
 
-  req <- request(api$url_models) |>
-    req_headers(Authorization = paste("Bearer", api$api_key),
+  req <- request(x$url_models) |>
+    req_headers(Authorization = paste("Bearer", x$api_key),
                 `Content-Type` = "application/json")
 
   content <- try_send_request(req)
