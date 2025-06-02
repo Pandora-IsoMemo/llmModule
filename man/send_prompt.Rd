@@ -6,12 +6,12 @@
 This function is a generic method for sending prompts to a remote or local LLM API.
 It dispatches to the appropriate method based on the class of the `api` argument.}
 \usage{
-send_prompt(api, prompt_settings)
+send_prompt(api, prompt_config)
 }
 \arguments{
 \item{api}{An object of class RemoteLlmApi or LocalLlmApi, which contains the API key and URL for the remote LLM API.}
 
-\item{prompt_settings}{An object of class LlmPromptSettings, containing the prompt content and model parameters.}
+\item{prompt_config}{An object of class LlmPromptConfig, containing the prompt content and model parameters.}
 }
 \description{
 Generic LLM prompt sender

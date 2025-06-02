@@ -9,7 +9,7 @@ llm_single_prompt_ui <- function(id,
   tagList(
     llm_api_ui(ns("api")),
     tags$br(),
-    llm_prompt_settings_ui(ns("prompt_settings")),
+    llm_prompt_config_ui(ns("prompt_config")),
     div(style = "margin-bottom: 0.5em;",
         tags$html(
           HTML(sprintf("<b>Prompt Input:</b> &nbsp;&nbsp; %s", prompt_beginning))
@@ -42,13 +42,13 @@ llm_single_prompt_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     llm_api_reactive <- llm_api_server("api")
-    prompt_settings_reactive <- llm_prompt_settings_server("prompt_settings", llm_api_reactive, reactive(input$prompt))
+    prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
 
     llm_response <- reactiveVal()
 
     # disable generate button if no API key is available
     observe({
-      if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_settings_reactive(), "LlmPromptSettings")) {
+      if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_config_reactive(), "LlmPromptConfig")) {
         shinyjs::disable(ns("generate"), asis = TRUE)
       } else {
         shinyjs::enable(ns("generate"), asis = TRUE)
@@ -56,7 +56,7 @@ llm_single_prompt_server <- function(id) {
     })
 
     observe({
-      new_response <- new_LlmResponse(llm_api_reactive(), prompt_settings_reactive())
+      new_response <- new_LlmResponse(llm_api_reactive(), prompt_config_reactive())
       llm_response(new_response)
     }) |>
       bindEvent(input$generate)

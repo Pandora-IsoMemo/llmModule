@@ -1,5 +1,5 @@
 # ---- UI Function ----
-llm_prompt_settings_ui <- function(id) {
+llm_prompt_config_ui <- function(id) {
   ns <- NS(id)
 
   # possibly load default values from config later ...
@@ -41,14 +41,14 @@ llm_prompt_settings_ui <- function(id) {
 }
 
 # ---- Server Function ----
-llm_prompt_settings_server <- function(id, llm_api = reactiveVal(list()), prompt_reactive = reactiveVal("")) {
+llm_prompt_config_server <- function(id, llm_api = reactiveVal(list()), prompt_reactive = reactiveVal("")) {
   moduleServer(id, function(input, output, session) {
     model_reactive <- llm_model_selector_server("model_picker", llm_api)
 
-    llm_prompt_settings <- reactiveVal()
+    llm_prompt_config <- reactiveVal()
 
     observe({
-      new_settings <- new_LlmPromptSettings(
+      new_settings <- new_LlmPromptConfig(
         prompt_content = prompt_reactive(),
         model = model_reactive(),
         prompt_role = input$prompt_role,
@@ -63,18 +63,18 @@ llm_prompt_settings_server <- function(id, llm_api = reactiveVal(list()), prompt
         logprobs = input$logprobs
       )
 
-      llm_prompt_settings(new_settings)
+      llm_prompt_config(new_settings)
     })
 
     statusMessageServer(
       "settings_status",
-      object = llm_prompt_settings,
+      object = llm_prompt_config,
       success_message = "Prompt settings ready!",
       warning_message = "Prompt settings incomplete.",
       error_message   = "Prompt settings invalid."
     )
 
-    llm_prompt_settings
+    llm_prompt_config
   })
 }
 
@@ -85,15 +85,15 @@ llm_prompt_settings_server <- function(id, llm_api = reactiveVal(list()), prompt
 
 # ui <- fluidPage(
 #   titlePanel("LLM Prompt Settings Module"),
-#   llm_prompt_settings_ui("llm_settings"),
+#   llm_prompt_config_ui("llm_settings"),
 #   verbatimTextOutput("params")
 # )
 #
 # server <- function(input, output, session) {
-#   prompt_settings <- llm_prompt_settings_server("llm_settings")
+#   prompt_config <- llm_prompt_config_server("llm_settings")
 #
 #   output$params <- renderPrint({
-#     prompt_settings()
+#     prompt_config()
 #   })
 # }
 #

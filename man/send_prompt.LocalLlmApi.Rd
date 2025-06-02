@@ -4,12 +4,12 @@
 \alias{send_prompt.LocalLlmApi}
 \title{Send a prompt to a local llm API (e.g., Ollama)}
 \usage{
-\method{send_prompt}{LocalLlmApi}(api, prompt_settings)
+\method{send_prompt}{LocalLlmApi}(api, prompt_config)
 }
 \arguments{
 \item{api}{An object of class LocalLlmApi, which contains the URL and model name for the local LLM API.}
 
-\item{prompt_settings}{An object of class LlmPromptSettings, containing the prompt content and model parameters.}
+\item{prompt_config}{An object of class LlmPromptConfig, containing the prompt content and model parameters.}
 }
 \value{
 A list containing the response from the Ollama API, structured similarly to OpenAI responses.

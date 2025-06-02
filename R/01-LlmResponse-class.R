@@ -1,25 +1,25 @@
 #' Create and Structure LLM Response Object
 #'
 #' The new_LlmResponse() function sends a prompt to a Large Language Model (LLM) API and returns a structured response object.
-#' It integrates the credentials from an LlmApi object and the prompt configuration from an LlmPromptSettings object,
+#' It integrates the credentials from an LlmApi object and the prompt configuration from an LlmPromptConfig object,
 #' handles request errors gracefully, and returns the model-generated content along with associated metadata.
 #'
 #' @param api An object of class RemoteLlmApi or LocalLlmApi.
-#' @param prompt_settings An object of class LlmPromptSettings, containing prompt content, model, and tuning parameters
+#' @param prompt_config An object of class LlmPromptConfig, containing prompt content, model, and tuning parameters
 #'   (e.g., temperature, max tokens).
 #'
 #' @return An object of class LlmResponse, which includes the following components:
 #'
 #' - content: The raw API response returned from the model.
 #' - provider: The name of the API provider (e.g., "OpenAI", "DeepSeek").
-#' - prompt_settings: The unclassed list representation of the original prompt settings.
+#' - prompt_config: The unclassed list representation of the original prompt settings.
 #' - generated_text: The primary response text content from the model.
 #'
 #' If an error occurs during validation or request sending, an empty list is returned with an error attribute containing the error message.
 #'
 #' @examples
 #' api <- new_RemoteLlmApi(api_key_path = "path/to/key.txt", provider = "OpenAI")
-#' prompt <- new_LlmPromptSettings(
+#' prompt <- new_LlmPromptConfig(
 #'   prompt_content = "Explain entropy in simple terms.",
 #'   model = "gpt-3.5-turbo",
 #'   temperature = 0.7
@@ -32,23 +32,23 @@
 #'   cat("Model response:", response$generated_text, "\n")
 #' }
 #'
-#' @seealso [new_RemoteLlmApi()], [new_LlmPromptSettings()]]
+#' @seealso [new_RemoteLlmApi()], [new_LlmPromptConfig()]]
 #' @export
-new_LlmResponse <- function(api, prompt_settings) {
+new_LlmResponse <- function(api, prompt_config) {
   if (!inherits(api, "LlmApi")) {
     response <- list()
     attr(response, "error") <- "LLM API not valid, must be an RemoteLlmApi or LocalLlmApi object."
     return(response)
   }
-  if (!inherits(prompt_settings, "LlmPromptSettings")) {
+  if (!inherits(prompt_config, "LlmPromptConfig")) {
     response <- list()
-    attr(response, "error") <- "Prompt settings not valid, must be an LlmPromptSettings object."
+    attr(response, "error") <- "Prompt settings not valid, must be an LlmPromptConfig object."
     return(response)
   }
 
   # send request
   content <- tryCatch(
-    send_prompt(api, prompt_settings),
+    send_prompt(api, prompt_config),
     error = function(e) e
   )
 
@@ -62,7 +62,7 @@ new_LlmResponse <- function(api, prompt_settings) {
     list(
       content = content,
       provider = api$provider,
-      prompt_settings = unclass(prompt_settings),
+      prompt_config = unclass(prompt_config),
       generated_text = content$choices[[1]]$message$content
     ),
     class = "LlmResponse"
@@ -78,8 +78,8 @@ new_LlmResponse <- function(api, prompt_settings) {
 print.LlmResponse <- function(x, ...) {
   cat("LLM Response Object\n")
   cat("Provider:", x$provider, "\n")
-  cat("Model:", x$prompt_settings$model, "\n")
-  cat("Temperature:", x$prompt_settings$temperature, "\n")
+  cat("Model:", x$prompt_config$model, "\n")
+  cat("Temperature:", x$prompt_config$temperature, "\n")
   cat("Generated Text:\n")
   cat(x$content$choices[[1]]$message$content, "\n")
 }
@@ -88,15 +88,19 @@ print.LlmResponse <- function(x, ...) {
 #' This function sends a prompt to the remote LLM API and returns the response in a structured format.
 #'
 #' @param api An object of class RemoteLlmApi, which contains the API key and URL for the remote LLM API.
-#' @param prompt_settings An object of class LlmPromptSettings, containing the prompt content and model parameters.
+#' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
 #' @return A list containing the response from the LLM API, structured similarly to OpenAI responses.
 #' @seealso [new_LlmResponse()]
 #' @export
-send_prompt.RemoteLlmApi <- function(api, prompt_settings) {
+send_prompt.RemoteLlmApi <- function(api, prompt_config) {
+  if (!inherits(prompt_config, "LlmPromptConfig")) {
+    stop("prompt_config must be an LlmPromptConfig object.")
+  }
+
   req <- request(api$url) |>
     req_headers(Authorization = paste("Bearer", api$api_key),
                 `Content-Type` = "application/json") |>
-    req_body_json(unclass(prompt_settings))
+    req_body_json(unclass(prompt_config))
 
   req |>
     req_perform() |>
@@ -107,14 +111,18 @@ send_prompt.RemoteLlmApi <- function(api, prompt_settings) {
 #'
 #' This function sends a prompt to the local LLM API (Ollama) and returns the response in a structured format.
 #' @param api An object of class LocalLlmApi, which contains the URL and model name for the local LLM API.
-#' @param prompt_settings An object of class LlmPromptSettings, containing the prompt content and model parameters.
+#' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
 #' @return A list containing the response from the Ollama API, structured similarly to OpenAI responses.
 #' @seealso [new_LlmResponse()]
 #' @export
-send_prompt.LocalLlmApi <- function(api, prompt_settings) {
+send_prompt.LocalLlmApi <- function(api, prompt_config) {
+  if (!inherits(prompt_config, "LlmPromptConfig")) {
+    stop("prompt_config must be an LlmPromptConfig object.")
+  }
+
   body <- list(
-    model = prompt_settings$model,
-    prompt = prompt_settings$messages$content,
+    model = prompt_config$model,
+    prompt = prompt_config$messages$content,
     stream = FALSE
   )
 
@@ -157,14 +165,14 @@ as_table.LlmResponse <- function(x, output_type = c("text", "meta", "logprobs", 
 }
 
 get_core_output <- function(x) {
-  prompt_settings <- x$prompt_settings
+  prompt_config <- x$prompt_config
   request_content <- x$content
   n <- length(request_content$choices)
 
   core_output = data.table::data.table(
     'n' = 1:n,
-    'prompt_role' = rep(prompt_settings$prompt_role, n),
-    'prompt_content' = rep(prompt_settings$prompt_content, n),
+    'prompt_role' = rep(prompt_config$prompt_role, n),
+    'prompt_content' = rep(prompt_config$prompt_content, n),
     'role' = rep("", n),
     'content' = rep("", n)
   )
@@ -179,7 +187,7 @@ get_core_output <- function(x) {
 
 get_meta_output <- function(x) {
   content <- x$content
-  ps <- x$prompt_settings
+  ps <- x$prompt_config
 
   dt <- data.table::data.table(
     'param_prompt_content' = ps$prompt_content,
@@ -214,7 +222,7 @@ get_meta_output <- function(x) {
 
 get_logprobs_output <- function(x) {
   # Check if logprobs were requested before text generation
-  if (!x$prompt_settings$logprobs) {
+  if (!x$prompt_config$logprobs) {
     return("'no logprobs requested'")
   }
 
