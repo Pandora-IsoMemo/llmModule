@@ -1,6 +1,4 @@
-#' Create and Validate LLM API Credentials
-# REMOTE LLM API ----
-
+#' Create and Validate Remote LLM API Credentials
 #'
 #' The new_RemoteLlmApi() function constructs an S3 object that stores API credentials for interacting
 #' with Large Language Models (LLMs) such as OpenAI's GPT models and DeepSeek models.
@@ -127,6 +125,84 @@ print.RemoteLlmApi <- function(x, ...) {
   cat("Models URL:", x$url_models, "\n")
 }
 
+#' Retrieve Available LLM Models
+#'
+#' The get_llm_models() method fetches a list of available models from a specified remote
+#' Large Language Model (LLM) API, such as OpenAI's GPT models or DeepSeek models.
+#' It requires an RemoteLlmApi object for authentication and returns the available model options.
+#'
+#' This function allows users to dynamically query OpenAI and DeepSeek to determine which models
+#' are accessible while ensuring valid authentication via the LlmApi class.
+#'
+#' @param x An object of class RemoteLlmApi
+#' @param ... Additional arguments
+#'
+#' @return A response object containing a list of available models from the selected API. This includes model IDs, descriptions, and other metadata.
+#'
+#' @examples
+#' \dontrun{
+#' # Create API credentials for DeepSeek
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/deepseek_key.txt", provider = "DeepSeek")
+#'
+#' # Retrieve available models from DeepSeek
+#' models <- get_llm_models(api)
+#'
+#' # Create API credentials for OpenAI
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+#'
+#' # Retrieve available models from OpenAI
+#' models <- get_llm_models(api)
+#' }
+#'
+#' @export
+get_llm_models.RemoteLlmApi <- function(x, ...) {
+  req <- request(x$url_models) |>
+    req_headers(Authorization = paste("Bearer", x$api_key),
+                `Content-Type` = "application/json")
+
+  content <- try_send_request(req)
+
+  # Extract categories
+  categories <- vapply(content$data, function(x) categorize_model(x$id), character(1))
+  models <- vapply(content$data, function(x) x$id, character(1))
+  models_list <- extract_named_model_list(models, categories)
+
+  return(models_list)
+}
+
+try_send_request <- function(request) {
+  request_base <- tryCatch({
+    # Send request
+    request |> req_perform()
+  }, error = function(e) {
+    return(list(error = "API request failed", message = e$message))
+  })
+
+  request_content <- tryCatch({
+    # Parse response
+    request_base |> resp_body_json()
+  }, error = function(e) {
+    code <- "API parsing failed"
+    warning(paste0(code, e$message))
+    list(error = code, message = e$message)
+  })
+
+  if (!is.null(request_base$status_code) &&
+      request_base$status_code != 200) {
+    code <- paste0("Request completed with error. Code: ",
+                   request_base$status_code)
+    if (!is.null(request_content$error)) {
+      message <- paste0(", message: ", request_content$error$message)
+    } else {
+      message <- NULL
+    }
+
+    warning(paste0(code, message))
+  }
+
+  return(request_content)
+}
+
 # Function to validate API key via a test request
 validate_api_key <- function(api_key, url_models) {
   test_req <- request(url_models) |>
@@ -139,80 +215,4 @@ validate_api_key <- function(api_key, url_models) {
   }
 
   return(!is.null(res) && res$status_code == 200)
-}
-
-# LOCAL LLM API ----
-
-#' Create a local LLM API object from model name and manager
-#'
-#' @param manager An OllamaModelManager object
-#' @param new_model Character, model name input from user (can be partial) of the model to pull
-#' @param base_url Local Ollama base URL
-#' @param pull_if_needed Logical, whether to pull the model automatically
-#'
-#' @return An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
-#' @export
-new_LocalLlmApi <- function(
-    manager,
-    new_model = "",
-    base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
-    pull_if_needed = TRUE
-) {
-  # TO DO: fix check, this check is not working yet...
-  # if (!is_server_running(url = base_url)) {
-  #   api <- list()
-  #   attr(api, "error") <- "Ollama server does not appear to be running at the specified base URL."
-  #   return(api)
-  # }
-
-  if (missing(manager)) {
-    manager <- update(new_OllamaModelManager())
-  }
-
-  if (!inherits(manager, "OllamaModelManager")) {
-    api <- list()
-    attr(api, "error") <- "You must provide a valid OllamaModelManager object."
-    return(api)
-  }
-
-  if (!is.null(new_model) && new_model != "") {
-    model_clean <- clean_model_name(manager, new_model)
-
-    res <- pull_model_if_needed(manager, model_clean)
-    manager <- res$manager
-    model_obj <- res$model
-
-    if (model_obj$status == "error") {
-      api <- list()
-      attr(api, "error") <- sprintf("Failed to pull model '%s': %s", model_clean, model_obj$message)
-      return(api)
-    }
-  }
-
-  api <- structure(
-    list(
-      url = base_url,
-      provider = "ollama",
-      manager = manager
-    ),
-    class = c("LocalLlmApi", "LlmApi")
-  )
-
-  if (!is.null(new_model) && new_model != "" && model_obj$status == "ready") {
-    attr(api, "message") <- sprintf("Model '%s' is already ready.", model_clean)
-  }
-
-  return(api)
-}
-
-#' Print method for LocalLlmApi
-#'
-#' @param x An LocalLlmApi object
-#' @param ... Additional arguments
-#'
-#' @export
-print.LocalLlmApi <- function(x, ...) {
-  cat("Local LLM API Credentials\n")
-  cat("Provider:", x$provider, "\n")
-  cat("Endpoint:", x$url, "\n")
 }
