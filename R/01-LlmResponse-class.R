@@ -58,7 +58,7 @@ new_LlmResponse <- function(api, prompt_config) {
     return(response)
   }
 
-  structure(
+  response <- structure(
     list(
       content = content,
       provider = api$provider,
@@ -67,6 +67,13 @@ new_LlmResponse <- function(api, prompt_config) {
     ),
     class = "LlmResponse"
   )
+
+  # propagate message attr from send_prompt
+  if (!is.null(attr(content, "message"))) {
+    attr(response, "message") <- attr(content, "message")
+  }
+
+  return(response)
 }
 
 #' Print method for user-friendly display
@@ -82,64 +89,6 @@ print.LlmResponse <- function(x, ...) {
   cat("Temperature:", x$prompt_config$temperature, "\n")
   cat("Generated Text:\n")
   cat(x$content$choices[[1]]$message$content, "\n")
-}
-
-#' Send a prompt to a remote LLM API (e.g., OpenAI, DeepSeek)
-#' This function sends a prompt to the remote LLM API and returns the response in a structured format.
-#'
-#' @param api An object of class RemoteLlmApi, which contains the API key and URL for the remote LLM API.
-#' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
-#' @return A list containing the response from the LLM API, structured similarly to OpenAI responses.
-#' @seealso [new_LlmResponse()]
-#' @export
-send_prompt.RemoteLlmApi <- function(api, prompt_config) {
-  if (!inherits(prompt_config, "LlmPromptConfig")) {
-    stop("prompt_config must be an LlmPromptConfig object.")
-  }
-
-  req <- request(api$url) |>
-    req_headers(Authorization = paste("Bearer", api$api_key),
-                `Content-Type` = "application/json") |>
-    req_body_json(unclass(prompt_config))
-
-  req |>
-    req_perform() |>
-    resp_body_json()
-}
-
-#' Send a prompt to a local llm API (e.g., Ollama)
-#'
-#' This function sends a prompt to the local LLM API (Ollama) and returns the response in a structured format.
-#' @param api An object of class LocalLlmApi, which contains the URL and model name for the local LLM API.
-#' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
-#' @return A list containing the response from the Ollama API, structured similarly to OpenAI responses.
-#' @seealso [new_LlmResponse()]
-#' @export
-send_prompt.LocalLlmApi <- function(api, prompt_config) {
-  if (!inherits(prompt_config, "LlmPromptConfig")) {
-    stop("prompt_config must be an LlmPromptConfig object.")
-  }
-
-  body <- list(
-    model = prompt_config$model,
-    prompt = prompt_config$messages$content,
-    stream = FALSE
-  )
-
-  req <- httr2::request(paste0(api$url, "/api/generate")) |>
-    httr2::req_body_json(body) |>
-    httr2::req_perform()
-
-  resp <- httr2::resp_body_json(req)
-
-  list(
-    choices = list(
-      list(message = list(
-        role = "assistant",
-        content = resp$response
-      ))
-    )
-  )
 }
 
 #' Extract and format LLM response as a table

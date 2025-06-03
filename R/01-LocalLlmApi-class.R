@@ -47,7 +47,7 @@ new_LocalLlmApi <- function(
   api <- structure(
     list(
       url = base_url,
-      provider = "ollama",
+      provider = "Ollama",
       manager = manager
     ),
     class = c("LocalLlmApi", "LlmApi")
@@ -94,4 +94,61 @@ get_llm_models.LocalLlmApi <- function(x, ...) {
   models_list <- extract_named_model_list(models, categories)
 
   return(models_list)
+}
+
+#' Send a prompt to a local llm API (e.g., Ollama)
+#'
+#' This function sends a prompt to the local LLM API (Ollama) and returns the response in a structured format.
+#' @param api An object of class LocalLlmApi, which contains the URL and model name for the local LLM API.
+#' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
+#' @return A list containing the response from the Ollama API, structured similarly to OpenAI responses.
+#' @seealso [new_LlmResponse()]
+#' @export
+send_prompt.LocalLlmApi <- function(api, prompt_config) {
+  # Filter the prompt configuration
+  prompt_config <- llm_filter_config(api, prompt_config)
+  body <- list(
+    model = prompt_config$model,
+    prompt = prompt_config$messages$content,
+    stream = FALSE
+  )
+
+  # Add optional parameters if available
+  if (!is.null(prompt_config$temperature)) {
+    body$temperature <- prompt_config$temperature
+  }
+  if (!is.null(prompt_config$top_p)) {
+    body$top_p <- prompt_config$top_p
+  }
+  if (!is.null(prompt_config$stop)) {
+    body$stop <- prompt_config$stop
+  }
+  if (!is.null(prompt_config$seed)) {
+    body$seed <- prompt_config$seed
+  }
+  if (!is.null(prompt_config$max_tokens)) {
+    body$num_predict <- prompt_config$max_tokens
+  }
+
+  req <- httr2::request(paste0(api$url, "/api/generate")) |>
+    httr2::req_body_json(body) |>
+    httr2::req_perform()
+
+  resp <- httr2::resp_body_json(req)
+
+  result <- list(
+    choices = list(
+      list(message = list(
+        role = "assistant",
+        content = resp$response
+      ))
+    )
+  )
+
+  # Attach message (if exists) to result
+  if (!is.null(attr(prompt_config, "message"))) {
+    result <- append_attr(result, attr(prompt_config, "message"), "message")
+  }
+
+  result
 }

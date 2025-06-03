@@ -43,3 +43,30 @@ extract_named_model_list <- function(models, categories) {
 
   return(models_list)
 }
+
+llm_filter_config <- function(api, config) {
+  provider <- api$provider  # e.g., "OpenAI", "DeepSeek", "Ollama"
+
+  supported <- switch(
+    provider,
+    "OpenAI" = c("model", "messages", "temperature", "top_p", "n", "stop", "seed", "max_tokens",
+                 "presence_penalty", "frequency_penalty", "logprobs"),
+    "DeepSeek" = c("model", "messages", "temperature", "top_p", "n", "stop", "seed", "max_tokens"),
+    "Ollama" = c("model", "messages", "temperature", "top_p", "stop", "seed", "max_tokens"),
+    character(0)
+  )
+
+  all_fields <- names(config)
+  unsupported <- setdiff(all_fields, supported)
+
+  result <- config[names(config) %in% supported]
+
+  if (length(unsupported) > 0) {
+    warning_msg <- sprintf("The following inputs are ignored for provider '%s': %s",
+                           provider,
+                           paste(unsupported, collapse = ", "))
+    result <- append_attr(result, warning_msg, "message")
+  }
+
+  return(result)
+}

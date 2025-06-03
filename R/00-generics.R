@@ -25,6 +25,14 @@ get_llm_models <- function(x, ...) {
 #' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
 #' @export
 send_prompt <- function(api, prompt_config) {
+  # Check if the inputs are valid objects
+  if (!inherits(prompt_config, "LlmPromptConfig")) {
+    stop("[send_prompt]: prompt_config must be an LlmPromptConfig object.")
+  }
+  if (!inherits(api, "LlmApi")) {
+    stop("[send_prompt]: api must be an LlmApi object (RemoteLlmApi or LocalLlmApi).")
+  }
+
   UseMethod("send_prompt", api)
 }
 

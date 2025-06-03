@@ -170,6 +170,35 @@ get_llm_models.RemoteLlmApi <- function(x, ...) {
   return(models_list)
 }
 
+#' Send a prompt to a remote LLM API (e.g., OpenAI, DeepSeek)
+#' This function sends a prompt to the remote LLM API and returns the response in a structured format.
+#'
+#' @param api An object of class RemoteLlmApi, which contains the API key and URL for the remote LLM API.
+#' @param prompt_config An object of class LlmPromptConfig, containing the prompt content and model parameters.
+#' @return A list containing the response from the LLM API, structured similarly to OpenAI responses.
+#' @seealso [new_LlmResponse()]
+#' @export
+send_prompt.RemoteLlmApi <- function(api, prompt_config) {
+  # Filter the prompt configuration
+  prompt_config <- llm_filter_config(api, prompt_config)
+
+  req <- request(api$url) |>
+    req_headers(Authorization = paste("Bearer", api$api_key),
+                `Content-Type` = "application/json") |>
+    req_body_json(unclass(prompt_config))
+
+  result <- req |>
+    req_perform() |>
+    resp_body_json()
+
+  # Attach message (if exists) to result
+  if (!is.null(attr(prompt_config, "message"))) {
+    result <- append_attr(result, attr(prompt_config, "message"), "message")
+  }
+
+  result
+}
+
 try_send_request <- function(request) {
   request_base <- tryCatch({
     # Send request
