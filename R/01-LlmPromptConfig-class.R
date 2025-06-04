@@ -51,16 +51,26 @@
 #' @export
 new_LlmPromptConfig <- function(prompt_content,
                                 model,
-                                prompt_role = 'user',
-                                seed = NULL,
                                 max_tokens = 100,
                                 temperature = 1.0,
+                                prompt_role = 'user',
+                                seed = NULL,
                                 top_p = 1,
                                 n = 1,
                                 stop = NULL,
                                 presence_penalty = 0,
                                 frequency_penalty = 0,
                                 logprobs = FALSE) {
+  # set default values if missing
+  prompt_role <- prompt_role |> setDefaultIfMissing("user")
+  seed <- seed |> setDefaultIfMissing(NULL)
+  top_p <- top_p |> setDefaultIfMissing(1)
+  n <- n |> setDefaultIfMissing(1)
+  stop <- stop |> setDefaultIfMissing(NULL)
+  presence_penalty <- presence_penalty |> setDefaultIfMissing(0)
+  frequency_penalty <- frequency_penalty |> setDefaultIfMissing(0)
+  logprobs <- logprobs |> setDefaultIfMissing(FALSE)
+
   # Create message structure
   messages <- data.frame(role = prompt_role, content = prompt_content, stringsAsFactors = FALSE)
 
@@ -128,6 +138,14 @@ print.LlmPromptConfig <- function(x, ...) {
   cat("N:", x$n, "\n")
   if (!is.null(x$stop)) cat("Stop Sequences:", paste(x$stop, collapse = ", "), "\n")
   if (!is.null(x$seed)) cat("Seed:", x$seed, "\n")
+}
+
+setDefaultIfMissing <- function(param, default) {
+  if (missing(param) || is.null(param) || is.na(param)) {
+    param <- default
+  }
+
+  param
 }
 
 # Append attribute to object

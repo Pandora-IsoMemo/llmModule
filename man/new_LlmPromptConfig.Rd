@@ -7,10 +7,10 @@
 new_LlmPromptConfig(
   prompt_content,
   model,
-  prompt_role = "user",
-  seed = NULL,
   max_tokens = 100,
   temperature = 1,
+  prompt_role = "user",
+  seed = NULL,
   top_p = 1,
   n = 1,
   stop = NULL,
@@ -28,13 +28,13 @@ See the following documentation for valid models:
 - \href{https://platform.openai.com/docs/models}{OpenAI model list}
 - \href{https://api-docs.deepseek.com/api/list-models}{DeepSeek model list}}
 
-\item{prompt_role}{character (default: 'user') specifying the role of the message. Common values include 'system', 'assistant', and 'user'.}
-
-\item{seed}{numeric (optional) for controlling reproducibility. If NULL, no seed is set.}
-
 \item{max_tokens}{numeric (default: 100) defining the maximum number of tokens to be generated in the response.}
 
 \item{temperature}{numeric (default: 1.0) controlling randomness in responses. Lower values (e.g., 0.2) make responses deterministic, while higher values (e.g., 1.5) increase creativity.}
+
+\item{prompt_role}{character (default: 'user') specifying the role of the message. Common values include 'system', 'assistant', and 'user'.}
+
+\item{seed}{numeric (optional) for controlling reproducibility. If NULL, no seed is set.}
 
 \item{top_p}{numeric (default: 1) alternative to temperature, specifying nucleus sampling probability. A value of 0.1 considers only the top 10\% probability mass.}
 

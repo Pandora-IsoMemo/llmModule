@@ -56,7 +56,15 @@ llm_single_prompt_server <- function(id) {
     })
 
     observe({
-      new_response <- new_LlmResponse(llm_api_reactive(), prompt_config_reactive())
+      new_response <- new_LlmResponse(llm_api_reactive(), prompt_config_reactive()) |>
+        withProgress(
+          message = "Generating response...",
+          value = 0.5,
+          min = 0,
+          max = 1,
+          detail = "Please wait..."
+        )
+
       llm_response(new_response)
     }) |>
       bindEvent(input$generate)

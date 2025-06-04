@@ -49,10 +49,10 @@ llm_filter_config <- function(api, config) {
 
   supported <- switch(
     provider,
-    "OpenAI" = c("model", "messages", "temperature", "top_p", "n", "stop", "seed", "max_tokens",
+    "OpenAI" = c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed",
                  "presence_penalty", "frequency_penalty", "logprobs"),
-    "DeepSeek" = c("model", "messages", "temperature", "top_p", "n", "stop", "seed", "max_tokens"),
-    "Ollama" = c("model", "messages", "temperature", "top_p", "stop", "seed", "max_tokens"),
+    "DeepSeek" = c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed"),
+    "Ollama" = c("model", "messages", "max_tokens", "temperature", "top_p", "stop", "seed"),
     character(0)
   )
 
@@ -65,7 +65,8 @@ llm_filter_config <- function(api, config) {
     warning_msg <- sprintf("The following inputs are ignored for provider '%s': %s",
                            provider,
                            paste(unsupported, collapse = ", "))
-    result <- append_attr(result, warning_msg, "message")
+    warning(warning_msg, call. = FALSE)
+    #result <- append_attr(result, warning_msg, "message")
   }
 
   return(result)
