@@ -4,18 +4,8 @@
 
 * Added option to use LLM models from a local installation of Ollama:
 
-  * New classes `OllamaApi`, `OllamaPromptConfig`, and `OllamaResponse` provide support for model configuration, prompt handling, and response parsing using locally hosted models.
-  * The `llm_api_ui/server` and `llm_prompt_config_ui/server` functions now detect and support Ollama-based backends.
-
-* New `llm_generate_prompt_ui/server` module:
-
-  * Provides a simple ACE-editor-based interface to test prompts interactively.
-  * Includes status display and response output option.
-
-## Improvements
-
-* Enhanced status messaging in `statusMessageServer` to distinguish between incomplete and failed responses.
-* Improved modularity and reusability of UI components (`llm_api_ui`, `llm_prompt_config_ui`).
+  * New classes `LocalLlmApi`, `OllamaModel`, and `OllamaModelManager` provide support for model configuration, and response parsing using locally hosted models.
+  * The `llm_api_ui/server`, `llm_prompt_config_ui/server` and `llm_generate_prompt_ui/server` functions now detect and support Ollama-based backends.
 
 ## Bug fixes
 
