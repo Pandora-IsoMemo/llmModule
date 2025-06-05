@@ -3,15 +3,13 @@
 #' @param manager An OllamaModelManager object
 #' @param new_model Character, model name input from user (can be partial) of the model to pull
 #' @param base_url Local Ollama base URL
-#' @param pull_if_needed Logical, whether to pull the model automatically
 #'
 #' @return An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
 #' @export
 new_LocalLlmApi <- function(
     manager,
     new_model = "",
-    base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
-    pull_if_needed = TRUE
+    base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434")
 ) {
   # TO DO: fix check, this check is not working yet...
   # if (!is_server_running(url = base_url)) {

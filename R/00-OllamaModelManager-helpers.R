@@ -1,5 +1,3 @@
-# Server Connection Test ----
-
 # Test Ollama Server Connection
 #
 # Checks if the local Ollama server is running and reachable.
@@ -16,19 +14,6 @@ is_server_running <- function(url = Sys.getenv("OLLAMA_BASE_URL")) {
     return(FALSE)
   })
 }
-
-
-# @title Ollama Helper Functions
-# @description
-# This file contains small helper functions used across the OllamaModel and OllamaModelManager classes.
-# Helpers improve usability, error handling, and user input flexibility.
-#
-# @keywords internal
-# @name ollama_helpers
-
-
-# Clean and Match Model Name ----
-
 
 # Clean and Match Model Name
 #
@@ -70,10 +55,6 @@ clean_model_name <- function(manager, input_name) {
   # No match found
   return(input_name)
 }
-
-
-# Ollama Model Manager ----
-
 
 # Check if a model is already available locally
 #

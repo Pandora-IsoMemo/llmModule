@@ -1,9 +1,10 @@
 # ---- UI Function ----
 
-llm_single_prompt_ui <- function(id,
+llm_generate_prompt_ui <- function(id,
                                  prompt_beginning = "",
                                  prompt_placeholder = "Ask me anything...",
-                                 theme = "xcode") {
+                                 theme = "xcode",
+                                 outputResponse = FALSE) {
   ns <- NS(id)
 
   tagList(
@@ -32,13 +33,13 @@ llm_single_prompt_ui <- function(id,
 
     ),
     hr(),
-    verbatimTextOutput(ns("generated_text"))
+    if (outputResponse) verbatimTextOutput(ns("generated_text")) else NULL
   )
 }
 
 # ---- Server Function ----
 
-llm_single_prompt_server <- function(id) {
+llm_generate_prompt_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     llm_api_reactive <- llm_api_server("api")
@@ -95,11 +96,11 @@ llm_single_prompt_server <- function(id) {
 # ui <- fluidPage(
 #   shinyjs::useShinyjs(),
 #   titlePanel("LLM Prompt Module Test"),
-#   llm_single_prompt_ui("single_prompt")
+#   llm_generate_prompt_ui("single_prompt")
 # )
 #
 # server <- function(input, output, session) {
-#   llm_single_prompt_server("single_prompt")
+#   llm_generate_prompt_server("single_prompt")
 # }
 #
 # shinyApp(ui, server)

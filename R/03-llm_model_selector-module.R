@@ -28,7 +28,7 @@ llm_model_selector_server <- function(id, api_reactive) {
       updateSelectInput(session, "model", choices = choices)
     }) |> bindEvent(api_reactive())
 
-    # Optional: return selected model
+    # return selected model
     reactive(input$model)
   })
 }
