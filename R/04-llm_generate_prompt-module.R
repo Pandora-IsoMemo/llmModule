@@ -1,5 +1,38 @@
-# ---- UI Function ----
-
+#' LLM Prompt Generator UI Module
+#'
+#' Provides a user interface to enter a prompt, configure LLM API access, and optionally display the generated text output.
+#'
+#' @param id A unique string identifying the module namespace.
+#' @param prompt_beginning Optional character string shown as a prefix label before the prompt input. Default is `""`.
+#' @param prompt_placeholder Placeholder text shown in the prompt input field. Default is `"Ask me anything..."`.
+#' @param theme Editor theme for the ACE input. Defaults to `"xcode"`.
+#' @param outputResponse Logical; whether to show the generated response output below the input UI. Default is `FALSE`.
+#'
+#' @return A UI definition (tagList) that can be included in a Shiny app.
+#'
+#' @details
+#' This module renders the following elements:
+#' - LLM API configuration UI (via `llm_api_ui`)
+#' - Prompt configuration UI (via `llm_prompt_config_ui`)
+#' - An ACE code editor for prompt input
+#' - A "Generate Text" button with status messaging
+#' - Optional display of the generated response (controlled by `outputResponse`)
+#'
+#' @seealso \code{\link{llm_generate_prompt_server}} for the server-side logic.
+#'
+#' @examples
+#' ui <- fluidPage(
+#'   shinyjs::useShinyjs(),
+#'   llm_generate_prompt_ui("my_prompt")
+#' )
+#'
+#' server <- function(input, output, session) {
+#'   llm_generate_prompt_server("my_prompt")
+#' }
+#'
+#' shinyApp(ui, server)
+#'
+#' @export
 llm_generate_prompt_ui <- function(id,
                                  prompt_beginning = "",
                                  prompt_placeholder = "Ask me anything...",
@@ -37,8 +70,30 @@ llm_generate_prompt_ui <- function(id,
   )
 }
 
-# ---- Server Function ----
-
+#' LLM Prompt Generator Server Module
+#'
+#' Server-side logic for handling prompt input, LLM API interaction, response handling, and error/status display.
+#'
+#' @param id A string specifying the module namespace, matching the `id` used in `llm_generate_prompt_ui`.
+#'
+#' @return A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
+#'
+#' @details
+#' The server module:
+#' - Initializes the LLM API and prompt configuration modules.
+#' - Enables or disables the "Generate Text" button based on configuration readiness.
+#' - On click, sends a prompt to the API and stores the result in a `reactiveVal`.
+#' - Uses `statusMessageServer()` to provide feedback on the response generation status.
+#' - Renders the LLM response using `renderPrint()` if UI is configured to do so.
+#'
+#' It depends on these additional server modules:
+#' - `llm_api_server()` for managing API key and connection
+#' - `llm_prompt_config_server()` for prompt tuning options
+#' - `statusMessageServer()` to show status messages like success, warning, or error
+#'
+#' @seealso \code{\link{llm_generate_prompt_ui}} for the UI component.
+#'
+#' @export
 llm_generate_prompt_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

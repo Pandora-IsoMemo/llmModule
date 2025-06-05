@@ -1,3 +1,10 @@
+# llmModule 25.06.0
+
+## New features
+
+- added option to use llm models from a local installation of ollama
+  - new classes ...
+
 # llmModule 25.04.0
 
 ## New features
