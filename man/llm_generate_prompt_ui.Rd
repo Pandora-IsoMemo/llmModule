@@ -37,19 +37,6 @@ This module renders the following elements:
 - A "Generate Text" button with status messaging
 - Optional display of the generated response (controlled by `outputResponse`)
 }
-\examples{
-ui <- fluidPage(
-  shinyjs::useShinyjs(),
-  llm_generate_prompt_ui("my_prompt")
-)
-
-server <- function(input, output, session) {
-  llm_generate_prompt_server("my_prompt")
-}
-
-shinyApp(ui, server)
-
-}
 \seealso{
 \code{\link{llm_generate_prompt_server}} for the server-side logic.
 }

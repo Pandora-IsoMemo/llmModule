@@ -20,24 +20,12 @@
 #'
 #' @seealso \code{\link{llm_generate_prompt_server}} for the server-side logic.
 #'
-#' @examples
-#' ui <- fluidPage(
-#'   shinyjs::useShinyjs(),
-#'   llm_generate_prompt_ui("my_prompt")
-#' )
-#'
-#' server <- function(input, output, session) {
-#'   llm_generate_prompt_server("my_prompt")
-#' }
-#'
-#' shinyApp(ui, server)
-#'
 #' @export
 llm_generate_prompt_ui <- function(id,
-                                 prompt_beginning = "",
-                                 prompt_placeholder = "Ask me anything...",
-                                 theme = "xcode",
-                                 outputResponse = FALSE) {
+                                   prompt_beginning = "",
+                                   prompt_placeholder = "Ask me anything...",
+                                   theme = "xcode",
+                                   outputResponse = FALSE) {
   ns <- NS(id)
 
   tagList(
