@@ -12,7 +12,7 @@ services:
     # build:
     #   context: .
     #   dockerfile: Dockerfile
-    image: ghcr.io/pandora-isomemo/llm-module:main
+    image: ghcr.io/pandora-isomemo/llmmodule:main
     container_name: shiny-llm-app
     ports:
       - "3838:3838"
