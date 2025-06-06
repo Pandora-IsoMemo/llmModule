@@ -6,57 +6,6 @@
 
 ---
 
-## 🧠 Ollama Setup (Optional)
-
-This app depends on [Ollama](https://ollama.com) to run **local** large language models like LLaMA 3, Mistral, or Gemma. Follow the steps below to install and run Ollama on your system if you'd like to use a local model in addition to cloud providers such as OpenAI or DeepSeek.
-
-### ✅ 1. Install Ollama
-
-#### Linux
-
-Run the official install script:
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-
-#### macOS
-
-Install via [Homebrew](https://brew.sh):
-
-```bash
-brew install ollama
-```
-
-#### Windows
-
-Download and run the installer from the [Ollama for Windows page](https://ollama.com/download).
-
-For full platform details, see the [official installation guide](https://ollama.com/download).
-
----
-
-### 🚀 2. Start the Ollama Service
-
-Start the Ollama backend by running:
-
-```bash
-ollama serve
-```
-
-On Linux, to enable it as a persistent background service:
-
-```bash
-sudo systemctl enable ollama
-sudo systemctl start ollama
-```
-
-On macOS, Ollama should automatically run in the background after installation.
-
-On Windows, the Ollama service will run automatically after installation.
-
----
-
 ## 🧠 Docker Installation (recommended)
 
 ### ✅ 1. Install the software Docker
