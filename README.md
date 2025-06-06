@@ -33,7 +33,7 @@ After Docker is installed you can pull & run the app manually.
 
 The docker compose has everything you need to run app directly from your web browser. To start the app you 
 need the [docker-compose.yaml](https://github.com/Pandora-IsoMemo/llmModule/blob/main/docker-compose.yml) of this
-Repository. You can clone the entire Repository and use `docker compuse up` or simply run the following command:
+Repository. You can clone the entire Repository and use `docker compose up` or simply run the following command:
 
 ```
 curl -sL https://raw.githubusercontent.com/Pandora-IsoMemo/llmModule/refs/heads/main/docker-compose.yml | docker compose -f - up
