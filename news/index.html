@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.04.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,21 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="25.06.0" id="llmmodule-25060">llmModule 25.06.0<a class="anchor" aria-label="anchor" href="#llmmodule-25060"></a></h2>
+<div class="section level3">
+<h3 id="new-features-25-06-0">New features<a class="anchor" aria-label="anchor" href="#new-features-25-06-0"></a></h3>
+<ul><li>
+<p>Added option to use LLM models from a local installation of Ollama:</p>
+<ul><li>New classes <code>LocalLlmApi</code>, <code>OllamaModel</code>, and <code>OllamaModelManager</code> provide support for model configuration, and response parsing using locally hosted models.</li>
+<li>The <code>llm_api_ui/server</code>, <code>llm_prompt_config_ui/server</code> and <code>llm_generate_prompt_ui/server</code> functions now detect and support Ollama-based backends.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-25-06-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-25-06-0"></a></h3>
+<ul><li>Fixed issue where the ‘Generate Text’ button remained enabled even when no valid API key was configured.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="25.04.0" id="llmmodule-25040">llmModule 25.04.0<a class="anchor" aria-label="anchor" href="#llmmodule-25040"></a></h2>
 <div class="section level3">
 <h3 id="new-features-25-04-0">New features<a class="anchor" aria-label="anchor" href="#new-features-25-04-0"></a></h3>
@@ -54,7 +69,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

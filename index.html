@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.04.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,10 +46,116 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="llmmodule">llmModule<a class="anchor" aria-label="anchor" href="#llmmodule"></a>
+<div class="page-header"><h1 id="llmmodule-development-version">llmModule (development version)<a class="anchor" aria-label="anchor" href="#llmmodule-development-version"></a>
 </h1></div>
 <!-- badges: start -->
 
+<hr>
+<div class="section level2">
+<h2 id="id_-ollama-setup-optional">🧠 Ollama Setup (Optional)<a class="anchor" aria-label="anchor" href="#id_-ollama-setup-optional"></a>
+</h2>
+<p>This app depends on <a href="https://ollama.com" class="external-link">Ollama</a> to run <strong>local</strong> large language models like LLaMA 3, Mistral, or Gemma. Follow the steps below to install and run Ollama on your system if you’d like to use a local model in addition to cloud providers such as OpenAI or DeepSeek.</p>
+<div class="section level3">
+<h3 id="id_-1-install-ollama">✅ 1. Install Ollama<a class="anchor" aria-label="anchor" href="#id_-1-install-ollama"></a>
+</h3>
+<div class="section level4">
+<h4 id="linux">Linux<a class="anchor" aria-label="anchor" href="#linux"></a>
+</h4>
+<p>Run the official install script:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-fsSL</span> https://ollama.com/install.sh <span class="kw">|</span> <span class="fu">sh</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="macos">macOS<a class="anchor" aria-label="anchor" href="#macos"></a>
+</h4>
+<p>Install via <a href="https://brew.sh" class="external-link">Homebrew</a>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">brew</span> install ollama</span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="windows">Windows<a class="anchor" aria-label="anchor" href="#windows"></a>
+</h4>
+<p>Download and run the installer from the <a href="https://ollama.com/download" class="external-link">Ollama for Windows page</a>.</p>
+<p>For full platform details, see the <a href="https://ollama.com/download" class="external-link">official installation guide</a>.</p>
+<hr>
+</div>
+</div>
+<div class="section level3">
+<h3 id="id_-2-start-the-ollama-service">🚀 2. Start the Ollama Service<a class="anchor" aria-label="anchor" href="#id_-2-start-the-ollama-service"></a>
+</h3>
+<p>Start the Ollama backend by running:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">ollama</span> serve</span></code></pre></div>
+<p>On Linux, to enable it as a persistent background service:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">sudo</span> systemctl enable ollama</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">sudo</span> systemctl start ollama</span></code></pre></div>
+<p>On macOS, Ollama should automatically run in the background after installation.</p>
+<p>On Windows, the Ollama service will run automatically after installation.</p>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="id_-docker-installation-recommended">🧠 Docker Installation (recommended)<a class="anchor" aria-label="anchor" href="#id_-docker-installation-recommended"></a>
+</h2>
+<div class="section level3">
+<h3 id="id_-1-install-the-software-docker">✅ 1. Install the software Docker<a class="anchor" aria-label="anchor" href="#id_-1-install-the-software-docker"></a>
+</h3>
+<p>Download installation files from one of the links below and follow installation instructions:</p>
+<ul>
+<li><a href="https://docs.docker.com/desktop/windows/install/" class="external-link">Windows</a></li>
+<li><a href="https://docs.docker.com/desktop/install/mac-install/" class="external-link">MacOS</a></li>
+<li><a href="https://docs.docker.com/desktop/install/linux-install/" class="external-link">Linux</a></li>
+</ul>
+<p>After Docker is installed you can pull &amp; run the app manually.</p>
+</div>
+<div class="section level3">
+<h3 id="id_-2-download-and-install-docker-image-of-the-app">✅ 2. Download and install docker image of the app<a class="anchor" aria-label="anchor" href="#id_-2-download-and-install-docker-image-of-the-app"></a>
+</h3>
+<p>This image contains all elements necessary for you to run the app from a web browser. Run this code in a local terminal</p>
+<p><strong>Open a terminal (command line):</strong></p>
+<ul>
+<li>Windows command line:
+<ol style="list-style-type: decimal">
+<li>Open the Start menu or press the <code>Windows key</code> + <code>R</code>;</li>
+<li>Type cmd or cmd.exe in the Run command box;</li>
+<li>Press Enter.</li>
+</ol>
+</li>
+<li>MacOS: open the Terminal app.</li>
+<li>Linux: most Linux systems use the same default keyboard shortcut to start the command line: <code>Ctrl</code>-<code>Alt</code>-<code>T</code> or <code>Super</code>-<code>T</code>
+</li>
+</ul>
+<p><strong>Copy paste the text below into the terminal and press Enter:</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">docker</span> pull ghcr.io/pandora-isomemo/llm-module:main</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_-3-run-the-application-in-docker">🚀 3. Run the application in Docker<a class="anchor" aria-label="anchor" href="#id_-3-run-the-application-in-docker"></a>
+</h3>
+<p>Steps 1 and 2 install the app. To run the app at any time after the installation open a terminal (as described in point 2) copy paste the text below into the terminal and press Enter. Wait for a notification that the app is in “listening” mode.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-p</span> 3838:3838 ghcr.io/pandora-isomemo/llm-module:main</span></code></pre></div>
+<p>If the app is shutdown on Docker or if the terminal is closed the app will no longer work in your web browser (see point 4).</p>
+</div>
+<div class="section level3">
+<h3 id="id_-4-display-the-app-in-a-web-browser">🚀 4. Display the app in a web browser<a class="anchor" aria-label="anchor" href="#id_-4-display-the-app-in-a-web-browser"></a>
+</h3>
+<p>Once the app is running in Docker you need to display it in a web browser. For this, copy-paste the address below into your web browser’s address input and press Enter.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="ex">http://127.0.0.1:3838/</span></span></code></pre></div>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="notes-for-developers">Notes for developers<a class="anchor" aria-label="anchor" href="#notes-for-developers"></a>
+</h2>
+<p>Run test app with docker-compose with ollama option:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">--build</span></span></code></pre></div>
+<p>Run test app with docker-compose with ollama option and point to the folder of your ollama models, e.g. default folders can be on</p>
+<ul>
+<li>linux: <code>/usr/share/ollama/.ollama</code>
+</li>
+<li>macOS: <code>~/.ollama</code>
+</li>
+<li>windows: <code>C:\\Users\\&lt;username&gt;\\.ollama</code>
+</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=&lt;</span>/path/to/your/models<span class="op">&gt;</span> docker <span class="ex">compose</span> up <span class="at">--build</span></span></code></pre></div>
+</div>
 </div>
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
@@ -70,8 +176,8 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Ricardo Fernandes <br><small class="roles"> Author, maintainer </small>  </li>
-<li>Antonia Runge <br><small class="roles"> Author </small>  </li>
+<li>Ricardo Fernandes <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Antonia Runge <br><small class="roles"> Author </small>   </li>
 </ul>
 </div>
 
@@ -91,7 +197,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
