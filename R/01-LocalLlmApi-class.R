@@ -11,12 +11,11 @@ new_LocalLlmApi <- function(
     new_model = "",
     base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434")
 ) {
-  # TO DO: fix check, this check is not working yet...
-  # if (!is_server_running(url = base_url)) {
-  #   api <- list()
-  #   attr(api, "error") <- "Ollama server does not appear to be running at the specified base URL."
-  #   return(api)
-  # }
+  if (!is_ollama_running(url = base_url)) {
+    api <- list()
+    attr(api, "error") <- sprintf("Ollama server does not appear to be running at the specified base URL: '%s%'.", base_url)
+    return(api)
+  }
 
   if (missing(manager)) {
     manager <- update(new_OllamaModelManager())

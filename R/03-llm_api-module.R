@@ -2,10 +2,10 @@
 llm_api_ui <- function(id, title = NULL) {
   ns <- NS(id)
 
-  is_shinyproxy <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "true"
+  ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
 
   provider_choices <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
-  if (!is_shinyproxy) {
+  if (ollama_available) {
     provider_choices <- c(provider_choices, "Ollama (Local)" = "Ollama")
   }
 
@@ -36,11 +36,11 @@ llm_api_server <- function(id) {
     ns <- session$ns
     # Reactive values
     api <- reactiveVal(NULL)
-    is_shinyproxy <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "true"
+    ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
 
     # Initialize manager
     manager <- reactiveVal(NULL)
-    if (!is_shinyproxy) {
+    if (ollama_available) {
       manager(update(new_OllamaModelManager()))
     }
 
@@ -62,13 +62,13 @@ llm_api_server <- function(id) {
 
     # Trigger local API creation when pull button is clicked
     local_api <- eventReactive(input$pull_ollama, {
-      req(!is_shinyproxy, input$new_model)
+      req(isTRUE(ollama_available), input$new_model)
       new_LocalLlmApi(manager(), input$new_model)
     })
 
     # Default to initializing Ollama if selected (no pull)
     observeEvent(input$provider, {
-      if (!is_shinyproxy && input$provider == "Ollama") {
+      if (ollama_available && input$provider == "Ollama") {
         api(new_LocalLlmApi(manager()))
       }
     })

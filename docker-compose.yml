@@ -1,6 +1,6 @@
 services:
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama:0.9.0
     container_name: ollama-server
     ports:
       - "51134:11434"   # Host port 51134 → Container port 11434
@@ -9,9 +9,10 @@ services:
     restart: unless-stopped
 
   shinyapp:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: ghcr.io/pandora-isomemo/llm-module:latest
     container_name: shiny-llm-app
     ports:
       - "3838:3838"

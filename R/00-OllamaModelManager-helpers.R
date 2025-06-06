@@ -6,10 +6,11 @@
 #
 # @keywords internal
 # @export
-is_server_running <- function(url = Sys.getenv("OLLAMA_BASE_URL")) {
+is_ollama_running <- function(url = Sys.getenv("OLLAMA_BASE_URL")) {
+  req <- request(url)
   tryCatch({
-    res <- test_connection(url = url)
-    return(isTRUE(res))
+    req_perform(req)
+    return(TRUE)
   }, error = function(e) {
     return(FALSE)
   })
