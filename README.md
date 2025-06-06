@@ -39,7 +39,7 @@ Repository. You can clone the entire Repository and use `docker compose up` or s
 curl -sL https://raw.githubusercontent.com/Pandora-IsoMemo/llmModule/refs/heads/main/docker-compose.yml | docker compose -f - up
 ```
 
-Both commands will perform the following actions::
+Both commands will perform the following actions:
 
 1. The first time you run this, it will download the necessary Docker images for `ollama` (for model serving and its 
    REST API) and the `llm-module` (the SHiny web frontend that controls Ollama and can also interact with other LLM APIs
