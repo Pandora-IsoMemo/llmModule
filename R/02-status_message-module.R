@@ -98,7 +98,7 @@ strip_ansi <- function(x) {
 #     if (valid()) {
 #       structure(
 #         list(api_key = "key", url = "url", provider = "provider"),
-#         class = "LlmApi"
+#         class = "RemoteLlmApi"
 #       )
 #     } else {
 #       obj <- list()

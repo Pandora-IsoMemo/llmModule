@@ -2,11 +2,29 @@
 llm_api_ui <- function(id, title = NULL) {
   ns <- NS(id)
 
+  ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
+
+  provider_choices <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+  if (ollama_available) {
+    provider_choices <- c(provider_choices, "Ollama (Local)" = "Ollama")
+  }
+
   tagList(
     if (!is.null(title)) h3(title) else NULL,
     fluidRow(
-      column(3, radioButtons(ns("provider"), "Choose Provider", choices = c("OpenAI", "DeepSeek"), selected = character(0))),
-      column(4, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt"))),
+      column(3, radioButtons(ns("provider"), "Choose Provider", choices = provider_choices, selected = character(0))),
+      conditionalPanel(
+        ns = ns,
+        condition = "input.provider != 'Ollama'",
+        column(4, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt")))
+      ),
+      conditionalPanel(
+        ns = ns,
+        condition = "input.provider == 'Ollama'",
+        column(4,
+               textInput(ns("new_model"), "Pull model", placeholder = "tinyllama"),
+               actionButton(ns("pull_ollama"), "Pull"))
+      ),
       column(5, align = "right", status_message_ui(ns("api_status")))
     ),
   )
@@ -15,20 +33,53 @@ llm_api_ui <- function(id, title = NULL) {
 # ---- Server Function ----
 llm_api_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     # Reactive values
     api <- reactiveVal(NULL)
+    ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
 
-    observe({
-      req(input$provider, input$api_key_file)
+    # Initialize manager
+    manager <- reactiveVal(NULL)
+    if (ollama_available) {
+      manager(update(new_OllamaModelManager()))
+    }
 
-      # Call new_LlmApi with structured result
-      result <- new_LlmApi(
-        api_key_path = input$api_key_file$datapath,
-        provider = input$provider
-      )
 
-      # Update reactive values
-      api(result)
+    # Cache the uploaded API key path (only when a new file is uploaded)
+    api_key_path <- reactive({
+      input$api_key_file$datapath
+    })
+
+    # Trigger remote API creation when file is uploaded
+    remote_api <- reactive({
+      req(input$provider %in% c("OpenAI", "DeepSeek"))
+      if (!is.null(input$api_key_file)) {
+        new_RemoteLlmApi(api_key_path = input$api_key_file$datapath, provider = input$provider)
+      } else {
+        new_RemoteLlmApi(provider = input$provider)
+      }
+    })
+
+    # Trigger local API creation when pull button is clicked
+    local_api <- eventReactive(input$pull_ollama, {
+      req(isTRUE(ollama_available), input$new_model)
+      new_LocalLlmApi(manager(), input$new_model)
+    })
+
+    # Default to initializing Ollama if selected (no pull)
+    observeEvent(input$provider, {
+      if (ollama_available && input$provider == "Ollama") {
+        api(new_LocalLlmApi(manager()))
+      }
+    })
+
+    # Watch the remote and local API creators and update the shared reactiveVal
+    observeEvent(remote_api(), {
+      api(remote_api())
+    })
+
+    observeEvent(local_api(), {
+      api(local_api())
     })
 
     statusMessageServer(

@@ -1,6 +1,6 @@
 #' Create and Manage LLM Prompt Settings
 #'
-#' The new_LlmPromptSettings() function constructs an S3 object that stores the parameters required for
+#' The new_LlmPromptConfig() function constructs an S3 object that stores the parameters required for
 #' making requests to Large Language Models (LLMs) such as OpenAI's GPT models and DeepSeek models.
 #'
 #' @param prompt_content character string containing the primary instruction or query for the model. This serves as the main input to the LLM.
@@ -21,17 +21,17 @@
 #' @param frequency_penalty numeric (default: 0) between -2.0 and +2.0, influencing model tendency to repeat words or phrases.
 #' @param logprobs boolean (default: FALSE) specifying whether to return log probabilities for output tokens.
 #'
-#' @return An object of class LlmPromptSettings, containing all specified parameters in a structured format.
+#' @return An object of class LlmPromptConfig, containing all specified parameters in a structured format.
 #'
 #' @examples
 #' \dontrun{
 #' # Retrieve available models
-#' api <- new_LlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
+#' api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "OpenAI")
 #' models <- get_llm_models(api)
 #' }
 #'
 #' # Create a parameter object for OpenAI GPT-4 Turbo
-#' params <- new_LlmPromptSettings(
+#' params <- new_LlmPromptConfig(
 #'   prompt_content = 'Explain entropy in simple terms.',
 #'   model = 'gpt-4-turbo',
 #'   temperature = 0.7,
@@ -39,7 +39,7 @@
 #' )
 #'
 #' # Create a parameter object for DeepSeek
-#' params <- new_LlmPromptSettings(
+#' params <- new_LlmPromptConfig(
 #'   prompt_content = 'What are three innovative AI research topics?',
 #'   model = 'deepseek-chat',
 #'   temperature = 0.9,
@@ -49,23 +49,33 @@
 #' # Print the parameter object
 #' print(params)
 #' @export
-new_LlmPromptSettings <- function(prompt_content,
-                                  model,
-                                  prompt_role = 'user',
-                                  seed = NULL,
-                                  max_tokens = 100,
-                                  temperature = 1.0,
-                                  top_p = 1,
-                                  n = 1,
-                                  stop = NULL,
-                                  presence_penalty = 0,
-                                  frequency_penalty = 0,
-                                  logprobs = FALSE) {
+new_LlmPromptConfig <- function(prompt_content,
+                                model,
+                                max_tokens = 100,
+                                temperature = 1.0,
+                                prompt_role = 'user',
+                                seed = NULL,
+                                top_p = 1,
+                                n = 1,
+                                stop = NULL,
+                                presence_penalty = 0,
+                                frequency_penalty = 0,
+                                logprobs = FALSE) {
+  # set default values if missing
+  prompt_role <- prompt_role |> setDefaultIfMissing("user")
+  seed <- seed |> setDefaultIfMissing(NULL)
+  top_p <- top_p |> setDefaultIfMissing(1)
+  n <- n |> setDefaultIfMissing(1)
+  stop <- stop |> setDefaultIfMissing(NULL)
+  presence_penalty <- presence_penalty |> setDefaultIfMissing(0)
+  frequency_penalty <- frequency_penalty |> setDefaultIfMissing(0)
+  logprobs <- logprobs |> setDefaultIfMissing(FALSE)
+
   # Create message structure
   messages <- data.frame(role = prompt_role, content = prompt_content, stringsAsFactors = FALSE)
 
   # Create prompt settings list
-  prompt_settings <- list(
+  prompt_config <- list(
     messages = messages,
     model = model,
     seed = seed,
@@ -90,7 +100,7 @@ new_LlmPromptSettings <- function(prompt_content,
   if (temperature == 0 & n > 1) {
     n <- 1
     n_msg <- "You are running the deterministic model, so `n` was set to 1 to avoid unnecessary token quota usage."
-    prompt_settings <- append_attr(prompt_settings, n_msg, attr_name = "message")
+    prompt_config <- append_attr(prompt_config, n_msg, attr_name = "message")
     message(n_msg)
   }
 
@@ -98,22 +108,22 @@ new_LlmPromptSettings <- function(prompt_content,
   if (is.numeric(seed)) {
     seed <- as.integer(seed)
     seed_msg <- sprintf("Seed set to '%s'.", seed)
-    prompt_settings <- append_attr(prompt_settings, seed_msg, attr_name = "message")
+    prompt_config <- append_attr(prompt_config, seed_msg, attr_name = "message")
     message(seed_msg)
   } else
     seed <- NULL
 
   # Construct S3 object
-  structure(prompt_settings, class = "LlmPromptSettings")
+  structure(prompt_config, class = "LlmPromptConfig")
 }
 
 #' Print method for better readability
 #'
-#' @param x An LlmPromptSettings object
+#' @param x An LlmPromptConfig object
 #' @param ... Additional arguments
 #'
 #' @export
-print.LlmPromptSettings <- function(x, ...) {
+print.LlmPromptConfig <- function(x, ...) {
   cat("LLM Promp Settings\n")
   cat("Model:", x$model, "\n")
   if (!is.null(x$messages)) {
@@ -130,9 +140,10 @@ print.LlmPromptSettings <- function(x, ...) {
   if (!is.null(x$seed)) cat("Seed:", x$seed, "\n")
 }
 
-# Append attribute to object
-append_attr <- function(object, val, attr_name) {
-  existing <- attr(object, attr_name)
-  attr(object, attr_name) <- c(existing, val)
-  object
+setDefaultIfMissing <- function(param, default) {
+  if (missing(param) || is.null(param) || is.na(param)) {
+    param <- default
+  }
+
+  param
 }
