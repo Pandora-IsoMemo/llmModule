@@ -45,7 +45,7 @@ Both commands will perform the following actions:
    REST API) and the `llm-module` (the SHiny web frontend that controls Ollama and can also interact with other LLM APIs
    like OpenAI, Deepseek, etc.).
 2. After images are pulled, a Docker network and a Docker volume will be created, and both container will start.
-3. The `llm-module` container host the application, which you can access in your web browser at `http://127.0.0.1:3838/`.
+3. The `llm-module` container hosts the application, which you can access in your web browser at `http://127.0.0.1:3838/`.
 
 ----
 
