@@ -57,7 +57,6 @@ On Windows, the Ollama service will run automatically after installation.
 
 ---
 
-
 ## 🧠 Docker Installation (recommended)
 
 ### ✅ 1. Install the software Docker
@@ -71,10 +70,7 @@ instructions:
 
 After Docker is installed you can pull & run the app manually.
 
-### ✅ 2. Download and install docker image of the app
-
-This image contains all elements necessary for you to run the app from a web
-browser. Run this code in a local terminal 
+### 🚀 2. Run the App with Docker Compose
 
 **Open a terminal (command line):**
 
@@ -86,35 +82,21 @@ browser. Run this code in a local terminal
 - Linux: most Linux systems use the same default keyboard shortcut to start the
   command line: `Ctrl`-`Alt`-`T` or `Super`-`T`
 
-**Copy paste the text below into the terminal and press Enter:**
+The docker compose has everything you need to run app directly from your web browser. To start the app you 
+need the [docker-compose.yaml](https://github.com/Pandora-IsoMemo/llmModule/blob/main/docker-compose.yml) of this
+Repository. You can clone the entire Repository and use `docker compuse up` or simply run the following command:
 
-```bash
-docker pull ghcr.io/pandora-isomemo/llm-module:main
+```
+curl -sL https://raw.githubusercontent.com/Pandora-IsoMemo/llmModule/refs/heads/main/docker-compose.yml | docker compose -f - up
 ```
 
-### 🚀 3. Run the application in Docker 
+Both commands will perform the following actions::
 
-Steps 1 and 2 install the app. To run the app at any time after the installation
-open a terminal (as described in point 2) copy paste the text below into the
-terminal and press Enter. Wait for a notification that the app is in “listening”
-mode.
-
-```bash
-docker run -p 3838:3838 ghcr.io/pandora-isomemo/llm-module:main
-```
-
-If the app is shutdown on Docker or if the terminal is closed the app will no
-longer work in your web browser (see point 4).
-
-### 🚀 4. Display the app in a web browser
-
-Once the app is running in Docker you need to display it in a web browser. For
-this, copy-paste the address below into your web browser’s address input and
-press Enter.
-
-```bash
-http://127.0.0.1:3838/
-```
+1. The first time you run this, it will download the necessary Docker images for `ollama` (for model serving and its 
+   REST API) and the `llm-module` (the SHiny web frontend that controls Ollama and can also interact with other LLM APIs
+   like OpenAI, Deepseek, etc.).
+2. After images are pulled, a Docker network and a Docker volume will be created, and both container will start.
+3. The `llm-module` container host the application, which you can access in your web browser at `http://127.0.0.1:3838/`.
 
 ----
 
