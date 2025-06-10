@@ -6,59 +6,10 @@
 
 ---
 
-## 🧠 Ollama Setup (Optional)
-
-This app depends on [Ollama](https://ollama.com) to run **local** large language models like LLaMA 3, Mistral, or Gemma. Follow the steps below to install and run Ollama on your system if you'd like to use a local model in addition to cloud providers such as OpenAI or DeepSeek.
-
-### ✅ 1. Install Ollama
-
-#### Linux
-
-Run the official install script:
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-```
-
-#### macOS
-
-Install via [Homebrew](https://brew.sh):
-
-```bash
-brew install ollama
-```
-
-#### Windows
-
-Download and run the installer from the [Ollama for Windows page](https://ollama.com/download).
-
-For full platform details, see the [official installation guide](https://ollama.com/download).
-
----
-
-### 🚀 2. Start the Ollama Service
-
-Start the Ollama backend by running:
-
-```bash
-ollama serve
-```
-
-On Linux, to enable it as a persistent background service:
-
-```bash
-sudo systemctl enable ollama
-sudo systemctl start ollama
-```
-
-On macOS, Ollama should automatically run in the background after installation.
-
-On Windows, the Ollama service will run automatically after installation.
-
----
-
-
 ## 🧠 Docker Installation (recommended)
+
+Run this app in your browser with just one command! The Docker setup includes all components — the 
+`llm-module` Shiny frontend and the `ollama` backend for local LLM model serving — no manual setup required.
 
 ### ✅ 1. Install the software Docker
 
@@ -71,10 +22,7 @@ instructions:
 
 After Docker is installed you can pull & run the app manually.
 
-### ✅ 2. Download and install docker image of the app
-
-This image contains all elements necessary for you to run the app from a web
-browser. Run this code in a local terminal 
+### 🚀 2. Run the App with Docker Compose
 
 **Open a terminal (command line):**
 
@@ -86,52 +34,74 @@ browser. Run this code in a local terminal
 - Linux: most Linux systems use the same default keyboard shortcut to start the
   command line: `Ctrl`-`Alt`-`T` or `Super`-`T`
 
-**Copy paste the text below into the terminal and press Enter:**
+To start the app you need the
+[docker-compose.yaml](https://github.com/Pandora-IsoMemo/llmModule/blob/main/docker-compose.yml) of
+this Repository. You can either:
 
-```bash
-docker pull ghcr.io/pandora-isomemo/llm-module:main
+**Run directly without cloning the repo:**
+
+```
+curl -sL https://raw.githubusercontent.com/Pandora-IsoMemo/llmModule/refs/heads/main/docker-compose.yml | docker compose -f - up
 ```
 
-### 🚀 3. Run the application in Docker 
+**OR: Clone the repository and run in the project directory:**
 
-Steps 1 and 2 install the app. To run the app at any time after the installation
-open a terminal (as described in point 2) copy paste the text below into the
-terminal and press Enter. Wait for a notification that the app is in “listening”
-mode.
-
-```bash
-docker run -p 3838:3838 ghcr.io/pandora-isomemo/llm-module:main
+```
+git clone https://github.com/Pandora-IsoMemo/llmModule.git
+cd llmModule
+docker compose up
 ```
 
-If the app is shutdown on Docker or if the terminal is closed the app will no
-longer work in your web browser (see point 4).
+These commands will:
 
-### 🚀 4. Display the app in a web browser
+1. The first time you run this, it will download the necessary Docker images for 
+    - `ollama` (for model serving and its REST API) and 
+    - the `llm-module` (the Shiny web frontend that controls Ollama and can also interact with other LLM APIs
+   like OpenAI, Deepseek).
+2. After images are pulled, a Docker network and a Docker volume will be created, and both container will start.
+3. The `llm-module` container hosts the application, which you can access in your web browser at `http://127.0.0.1:3838/`.
 
-Once the app is running in Docker you need to display it in a web browser. For
-this, copy-paste the address below into your web browser’s address input and
-press Enter.
 
-```bash
-http://127.0.0.1:3838/
-```
+### 🚀 3. Run the app with a custom Ollama models path (optional)
 
-----
+To use your own pre-downloaded Ollama models, specify a custom path by setting the 
+`OLLAMA_LOCAL_MODELS_PATH` environment variable.
 
-## Notes for developers
-
-Run test app with docker-compose with ollama option:
+This requires cloning the repository and running Docker Compose from the project directory.
 
 ```bash
-docker compose up --build
+OLLAMA_LOCAL_MODELS_PATH=/path/to/your/models docker compose up
 ```
 
-Run test app with docker-compose with ollama option and point to the folder of your ollama models, e.g. default folders can be on
+Default locations for Ollama models:
 
 - linux: `/usr/share/ollama/.ollama`
 - macOS: `~/.ollama`
 - windows: `C:\\Users\\<username>\\.ollama`
 
+This will mount your local models into the container for faster startup and persistent access.
+
+----
+
+## Notes for developers — local testing
+
+To build and run the app locally:
+
+```bash
+docker compose up --build
+```
+
+Use `--build` if:
+
+- You made changes to source code or Dockerfiles,
+- Or you're testing a fresh environment.
+
+To run with a custom models path:
+
 ```bash
 OLLAMA_LOCAL_MODELS_PATH=</path/to/your/models> docker compose up --build
 ```
+
+*Tip:* Use `docker compose down` to stop and clean up the containers when done.
+
+
