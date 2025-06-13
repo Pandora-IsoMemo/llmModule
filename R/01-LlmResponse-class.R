@@ -52,10 +52,8 @@ new_LlmResponse <- function(api, prompt_config) {
     error = function(e) e
   )
 
-  if (inherits(content, "error")) {
-    response <- list()
-    attr(response, "error") <- content$message
-    return(response)
+  if (!is.null(attr(content, "error"))) {
+    return(content)
   }
 
   response <- structure(

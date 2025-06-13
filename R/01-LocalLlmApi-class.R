@@ -147,8 +147,6 @@ send_prompt.LocalLlmApi <- function(api, prompt_config) {
     return(resp)
   }
 
-  resp <- resp |> httr2::resp_body_json()
-
   result <- list(
     choices = list(
       list(message = list(
