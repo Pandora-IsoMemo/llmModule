@@ -5,8 +5,12 @@
 #' It reads the API key from a specified file, validates its format, ensures it matches the correct provider,
 #' and checks if the key is valid by performing a test request.
 #'
-#' @param api_key_path character string specifying the path to a file containing the API key.
-#' @param provider character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
+#' @param api_key_path Character string specifying the path to a file containing the API key.
+#' @param provider Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
+#' @param no_internet Logical, indicating whether to skip internet checks. If `TRUE`,
+#'   the function will not attempt to validate the API key via a network request.
+#' @param excludePattern Character, a regex pattern to exclude certain models from the list of
+#'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
 #' @return An object of class RemoteLlmApi, containing the API key, URL, and provider name
 #'  (either "OpenAI" or "DeepSeek"), or a list with an "error" attribute if construction fails.
@@ -33,8 +37,18 @@
 #' print(api)
 #' }
 #' @export
-new_RemoteLlmApi <- function(api_key_path, provider) {
+new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, excludePattern = "") {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
+
+  if (is.null(no_internet)) {
+    no_internet <- !isTRUE(has_internet())
+  }
+
+  if (no_internet) {
+    api <- list()
+    attr(api, "error") <- "No connection! Check you internet connection."
+    return(api)
+  }
 
   if (missing(api_key_path) || !is.character(api_key_path) || nchar(api_key_path) == 0) {
     api <- list()
@@ -50,6 +64,12 @@ new_RemoteLlmApi <- function(api_key_path, provider) {
   }
 
   api_key <- trimws(readLines(api_key_path, warn = FALSE))
+
+  if (!(length(api_key) == 1)) {
+    api <- list()
+    attr(api, "error") <- "Wrong format. The file should only contain one line with the key."
+    return(api)
+  }
 
   if (nchar(api_key) < 20) {
     api <- list()
@@ -105,7 +125,11 @@ new_RemoteLlmApi <- function(api_key_path, provider) {
   }
 
   api_obj <- structure(
-    list(api_key = api_key, provider = provider, url = url[provider], url_models = url_models[provider]),
+    list(api_key = api_key,
+         provider = provider,
+         url = url[provider],
+         url_models = url_models[provider],
+         excludePattern = excludePattern),
     class = c("RemoteLlmApi", "LlmApi")
   )
   return(api_obj)
@@ -156,15 +180,29 @@ print.RemoteLlmApi <- function(x, ...) {
 #'
 #' @export
 get_llm_models.RemoteLlmApi <- function(x, ...) {
+  excludePattern <- x$excludePattern
+
   req <- request(x$url_models) |>
     req_headers(Authorization = paste("Bearer", x$api_key),
                 `Content-Type` = "application/json")
 
   content <- try_send_request(req)
 
-  # Extract categories
-  categories <- vapply(content$data, function(x) categorize_model(x$id), character(1))
+  # Early return on error
+  if (!is.null(attr(content, "error"))) {
+    warning(paste("Error retrieving models:", attr(content, "error")))
+    return(list())  # or return(NULL), depending on what downstream expects
+  }
+
+  # Extract models
   models <- vapply(content$data, function(x) x$id, character(1))
+
+  # Filter models
+  #excludePattern = "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
+  models <- models |> filter_model_list(excludePattern = excludePattern)
+
+  # Extract categories
+  categories <- vapply(models, function(x) categorize_model(x), character(1))
   models_list <- extract_named_model_list(models, categories)
 
   return(models_list)
@@ -189,7 +227,8 @@ send_prompt.RemoteLlmApi <- function(api, prompt_config) {
 
   result <- req |>
     req_perform() |>
-    resp_body_json()
+    resp_body_json() |>
+    try_send_request()
 
   # Attach message (if exists) to result
   if (!is.null(attr(prompt_config, "message"))) {
@@ -200,36 +239,28 @@ send_prompt.RemoteLlmApi <- function(api, prompt_config) {
 }
 
 try_send_request <- function(request) {
-  request_base <- tryCatch({
-    # Send request
-    request |> req_perform()
-  }, error = function(e) {
-    return(list(error = "API request failed", message = e$message))
-  })
-
-  request_content <- tryCatch({
-    # Parse response
-    request_base |> resp_body_json()
-  }, error = function(e) {
-    code <- "API parsing failed"
-    warning(paste0(code, e$message))
-    list(error = code, message = e$message)
-  })
-
-  if (!is.null(request_base$status_code) &&
-      request_base$status_code != 200) {
-    code <- paste0("Request completed with error. Code: ",
-                   request_base$status_code)
-    if (!is.null(request_content$error)) {
-      message <- paste0(", message: ", request_content$error$message)
-    } else {
-      message <- NULL
+  response <- tryCatch(
+    req_perform(request),
+    error = function(e) {
+      return(structure(list(), error = paste("API request failed:", e$message)))
     }
+  )
 
-    warning(paste0(code, message))
+  parsed <- tryCatch(
+    resp_body_json(response),
+    error = function(e) {
+      warning(paste("API response parsing failed:", e$message))
+      return(structure(list(), error = "Invalid JSON response"))
+    }
+  )
+
+  if (!is.null(response$status_code) && response$status_code != 200) {
+    warning(sprintf("API returned HTTP %s: %s", response$status_code,
+                    parsed$error$message %||% "Unknown error"))
+    attr(parsed, "error") <- parsed$error$message %||% paste("HTTP", response$status_code)
   }
 
-  return(request_content)
+  return(parsed)
 }
 
 # Function to validate API key via a test request
@@ -244,4 +275,21 @@ validate_api_key <- function(api_key, url_models) {
   }
 
   return(!is.null(res) && res$status_code == 200)
+}
+
+#' Has Internet
+#'
+#' @param url (character) URL to test for internet connectivity. Default is "https://www.google.com".
+#' @param timeout (numeric) number of seconds to wait for a response until giving up. Can not be less than 1 ms.
+#'
+#' @export
+has_internet <- function(url = "https://www.google.com", timeout = 2) {
+  tryCatch({
+    request(url) |>
+      req_timeout(seconds = timeout) |>
+      req_perform()
+    TRUE
+  }, error = function(e) {
+    FALSE
+  })
 }

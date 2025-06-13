@@ -3,13 +3,16 @@
 #' @param manager An OllamaModelManager object
 #' @param new_model Character, model name input from user (can be partial) of the model to pull
 #' @param base_url Local Ollama base URL
+#' @param excludePattern  Character, a regex pattern to exclude certain models from the list of
+#'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
 #' @return An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
 #' @export
 new_LocalLlmApi <- function(
     manager,
     new_model = "",
-    base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434")
+    base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
+    excludePattern = ""
 ) {
   if (!is_ollama_running(url = base_url)) {
     api <- list()
@@ -45,7 +48,8 @@ new_LocalLlmApi <- function(
     list(
       url = base_url,
       provider = "Ollama",
-      manager = manager
+      manager = manager,
+      excludePattern = excludePattern
     ),
     class = c("LocalLlmApi", "LlmApi")
   )
@@ -84,10 +88,17 @@ print.LocalLlmApi <- function(x, ...) {
 #' @export
 get_llm_models.LocalLlmApi <- function(x, ...) {
   local_models <- x$manager$local_models
+  excludePattern <- x$excludePattern
+
+  # Extract models
+  models <- vapply(local_models, function(x) x, character(1))
+
+  # Filter models
+  models <- models |> filter_model_list(excludePattern = excludePattern)
 
   # Extract categories
-  categories <- vapply(local_models, function(x) categorize_model(x), character(1))
-  models <- vapply(local_models, function(x) x, character(1))
+  categories <- vapply(models, function(x) categorize_model(x), character(1))
+
   models_list <- extract_named_model_list(models, categories)
 
   return(models_list)
@@ -127,11 +138,16 @@ send_prompt.LocalLlmApi <- function(api, prompt_config) {
     body$num_predict <- prompt_config$max_tokens
   }
 
-  req <- httr2::request(paste0(api$url, "/api/generate")) |>
-    httr2::req_body_json(body) |>
-    httr2::req_perform()
+  resp <- request(paste0(api$url, "/api/generate")) |>
+    req_body_json(body) |>
+    try_send_request()
 
-  resp <- httr2::resp_body_json(req)
+  # return early if there was an error
+  if (!is.null(attr(resp, "error"))) {
+    return(resp)
+  }
+
+  resp <- resp |> httr2::resp_body_json()
 
   result <- list(
     choices = list(

@@ -1,3 +1,11 @@
+filter_model_list <- function(models, excludePattern) {
+  if (!missing(excludePattern) && length(excludePattern) > 0 && excludePattern != "") {
+    models <- models[!grepl(excludePattern, models)]
+  }
+
+  return(models)
+}
+
 categorize_model <- function(id) {
   if (grepl("^gpt-[0-9.]+", id)) {
     match <- regmatches(id, regexpr("^gpt-[0-9.]+", id))

@@ -31,7 +31,7 @@ llm_api_ui <- function(id, title = NULL) {
 }
 
 # ---- Server Function ----
-llm_api_server <- function(id) {
+llm_api_server <- function(id, no_internet = NULL, excludePattern = "") {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Reactive values
@@ -54,9 +54,18 @@ llm_api_server <- function(id) {
     remote_api <- reactive({
       req(input$provider %in% c("OpenAI", "DeepSeek"))
       if (!is.null(input$api_key_file)) {
-        new_RemoteLlmApi(api_key_path = input$api_key_file$datapath, provider = input$provider)
+        new_RemoteLlmApi(
+          api_key_path = input$api_key_file$datapath,
+          provider = input$provider,
+          no_internet = no_internet,
+          excludePattern = excludePattern
+        )
       } else {
-        new_RemoteLlmApi(provider = input$provider)
+        new_RemoteLlmApi(
+          provider = input$provider,
+          no_internet = no_internet,
+          excludePattern = excludePattern
+        )
       }
     })
 

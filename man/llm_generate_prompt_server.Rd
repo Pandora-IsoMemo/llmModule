@@ -4,10 +4,21 @@
 \alias{llm_generate_prompt_server}
 \title{LLM Prompt Generator Server Module}
 \usage{
-llm_generate_prompt_server(id)
+llm_generate_prompt_server(
+  id,
+  autoCompleteList = reactive(NULL),
+  no_internet = NULL,
+  excludePattern = ""
+)
 }
 \arguments{
 \item{id}{A string specifying the module namespace, matching the `id` used in `llm_generate_prompt_ui`.}
+
+\item{autoCompleteList}{A reactive list.}
+
+\item{no_internet}{logical}
+
+\item{excludePattern}{character, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
 }
 \value{
 A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.

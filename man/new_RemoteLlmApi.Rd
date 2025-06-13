@@ -4,12 +4,23 @@
 \alias{new_RemoteLlmApi}
 \title{Create and Validate Remote LLM API Credentials}
 \usage{
-new_RemoteLlmApi(api_key_path, provider)
+new_RemoteLlmApi(
+  api_key_path,
+  provider,
+  no_internet = NULL,
+  excludePattern = ""
+)
 }
 \arguments{
-\item{api_key_path}{character string specifying the path to a file containing the API key.}
+\item{api_key_path}{Character string specifying the path to a file containing the API key.}
 
-\item{provider}{character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".}
+\item{provider}{Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".}
+
+\item{no_internet}{Logical, indicating whether to skip internet checks. If `TRUE`,
+the function will not attempt to validate the API key via a network request.}
+
+\item{excludePattern}{Character, a regex pattern to exclude certain models from the list of
+available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
 }
 \value{
 An object of class RemoteLlmApi, containing the API key, URL, and provider name
