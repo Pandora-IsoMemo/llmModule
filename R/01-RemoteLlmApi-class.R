@@ -96,7 +96,7 @@ new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude
 
   if (inherits(is_valid, "error")) {
     # set error message
-    err_msg <- is_valid$message
+    err_msg <- is_valid$message |> clean_error_message()
 
     # test the other provider
     other_provider <- ifelse(provider == "OpenAI", "DeepSeek", "OpenAI")
@@ -225,10 +225,7 @@ send_prompt.RemoteLlmApi <- function(api, prompt_config) {
                 `Content-Type` = "application/json") |>
     req_body_json(unclass(prompt_config))
 
-  result <- req |>
-    req_perform() |>
-    resp_body_json() |>
-    try_send_request()
+  result <- req |> try_send_request()
 
   # Attach message (if exists) to result
   if (!is.null(attr(prompt_config, "message"))) {
@@ -246,6 +243,11 @@ try_send_request <- function(request) {
     }
   )
 
+  # early return if response has an error
+  if (!is.null(attr(response, "error"))) {
+    return(clean_error_message(response))
+  }
+
   parsed <- tryCatch(
     resp_body_json(response),
     error = function(e) {
@@ -257,7 +259,9 @@ try_send_request <- function(request) {
   if (!is.null(response$status_code) && response$status_code != 200) {
     warning(sprintf("API returned HTTP %s: %s", response$status_code,
                     parsed$error$message %||% "Unknown error"))
-    attr(parsed, "error") <- parsed$error$message %||% paste("HTTP", response$status_code)
+    attr(parsed, "error") <- clean_error_message(
+      parsed$error$message %||% paste("HTTP", response$status_code)
+    )
   }
 
   return(parsed)
@@ -268,14 +272,28 @@ validate_api_key <- function(api_key, url_models) {
   test_req <- request(url_models) |>
     req_headers(Authorization = paste("Bearer", api_key))
 
-  res <- req_perform(test_req)
+  res <- try_send_request(test_req)
 
-  if (!is.null(res) && !is.null(res$status_code) && res$status_code != 200) {
-    stop(res$status_code)
+  # Return FALSE or error if invalid
+  if (!is.null(attr(res, "error"))) {
+    stop(attr(res, "error"))
   }
 
-  return(!is.null(res) && res$status_code == 200)
+  # Additional safety check
+  return(TRUE)
 }
+
+
+clean_error_message <- function(msg) {
+  # Remove ANSI escape sequences
+  msg <- gsub("\033\\[[0-9;]*m", "", msg)
+
+  # Replace known HTTP codes with friendly text
+  msg <- gsub("HTTP 401 Unauthorized", "Unauthorized: API key is invalid or expired", msg)
+
+  return(trimws(msg))
+}
+
 
 #' Has Internet
 #'
