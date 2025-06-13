@@ -95,6 +95,7 @@ llm_api_server <- function(id, no_internet = NULL, excludePattern = "") {
       "api_status",
       object = api,
       success_message = "Connection test successful!",
+      warning_message = "Connection test warning!",
       error_message = "Connection test failed!"
     )
 

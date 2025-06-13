@@ -102,9 +102,9 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     statusMessageServer(
       "settings_status",
       object = llm_prompt_config,
-      success_message = "Prompt settings ready!",
-      warning_message = "Prompt settings incomplete.",
-      error_message   = "Prompt settings invalid."
+      success_message = "Prompt inputs ready!",
+      warning_message = "Prompt inputs warning!",
+      error_message   = "Prompt inputs error!"
     )
 
     llm_prompt_config

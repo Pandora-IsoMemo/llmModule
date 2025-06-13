@@ -134,8 +134,8 @@ llm_generate_prompt_server <- function(id, autoCompleteList = reactive(NULL), no
       "response_status",
       object = llm_response,
       success_message = "Response ready!",
-      warning_message = "Response incomplete.",
-      error_message   = "Response generation failed."
+      warning_message = "Response incomplete!",
+      error_message   = "Response generation failed!"
     )
 
     output$generated_text <- renderPrint({
