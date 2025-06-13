@@ -239,13 +239,14 @@ try_send_request <- function(request) {
   response <- tryCatch(
     req_perform(request),
     error = function(e) {
-      return(structure(list(), error = paste("API request failed:", e$message)))
+      return(structure(list(), error = paste("API request failed:",
+                                             clean_error_message(e$message))))
     }
   )
 
   # early return if response has an error
   if (!is.null(attr(response, "error"))) {
-    return(clean_error_message(response))
+    return(response)
   }
 
   parsed <- tryCatch(
