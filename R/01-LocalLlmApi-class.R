@@ -3,7 +3,7 @@
 #' @param manager An OllamaModelManager object
 #' @param new_model Character, model name input from user (can be partial) of the model to pull
 #' @param base_url Local Ollama base URL
-#' @param excludePattern  Character, a regex pattern to exclude certain models from the list of
+#' @param exclude_pattern  Character, a regex pattern to exclude certain models from the list of
 #'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
 #' @return An object of class LocalLlmApi, or a list with an "error" attribute if construction fails.
@@ -12,7 +12,7 @@ new_LocalLlmApi <- function(
     manager,
     new_model = "",
     base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
-    excludePattern = ""
+    exclude_pattern = ""
 ) {
   if (!is_ollama_running(url = base_url)) {
     api <- list()
@@ -49,7 +49,7 @@ new_LocalLlmApi <- function(
       url = base_url,
       provider = "Ollama",
       manager = manager,
-      excludePattern = excludePattern
+      exclude_pattern = exclude_pattern
     ),
     class = c("LocalLlmApi", "LlmApi")
   )
@@ -88,13 +88,13 @@ print.LocalLlmApi <- function(x, ...) {
 #' @export
 get_llm_models.LocalLlmApi <- function(x, ...) {
   local_models <- x$manager$local_models
-  excludePattern <- x$excludePattern
+  exclude_pattern <- x$exclude_pattern
 
   # Extract models
   models <- vapply(local_models, function(x) x, character(1))
 
   # Filter models
-  models <- models |> filter_model_list(excludePattern = excludePattern)
+  models <- models |> filter_model_list(exclude_pattern = exclude_pattern)
 
   # Extract categories
   categories <- vapply(models, function(x) categorize_model(x), character(1))

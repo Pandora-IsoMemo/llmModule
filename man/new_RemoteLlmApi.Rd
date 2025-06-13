@@ -8,7 +8,7 @@ new_RemoteLlmApi(
   api_key_path,
   provider,
   no_internet = NULL,
-  excludePattern = ""
+  exclude_pattern = ""
 )
 }
 \arguments{
@@ -19,7 +19,7 @@ new_RemoteLlmApi(
 \item{no_internet}{Logical, indicating whether to skip internet checks. If `TRUE`,
 the function will not attempt to validate the API key via a network request.}
 
-\item{excludePattern}{Character, a regex pattern to exclude certain models from the list of
+\item{exclude_pattern}{Character, a regex pattern to exclude certain models from the list of
 available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
 }
 \value{

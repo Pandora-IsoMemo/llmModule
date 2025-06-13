@@ -2,7 +2,7 @@ testthat::test_that("Test llm_api_server with too short OpenAI key", {
   shiny::testServer(llm_api_server,
                     args = list(
                       no_internet = NULL,
-                      excludePattern = ""
+                      exclude_pattern = ""
                     ),
                     {
                       # Arrange
@@ -30,7 +30,7 @@ testthat::test_that("Test llm_api_server with OpenAI key", {
   shiny::testServer(llm_api_server,
                     args = list(
                       no_internet = NULL,
-                      excludePattern = ""
+                      exclude_pattern = ""
                     ),
                     {
                       # Arrange

@@ -9,7 +9,7 @@
 #' @param provider Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
 #' @param no_internet Logical, indicating whether to skip internet checks. If `TRUE`,
 #'   the function will not attempt to validate the API key via a network request.
-#' @param excludePattern Character, a regex pattern to exclude certain models from the list of
+#' @param exclude_pattern Character, a regex pattern to exclude certain models from the list of
 #'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
 #' @return An object of class RemoteLlmApi, containing the API key, URL, and provider name
@@ -37,7 +37,7 @@
 #' print(api)
 #' }
 #' @export
-new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, excludePattern = "") {
+new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude_pattern = "") {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 
   if (is.null(no_internet)) {
@@ -129,7 +129,7 @@ new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude
          provider = provider,
          url = url[provider],
          url_models = url_models[provider],
-         excludePattern = excludePattern),
+         exclude_pattern = exclude_pattern),
     class = c("RemoteLlmApi", "LlmApi")
   )
   return(api_obj)
@@ -180,7 +180,7 @@ print.RemoteLlmApi <- function(x, ...) {
 #'
 #' @export
 get_llm_models.RemoteLlmApi <- function(x, ...) {
-  excludePattern <- x$excludePattern
+  exclude_pattern <- x$exclude_pattern
 
   req <- request(x$url_models) |>
     req_headers(Authorization = paste("Bearer", x$api_key),
@@ -198,8 +198,7 @@ get_llm_models.RemoteLlmApi <- function(x, ...) {
   models <- vapply(content$data, function(x) x$id, character(1))
 
   # Filter models
-  #excludePattern = "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
-  models <- models |> filter_model_list(excludePattern = excludePattern)
+  models <- models |> filter_model_list(exclude_pattern = exclude_pattern)
 
   # Extract categories
   categories <- vapply(models, function(x) categorize_model(x), character(1))

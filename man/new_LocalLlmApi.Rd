@@ -8,7 +8,7 @@ new_LocalLlmApi(
   manager,
   new_model = "",
   base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
-  excludePattern = ""
+  exclude_pattern = ""
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ new_LocalLlmApi(
 
 \item{base_url}{Local Ollama base URL}
 
-\item{excludePattern}{Character, a regex pattern to exclude certain models from the list of
+\item{exclude_pattern}{Character, a regex pattern to exclude certain models from the list of
 available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
 }
 \value{

@@ -6,19 +6,20 @@
 \usage{
 llm_generate_prompt_server(
   id,
-  autoCompleteList = reactive(NULL),
+  auto_complete_list = reactive(NULL),
   no_internet = NULL,
-  excludePattern = ""
+  exclude_pattern = ""
 )
 }
 \arguments{
 \item{id}{A string specifying the module namespace, matching the `id` used in `llm_generate_prompt_ui`.}
 
-\item{autoCompleteList}{A reactive list.}
+\item{auto_complete_list}{A reactive list.}
 
 \item{no_internet}{logical}
 
-\item{excludePattern}{character, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
+\item{exclude_pattern}{character, a regex pattern to exclude certain models from the list of
+available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
 }
 \value{
 A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.

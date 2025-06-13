@@ -64,8 +64,9 @@ llm_generate_prompt_ui <- function(id,
 #'
 #' @param id A string specifying the module namespace, matching the `id` used in `llm_generate_prompt_ui`.
 #' @param no_internet logical
-#' @param autoCompleteList A reactive list.
-#' @param excludePattern character, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
+#' @param auto_complete_list A reactive list.
+#' @param exclude_pattern character, a regex pattern to exclude certain models from the list of
+#'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
 #' @return A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
 #'
@@ -85,10 +86,10 @@ llm_generate_prompt_ui <- function(id,
 #' @seealso \code{\link{llm_generate_prompt_ui}} for the UI component.
 #'
 #' @export
-llm_generate_prompt_server <- function(id, autoCompleteList = reactive(NULL), no_internet = NULL, excludePattern = "") {
+llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    llm_api_reactive <- llm_api_server("api", no_internet = no_internet, excludePattern = excludePattern)
+    llm_api_reactive <- llm_api_server("api", no_internet = no_internet, exclude_pattern = exclude_pattern)
     prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
 
     llm_response <- reactiveVal()
@@ -109,10 +110,10 @@ llm_generate_prompt_server <- function(id, autoCompleteList = reactive(NULL), no
         session = session,
         "prompt",
         autoCompleters = c("snippet", "text", "static", "keyword"),
-        autoCompleteList = unlist(autoCompleteList(), use.names = FALSE)
+        autoCompleteList = unlist(auto_complete_list(), use.names = FALSE)
       )
     }) %>%
-      bindEvent(autoCompleteList(),
+      bindEvent(auto_complete_list(),
                 ignoreNULL = FALSE,
                 ignoreInit = TRUE)
 
