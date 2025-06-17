@@ -58,13 +58,15 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
           provider = input$provider,
           no_internet = no_internet,
           exclude_pattern = exclude_pattern
-        )
+        ) |>
+          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
       } else {
         new_RemoteLlmApi(
           provider = input$provider,
           no_internet = no_internet,
           exclude_pattern = exclude_pattern
-        )
+        ) |>
+          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
       }
     })
 
@@ -77,7 +79,9 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
     # Default to initializing Ollama if selected (no pull)
     observeEvent(input$provider, {
       if (ollama_available && input$provider == "Ollama") {
-        api(new_LocalLlmApi(manager()))
+        new_api <- new_LocalLlmApi(manager()) |>
+          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
+        api(new_api)
       }
     })
 

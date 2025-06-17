@@ -20,7 +20,8 @@ Imports:
     ollamar,
     shiny,
     shinyAce,
-    shinyjs
+    shinyjs,
+    shinyTools
 Suggests:
     lintr (>= 1.0.2),
     testthat (>= 2.0.0),

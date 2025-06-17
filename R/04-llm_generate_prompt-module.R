@@ -6,7 +6,7 @@
 #' @param prompt_beginning Optional character string shown as a prefix label before the prompt input. Default is `""`.
 #' @param prompt_placeholder Placeholder text shown in the prompt input field. Default is `"Ask me anything..."`.
 #' @param theme Editor theme for the ACE input. Defaults to `"xcode"`.
-#' @param outputResponse Logical; whether to show the generated response output below the input UI. Default is `FALSE`.
+#' @param output_response Logical; whether to show the generated response output below the input UI. Default is `FALSE`.
 #'
 #' @return A UI definition (tagList) that can be included in a Shiny app.
 #'
@@ -16,7 +16,7 @@
 #' - Prompt configuration UI (via `llm_prompt_config_ui`)
 #' - An ACE code editor for prompt input
 #' - A "Generate Text" button with status messaging
-#' - Optional display of the generated response (controlled by `outputResponse`)
+#' - Optional display of the generated response (controlled by `output_response`)
 #'
 #' @seealso \code{\link{llm_generate_prompt_server}} for the server-side logic.
 #'
@@ -25,7 +25,7 @@ llm_generate_prompt_ui <- function(id,
                                    prompt_beginning = "",
                                    prompt_placeholder = "Ask me anything...",
                                    theme = "xcode",
-                                   outputResponse = FALSE) {
+                                   output_response = FALSE) {
   ns <- NS(id)
 
   tagList(
@@ -54,7 +54,7 @@ llm_generate_prompt_ui <- function(id,
 
     ),
     hr(),
-    if (outputResponse) verbatimTextOutput(ns("generated_text")) else NULL
+    if (output_response) verbatimTextOutput(ns("generated_text")) else NULL
   )
 }
 
@@ -125,7 +125,8 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
           min = 0,
           max = 1,
           detail = "Please wait..."
-        )
+        ) |>
+        shinyTryCatch(errorTitle = "Prompt generation failed", alertStyle = "shinyalert")
 
       llm_response(new_response)
     }) |>

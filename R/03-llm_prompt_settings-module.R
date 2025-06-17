@@ -63,7 +63,8 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     observe({
       api <- llm_api()
       if (inherits(api, "LlmApi")) {
-        models <- get_llm_models(api)
+        models <- get_llm_models(api) |>
+          shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
       } else {
         models <- list()
       }
@@ -94,7 +95,8 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         presence_penalty = input$presence_penalty,
         frequency_penalty = input$frequency_penalty,
         logprobs = input$logprobs
-      )
+      ) |>
+        shinyTryCatch(errorTitle = "Prompt inputs setup failed", alertStyle = "shinyalert")
 
       llm_prompt_config(new_settings)
     })

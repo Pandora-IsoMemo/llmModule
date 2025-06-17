@@ -5,5 +5,6 @@
 #' @importFrom ollamar list_models pull test_connection
 #' @importFrom shinyAce aceEditor updateAceEditor
 #' @importFrom shinyjs disable enable
+#' @importFrom shinyTools shinyTryCatch
 #'
 NULL
