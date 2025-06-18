@@ -76,7 +76,6 @@ is_model_available <- function(manager, model_name) {
 # @param manager An OllamaModelManager object
 # @param model_name Character string of the model name
 # @return An OllamaModel object
-# @export
 pull_model_if_needed <- function(manager, model_name) {
 
   available <- is_model_available(manager, model_name)
