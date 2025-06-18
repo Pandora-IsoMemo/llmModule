@@ -53,7 +53,7 @@ prompt <- new_LlmPromptConfig(
 )
 
 # Send the prompt
-# result <- send_prompt(api, prompt)
+result <- send_prompt(api, prompt)
 
 # Extract the assistant's reply
 result$choices[[1]]$message$content
