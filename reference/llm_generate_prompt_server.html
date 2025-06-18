@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">llm_generate_prompt_server</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">llm_generate_prompt_server</span><span class="op">(</span></span>
+<span>  <span class="va">id</span>,</span>
+<span>  auto_complete_list <span class="op">=</span> <span class="fu">reactive</span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span>,</span>
+<span>  no_internet <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exclude_pattern <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -47,6 +52,19 @@
 
 <dl><dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>A string specifying the module namespace, matching the `id` used in `llm_generate_prompt_ui`.</p></dd>
+
+
+<dt id="arg-auto-complete-list">auto_complete_list<a class="anchor" aria-label="anchor" href="#arg-auto-complete-list"></a></dt>
+<dd><p>A reactive list.</p></dd>
+
+
+<dt id="arg-no-internet">no_internet<a class="anchor" aria-label="anchor" href="#arg-no-internet"></a></dt>
+<dd><p>logical</p></dd>
+
+
+<dt id="arg-exclude-pattern">exclude_pattern<a class="anchor" aria-label="anchor" href="#arg-exclude-pattern"></a></dt>
+<dd><p>character, a regex pattern to exclude certain models from the list of
+available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"</p></dd>
 
 </dl></div>
     <div class="section level2">

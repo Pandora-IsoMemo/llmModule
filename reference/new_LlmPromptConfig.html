@@ -9,7 +9,7 @@ making requests to Large Language Models (LLMs) such as OpenAI's GPT models and 
 
     <a class="navbar-brand me-2" href="../index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,8 @@ making requests to Large Language Models (LLMs) such as OpenAI's GPT models and 
 
 
 <dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
-<dd><p>Character string specifying the model to use (e.g., `'gpt-4-turbo'` for OpenAI or `'deepseek-chat'` for DeepSeek). To retrieve a list of valid models for each LLM, use the <code><a href="get_llm_models.html">get_llm_models()</a></code> function.</p>
+<dd><p>Character string specifying the model to use (e.g., `'gpt-4.1'` for OpenAI or `'deepseek-chat'` for DeepSeek).
+ To retrieve a list of valid models for each LLM, use the <code><a href="get_llm_models.html">get_llm_models()</a></code> method</p>
 <p>See the following documentation for valid models:
 - <a href="https://platform.openai.com/docs/models" class="external-link">OpenAI model list</a>
 - <a href="https://api-docs.deepseek.com/api/list-models" class="external-link">DeepSeek model list</a></p></dd>
@@ -125,10 +126,10 @@ making requests to Large Language Models (LLMs) such as OpenAI's GPT models and 
 <span class="r-in"><span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_llm_models.html">get_llm_models</a></span><span class="op">(</span><span class="va">api</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create a parameter object for OpenAI GPT-4 Turbo</span></span></span>
+<span class="r-in"><span><span class="co"># Create a parameter object for OpenAI GPT-4.1</span></span></span>
 <span class="r-in"><span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu">new_LlmPromptConfig</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  prompt_content <span class="op">=</span> <span class="st">'Explain entropy in simple terms.'</span>,</span></span>
-<span class="r-in"><span>  model <span class="op">=</span> <span class="st">'gpt-4-turbo'</span>,</span></span>
+<span class="r-in"><span>  model <span class="op">=</span> <span class="st">'gpt-4.1'</span>,</span></span>
 <span class="r-in"><span>  temperature <span class="op">=</span> <span class="fl">0.7</span>,</span></span>
 <span class="r-in"><span>  max_tokens <span class="op">=</span> <span class="fl">150</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>

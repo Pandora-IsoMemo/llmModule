@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,11 +50,80 @@
 </h1></div>
 <!-- badges: start -->
 
-<hr>
+<p><code>llmModule</code> provides a structured and extensible R interface to interact with both remote (e.g., OpenAI, DeepSeek) and local (via Ollama) Large Language Model (LLM) APIs. It simplifies key workflows such as model selection, prompt configuration, and request handling through a consistent object-oriented interface.</p>
+<p><code>llmModule</code> provides a structured R interface for working with Large Language Model (LLM) APIs, including <a href="https://platform.openai.com" class="external-link">OpenAI</a> and <a href="https://platform.deepseek.com" class="external-link">DeepSeek</a>.</p>
+<p>It simplifies interactions with chat-based LLMs by offering methods and S3 classes for:</p>
+<ul>
+<li>API key management and validation</li>
+<li>Prompt configuration</li>
+<li>Sending chat prompts</li>
+<li>Extracting responses</li>
+</ul>
 <div class="section level2">
-<h2 id="id_-docker-installation-recommended">🧠 Docker Installation (recommended)<a class="anchor" aria-label="anchor" href="#id_-docker-installation-recommended"></a>
+<h2 id="id_-features">🚀 Features<a class="anchor" aria-label="anchor" href="#id_-features"></a>
 </h2>
-<p>Run this app in your browser with just one command! The Docker setup includes all components — the <code>llm-module</code> Shiny frontend and the <code>ollama</code> backend for local LLM model serving — no manual setup required.</p>
+<ul>
+<li>Modular, object-oriented interface using S3 classes:
+<ul>
+<li>
+<code>RemoteLlmApi</code> for remote providers (OpenAI, DeepSeek)</li>
+<li>
+<code>LocalLlmApi</code> for local Ollama servers</li>
+<li>
+<code>LlmPromptConfig</code> to configure prompt messages and parameters</li>
+<li>
+<code>LlmResponse</code> for structured handling of responses</li>
+</ul>
+</li>
+<li>Comprehensive API validation:
+<ul>
+<li>Validates API key format, provider match, and key functionality via test request</li>
+<li>Clear error reporting with automatic suggestion of likely provider mismatches</li>
+</ul>
+</li>
+<li>Local model support (via <a href="https://ollama.com" class="external-link">Ollama</a>):
+<ul>
+<li>Allows to pull new models</li>
+<li>Allows exclusion of deprecated or irrelevant models via <code>exclude_pattern</code>
+</li>
+</ul>
+</li>
+<li>Unified method interface:
+<ul>
+<li>
+<code><a href="reference/get_llm_models.html">get_llm_models()</a></code> to fetch available models</li>
+<li>
+<code><a href="reference/send_prompt.html">send_prompt()</a></code> to submit prompts and retrieve responses</li>
+</ul>
+</li>
+<li>Optional Docker integration for local deployment (see below)</li>
+</ul>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="id_-quick-example">🧪 Quick Example<a class="anchor" aria-label="anchor" href="#id_-quick-example"></a>
+</h2>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Create an LLM API object</span></span>
+<span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_RemoteLlmApi.html">new_RemoteLlmApi</a></span><span class="op">(</span><span class="st">"~/.secrets/openai.txt"</span>, provider <span class="op">=</span> <span class="st">"OpenAI"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set up a prompt</span></span>
+<span><span class="va">prompt</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_LlmPromptConfig.html">new_LlmPromptConfig</a></span><span class="op">(</span></span>
+<span>      model <span class="op">=</span> <span class="st">"gpt-4.1"</span>,</span>
+<span>      prompt_content <span class="op">=</span> <span class="st">"What's the capital of Italy?"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Send the prompt</span></span>
+<span><span class="co"># result &lt;- send_prompt(api, prompt)</span></span>
+<span></span>
+<span><span class="co"># Extract the assistant's reply</span></span>
+<span><span class="va">result</span><span class="op">$</span><span class="va">choices</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">message</span><span class="op">$</span><span class="va">content</span></span></code></pre></div>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="id_-docker-installation-recommended">📦 Docker Installation (recommended)<a class="anchor" aria-label="anchor" href="#id_-docker-installation-recommended"></a>
+</h2>
+<p>Run this app in your browser with just one command! The Docker setup includes all components — the <code>llmModule</code> Shiny frontend and the <code>ollama</code> backend for local LLM model serving — no manual setup required.</p>
 <div class="section level3">
 <h3 id="id_-1-install-the-software-docker">✅ 1. Install the software Docker<a class="anchor" aria-label="anchor" href="#id_-1-install-the-software-docker"></a>
 </h3>
@@ -107,7 +176,7 @@ docker compose up</code></pre>
 </h3>
 <p>To use your own pre-downloaded Ollama models, specify a custom path by setting the <code>OLLAMA_LOCAL_MODELS_PATH</code> environment variable.</p>
 <p>This requires cloning the repository and running Docker Compose from the project directory.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=</span>/path/to/your/models <span class="ex">docker</span> compose up</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=</span>/path/to/your/models <span class="ex">docker</span> compose up</span></code></pre></div>
 <p>Default locations for Ollama models:</p>
 <ul>
 <li>linux: <code>/usr/share/ollama/.ollama</code>
@@ -125,14 +194,14 @@ docker compose up</code></pre>
 <h2 id="notes-for-developers--local-testing">Notes for developers — local testing<a class="anchor" aria-label="anchor" href="#notes-for-developers--local-testing"></a>
 </h2>
 <p>To build and run the app locally:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">--build</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">--build</span></span></code></pre></div>
 <p>Use <code>--build</code> if:</p>
 <ul>
 <li>You made changes to source code or Dockerfiles,</li>
 <li>Or you’re testing a fresh environment.</li>
 </ul>
 <p>To run with a custom models path:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=&lt;</span>/path/to/your/models<span class="op">&gt;</span> docker <span class="ex">compose</span> up <span class="at">--build</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=&lt;</span>/path/to/your/models<span class="op">&gt;</span> docker <span class="ex">compose</span> up <span class="at">--build</span></span></code></pre></div>
 <p><em>Tip:</em> Use <code>docker compose down</code> to stop and clean up the containers when done.</p>
 </div>
 </div>

@@ -13,7 +13,7 @@ and checks if the key is valid by performing a test request."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.06.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,12 @@ and checks if the key is valid by performing a test request.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_RemoteLlmApi</span><span class="op">(</span><span class="va">api_key_path</span>, <span class="va">provider</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">new_RemoteLlmApi</span><span class="op">(</span></span>
+<span>  <span class="va">api_key_path</span>,</span>
+<span>  <span class="va">provider</span>,</span>
+<span>  no_internet <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exclude_pattern <span class="op">=</span> <span class="st">""</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -55,11 +60,21 @@ and checks if the key is valid by performing a test request.</p>
 
 
 <dl><dt id="arg-api-key-path">api_key_path<a class="anchor" aria-label="anchor" href="#arg-api-key-path"></a></dt>
-<dd><p>character string specifying the path to a file containing the API key.</p></dd>
+<dd><p>Character string specifying the path to a file containing the API key.</p></dd>
 
 
 <dt id="arg-provider">provider<a class="anchor" aria-label="anchor" href="#arg-provider"></a></dt>
-<dd><p>character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".</p></dd>
+<dd><p>Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".</p></dd>
+
+
+<dt id="arg-no-internet">no_internet<a class="anchor" aria-label="anchor" href="#arg-no-internet"></a></dt>
+<dd><p>Logical, indicating whether to skip internet checks. If `TRUE`,
+the function will not attempt to validate the API key via a network request.</p></dd>
+
+
+<dt id="arg-exclude-pattern">exclude_pattern<a class="anchor" aria-label="anchor" href="#arg-exclude-pattern"></a></dt>
+<dd><p>Character, a regex pattern to exclude certain models from the list of
+available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"</p></dd>
 
 </dl></div>
     <div class="section level2">
