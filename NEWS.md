@@ -8,7 +8,7 @@
 
 ## New features
 
-* Added option to use LLM models from a local installation of Ollama:
+* Added option to use LLM models from a local installation of Ollama (#4):
 
   * New classes `LocalLlmApi`, `OllamaModel`, and `OllamaModelManager` provide support for model configuration, and response parsing using locally hosted models.
   * The `llm_api_ui/server`, `llm_prompt_config_ui/server` and `llm_generate_prompt_ui/server` functions now detect and support Ollama-based backends.
