@@ -1,3 +1,9 @@
+# llmModule 25.06.1
+
+## New features
+
+* add options to enable integration of `llm_generate_prompt` shiny module into the import module of the `DataTools` package (#3)
+
 # llmModule 25.06.0
 
 ## New features

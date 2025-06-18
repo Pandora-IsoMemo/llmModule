@@ -4,12 +4,67 @@
 [![R-CMD-check](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
+`llmModule` provides a structured and extensible R interface to interact with both remote 
+(e.g., OpenAI, DeepSeek) and local (via Ollama) Large Language Model (LLM) APIs. It simplifies key
+workflows such as model selection, prompt configuration, and request handling through a consistent
+object-oriented interface.
+
+`llmModule` provides a structured R interface for working with Large Language Model (LLM) APIs,
+including [OpenAI](https://platform.openai.com) and [DeepSeek](https://platform.deepseek.com).
+
+
+It simplifies interactions with chat-based LLMs by offering methods and S3 classes for:
+
+- API key management and validation
+- Prompt configuration
+- Sending chat prompts
+- Extracting responses
+
+## 🚀 Features
+
+- Modular, object-oriented interface using S3 classes:
+  - `RemoteLlmApi` for remote providers (OpenAI, DeepSeek)
+  - `LocalLlmApi` for local Ollama servers
+  - `LlmPromptConfig` to configure prompt messages and parameters
+  - `LlmResponse` for structured handling of responses
+- Comprehensive API validation:
+  - Validates API key format, provider match, and key functionality via test request
+  - Clear error reporting with automatic suggestion of likely provider mismatches
+- Local model support (via [Ollama](https://ollama.com)):
+  - Allows to pull new models
+  - Allows exclusion of deprecated or irrelevant models via `exclude_pattern`
+- Unified method interface:
+  - `get_llm_models()` to fetch available models
+  - `send_prompt()` to submit prompts and retrieve responses
+- Optional Docker integration for local deployment (see below)
+
 ---
 
-## 🧠 Docker Installation (recommended)
+## 🧪 Quick Example
+
+```r
+# Create an LLM API object
+api <- new_RemoteLlmApi("~/.secrets/openai.txt", provider = "OpenAI")
+
+# Set up a prompt
+prompt <- new_LlmPromptConfig(
+      model = "gpt-4.1",
+      prompt_content = "What's the capital of Italy?"
+)
+
+# Send the prompt
+# result <- send_prompt(api, prompt)
+
+# Extract the assistant's reply
+result$choices[[1]]$message$content
+```
+
+---
+
+## 📦 Docker Installation (recommended)
 
 Run this app in your browser with just one command! The Docker setup includes all components — the 
-`llm-module` Shiny frontend and the `ollama` backend for local LLM model serving — no manual setup required.
+`llmModule` Shiny frontend and the `ollama` backend for local LLM model serving — no manual setup required.
 
 ### ✅ 1. Install the software Docker
 
@@ -56,8 +111,8 @@ These commands will:
 
 1. The first time you run this, it will download the necessary Docker images for 
     - `ollama` (for model serving and its REST API) and 
-    - the `llm-module` (the Shiny web frontend that controls Ollama and can also interact with other LLM APIs
-   like OpenAI, Deepseek).
+    - the `llm-module` (the Shiny web frontend that controls Ollama and can also interact with other
+      LLM APIs like OpenAI, Deepseek).
 2. After images are pulled, a Docker network and a Docker volume will be created, and both container will start.
 3. The `llm-module` container hosts the application, which you can access in your web browser at `http://127.0.0.1:3838/`.
 
@@ -103,5 +158,3 @@ OLLAMA_LOCAL_MODELS_PATH=</path/to/your/models> docker compose up --build
 ```
 
 *Tip:* Use `docker compose down` to stop and clean up the containers when done.
-
-

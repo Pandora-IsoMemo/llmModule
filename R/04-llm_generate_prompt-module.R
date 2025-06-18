@@ -6,7 +6,7 @@
 #' @param prompt_beginning Optional character string shown as a prefix label before the prompt input. Default is `""`.
 #' @param prompt_placeholder Placeholder text shown in the prompt input field. Default is `"Ask me anything..."`.
 #' @param theme Editor theme for the ACE input. Defaults to `"xcode"`.
-#' @param outputResponse Logical; whether to show the generated response output below the input UI. Default is `FALSE`.
+#' @param output_response Logical; whether to show the generated response output below the input UI. Default is `FALSE`.
 #'
 #' @return A UI definition (tagList) that can be included in a Shiny app.
 #'
@@ -16,7 +16,7 @@
 #' - Prompt configuration UI (via `llm_prompt_config_ui`)
 #' - An ACE code editor for prompt input
 #' - A "Generate Text" button with status messaging
-#' - Optional display of the generated response (controlled by `outputResponse`)
+#' - Optional display of the generated response (controlled by `output_response`)
 #'
 #' @seealso \code{\link{llm_generate_prompt_server}} for the server-side logic.
 #'
@@ -25,7 +25,7 @@ llm_generate_prompt_ui <- function(id,
                                    prompt_beginning = "",
                                    prompt_placeholder = "Ask me anything...",
                                    theme = "xcode",
-                                   outputResponse = FALSE) {
+                                   output_response = FALSE) {
   ns <- NS(id)
 
   tagList(
@@ -54,7 +54,7 @@ llm_generate_prompt_ui <- function(id,
 
     ),
     hr(),
-    if (outputResponse) verbatimTextOutput(ns("generated_text")) else NULL
+    if (output_response) verbatimTextOutput(ns("generated_text")) else NULL
   )
 }
 
@@ -63,6 +63,10 @@ llm_generate_prompt_ui <- function(id,
 #' Server-side logic for handling prompt input, LLM API interaction, response handling, and error/status display.
 #'
 #' @param id A string specifying the module namespace, matching the `id` used in `llm_generate_prompt_ui`.
+#' @param no_internet logical
+#' @param auto_complete_list A reactive list.
+#' @param exclude_pattern character, a regex pattern to exclude certain models from the list of
+#'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
 #' @return A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
 #'
@@ -82,10 +86,10 @@ llm_generate_prompt_ui <- function(id,
 #' @seealso \code{\link{llm_generate_prompt_ui}} for the UI component.
 #'
 #' @export
-llm_generate_prompt_server <- function(id) {
+llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    llm_api_reactive <- llm_api_server("api")
+    llm_api_reactive <- llm_api_server("api", no_internet = no_internet, exclude_pattern = exclude_pattern)
     prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
 
     llm_response <- reactiveVal()
@@ -99,6 +103,20 @@ llm_generate_prompt_server <- function(id) {
       }
     })
 
+    # UPDATE AceEditor's auto-complete ----
+    observe({
+      logDebug("%s: update prompt", id)
+      updateAceEditor(
+        session = session,
+        "prompt",
+        autoCompleters = c("snippet", "text", "static", "keyword"),
+        autoCompleteList = unlist(auto_complete_list(), use.names = FALSE)
+      )
+    }) %>%
+      bindEvent(auto_complete_list(),
+                ignoreNULL = FALSE,
+                ignoreInit = TRUE)
+
     observe({
       new_response <- new_LlmResponse(llm_api_reactive(), prompt_config_reactive()) |>
         withProgress(
@@ -107,7 +125,8 @@ llm_generate_prompt_server <- function(id) {
           min = 0,
           max = 1,
           detail = "Please wait..."
-        )
+        ) |>
+        shinyTryCatch(errorTitle = "Prompt generation failed", alertStyle = "shinyalert")
 
       llm_response(new_response)
     }) |>
@@ -117,8 +136,8 @@ llm_generate_prompt_server <- function(id) {
       "response_status",
       object = llm_response,
       success_message = "Response ready!",
-      warning_message = "Response incomplete.",
-      error_message   = "Response generation failed."
+      warning_message = "Response incomplete!",
+      error_message   = "Response generation failed!"
     )
 
     output$generated_text <- renderPrint({

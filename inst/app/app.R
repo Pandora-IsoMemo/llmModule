@@ -4,7 +4,7 @@ library(llmModule)
 ui <- fluidPage(
   shinyjs::useShinyjs(),
   titlePanel("LLM Prompt Module Test"),
-  llm_generate_prompt_ui("single_prompt", outputResponse = TRUE)
+  llm_generate_prompt_ui("single_prompt", output_response = TRUE)
 )
 
 server <- function(input, output, session) {

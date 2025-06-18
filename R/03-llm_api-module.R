@@ -16,22 +16,21 @@ llm_api_ui <- function(id, title = NULL) {
       conditionalPanel(
         ns = ns,
         condition = "input.provider != 'Ollama'",
-        column(4, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt")))
+        column(5, fileInput(ns("api_key_file"), "Upload API Key File", accept = c(".txt")))
       ),
       conditionalPanel(
         ns = ns,
         condition = "input.provider == 'Ollama'",
-        column(4,
-               textInput(ns("new_model"), "Pull model", placeholder = "tinyllama"),
-               actionButton(ns("pull_ollama"), "Pull"))
+        column(3, textInput(ns("new_model"), "Pull model", placeholder = "tinyllama")),
+        column(2, style = "margin-top: 1.75em", actionButton(ns("pull_ollama"), "Pull"))
       ),
-      column(5, align = "right", status_message_ui(ns("api_status")))
+      column(4, align = "right", status_message_ui(ns("api_status")))
     ),
   )
 }
 
 # ---- Server Function ----
-llm_api_server <- function(id) {
+llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Reactive values
@@ -54,9 +53,20 @@ llm_api_server <- function(id) {
     remote_api <- reactive({
       req(input$provider %in% c("OpenAI", "DeepSeek"))
       if (!is.null(input$api_key_file)) {
-        new_RemoteLlmApi(api_key_path = input$api_key_file$datapath, provider = input$provider)
+        new_RemoteLlmApi(
+          api_key_path = input$api_key_file$datapath,
+          provider = input$provider,
+          no_internet = no_internet,
+          exclude_pattern = exclude_pattern
+        ) |>
+          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
       } else {
-        new_RemoteLlmApi(provider = input$provider)
+        new_RemoteLlmApi(
+          provider = input$provider,
+          no_internet = no_internet,
+          exclude_pattern = exclude_pattern
+        ) |>
+          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
       }
     })
 
@@ -69,7 +79,9 @@ llm_api_server <- function(id) {
     # Default to initializing Ollama if selected (no pull)
     observeEvent(input$provider, {
       if (ollama_available && input$provider == "Ollama") {
-        api(new_LocalLlmApi(manager()))
+        new_api <- new_LocalLlmApi(manager()) |>
+          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
+        api(new_api)
       }
     })
 
@@ -86,6 +98,7 @@ llm_api_server <- function(id) {
       "api_status",
       object = api,
       success_message = "Connection test successful!",
+      warning_message = "Connection test warning!",
       error_message = "Connection test failed!"
     )
 

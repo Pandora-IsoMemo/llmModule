@@ -9,7 +9,7 @@ llm_generate_prompt_ui(
   prompt_beginning = "",
   prompt_placeholder = "Ask me anything...",
   theme = "xcode",
-  outputResponse = FALSE
+  output_response = FALSE
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ llm_generate_prompt_ui(
 
 \item{theme}{Editor theme for the ACE input. Defaults to `"xcode"`.}
 
-\item{outputResponse}{Logical; whether to show the generated response output below the input UI. Default is `FALSE`.}
+\item{output_response}{Logical; whether to show the generated response output below the input UI. Default is `FALSE`.}
 }
 \value{
 A UI definition (tagList) that can be included in a Shiny app.
@@ -35,7 +35,7 @@ This module renders the following elements:
 - Prompt configuration UI (via `llm_prompt_config_ui`)
 - An ACE code editor for prompt input
 - A "Generate Text" button with status messaging
-- Optional display of the generated response (controlled by `outputResponse`)
+- Optional display of the generated response (controlled by `output_response`)
 }
 \seealso{
 \code{\link{llm_generate_prompt_server}} for the server-side logic.

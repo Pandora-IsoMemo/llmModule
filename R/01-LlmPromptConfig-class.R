@@ -4,7 +4,8 @@
 #' making requests to Large Language Models (LLMs) such as OpenAI's GPT models and DeepSeek models.
 #'
 #' @param prompt_content character string containing the primary instruction or query for the model. This serves as the main input to the LLM.
-#' @param model Character string specifying the model to use (e.g., `'gpt-4-turbo'` for OpenAI or `'deepseek-chat'` for DeepSeek). To retrieve a list of valid models for each LLM, use the \code{get_llm_models()} function.
+#' @param model Character string specifying the model to use (e.g., `'gpt-4.1'` for OpenAI or `'deepseek-chat'` for DeepSeek).
+#'  To retrieve a list of valid models for each LLM, use the \code{get_llm_models()} method
 #'
 #' See the following documentation for valid models:
 #' - \href{https://platform.openai.com/docs/models}{OpenAI model list}
@@ -30,10 +31,10 @@
 #' models <- get_llm_models(api)
 #' }
 #'
-#' # Create a parameter object for OpenAI GPT-4 Turbo
+#' # Create a parameter object for OpenAI GPT-4.1
 #' params <- new_LlmPromptConfig(
 #'   prompt_content = 'Explain entropy in simple terms.',
-#'   model = 'gpt-4-turbo',
+#'   model = 'gpt-4.1',
 #'   temperature = 0.7,
 #'   max_tokens = 150
 #' )

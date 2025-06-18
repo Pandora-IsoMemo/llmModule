@@ -4,7 +4,7 @@ llm_prompt_config_ui <- function(id) {
 
   tagList(
     fluidRow(
-      column(3, llm_model_selector_ui(ns("model_picker"))),
+      column(3, selectInput(ns("model"), "Select a model", choices = c("Check provider ..." = ""))),
       column(3, sliderInput(ns("temperature"), "Temperature", min = 0, max = 2, value = 1, step = 0.1)),
       column(3, numericInput(ns("max_tokens"), "Max Tokens", value = 100, min = 1)),
       column(3, checkboxInput(ns("show_advanced"), "Show Advanced Settings", value = FALSE))
@@ -24,7 +24,6 @@ llm_prompt_config_ui <- function(id) {
 llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal("")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    model_reactive <- llm_model_selector_server("model_picker", llm_api)
 
     llm_prompt_config <- reactiveVal()
 
@@ -62,11 +61,28 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     })
 
     observe({
+      api <- llm_api()
+      if (inherits(api, "LlmApi")) {
+        models <- get_llm_models(api) |>
+          shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
+      } else {
+        models <- list()
+      }
+
+      choices <- if (length(models) == 0) {
+        c("No models found..." = "")
+      } else {
+        models
+      }
+      updateSelectInput(session, "model", choices = choices)
+    }) |> bindEvent(llm_api())
+
+    observe({
       req(prompt_reactive())
       new_settings <- new_LlmPromptConfig(
         # all providers:
         prompt_content = prompt_reactive(),
-        model = model_reactive(),
+        model = input$model,
         max_tokens = input$max_tokens,
         temperature = input$temperature,
         prompt_role = input$prompt_role,
@@ -79,7 +95,8 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         presence_penalty = input$presence_penalty,
         frequency_penalty = input$frequency_penalty,
         logprobs = input$logprobs
-      )
+      ) |>
+        shinyTryCatch(errorTitle = "Prompt inputs setup failed", alertStyle = "shinyalert")
 
       llm_prompt_config(new_settings)
     })
@@ -87,9 +104,9 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     statusMessageServer(
       "settings_status",
       object = llm_prompt_config,
-      success_message = "Prompt settings ready!",
-      warning_message = "Prompt settings incomplete.",
-      error_message   = "Prompt settings invalid."
+      success_message = "Prompt inputs ready!",
+      warning_message = "Prompt inputs warning!",
+      error_message   = "Prompt inputs error!"
     )
 
     llm_prompt_config

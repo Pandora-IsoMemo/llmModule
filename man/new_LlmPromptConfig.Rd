@@ -22,7 +22,8 @@ new_LlmPromptConfig(
 \arguments{
 \item{prompt_content}{character string containing the primary instruction or query for the model. This serves as the main input to the LLM.}
 
-\item{model}{Character string specifying the model to use (e.g., `'gpt-4-turbo'` for OpenAI or `'deepseek-chat'` for DeepSeek). To retrieve a list of valid models for each LLM, use the \code{get_llm_models()} function.
+\item{model}{Character string specifying the model to use (e.g., `'gpt-4.1'` for OpenAI or `'deepseek-chat'` for DeepSeek).
+ To retrieve a list of valid models for each LLM, use the \code{get_llm_models()} method
 
 See the following documentation for valid models:
 - \href{https://platform.openai.com/docs/models}{OpenAI model list}
@@ -62,10 +63,10 @@ api <- new_RemoteLlmApi(api_key_path = "path/to/openai_key.txt", provider = "Ope
 models <- get_llm_models(api)
 }
 
-# Create a parameter object for OpenAI GPT-4 Turbo
+# Create a parameter object for OpenAI GPT-4.1
 params <- new_LlmPromptConfig(
   prompt_content = 'Explain entropy in simple terms.',
-  model = 'gpt-4-turbo',
+  model = 'gpt-4.1',
   temperature = 0.7,
   max_tokens = 150
 )
