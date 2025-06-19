@@ -112,7 +112,7 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
         autoCompleters = c("snippet", "text", "static", "keyword"),
         autoCompleteList = unlist(auto_complete_list(), use.names = FALSE)
       )
-    }) %>%
+    }) |>
       bindEvent(auto_complete_list(),
                 ignoreNULL = FALSE,
                 ignoreInit = TRUE)

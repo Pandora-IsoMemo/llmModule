@@ -1,3 +1,9 @@
+# llmModule 25.06.2
+
+## Bug Fixes
+
+* Fixed issue with pipe operator for deployment of the `llm_generate_prompt` shiny module in the `DataTools` package.
+
 # llmModule 25.06.1
 
 ## New features
