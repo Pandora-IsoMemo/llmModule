@@ -2,9 +2,6 @@ FROM ghcr.io/pandora-isomemo/base-image:latest
 
 ADD . .
 
-# Install ollamar from GitHub
-RUN Rscript -e "remotes::install_github('hauselin/ollama-r')"
-
 RUN installPackage
 
 # Expose ports
