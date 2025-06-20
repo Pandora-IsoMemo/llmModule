@@ -17,7 +17,7 @@ Imports:
     data.table,
     futile.logger,
     httr2,
-    ollama-r,
+    ollamar,
     shiny,
     shinyAce,
     shinyjs,
