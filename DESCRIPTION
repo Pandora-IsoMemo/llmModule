@@ -1,7 +1,7 @@
 Package: llmModule
 Type: Package
 Title: R Interface for Large Language Model APIs
-Version: 25.06.3
+Version: 25.06.4
 Authors@R: c(
             person("Ricardo", "Fernandes", email = "ldv1452@gmail.com", role = c("aut", "cre")),
             person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
@@ -28,7 +28,7 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    hauselin/ollama-r@v1.2.2
+    ollamar=hauselin/ollama-r@v1.2.2
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 URL: https://pandora-isomemo.github.io/llmModule/
