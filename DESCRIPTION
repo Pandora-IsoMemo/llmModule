@@ -17,7 +17,7 @@ Imports:
     data.table,
     futile.logger,
     httr2,
-    ollamar,
+    ollama-r,
     shiny,
     shinyAce,
     shinyjs,
@@ -27,6 +27,8 @@ Suggests:
     testthat (>= 2.0.0),
     knitr,
     rmarkdown
+Remotes:
+    hauselin/ollama-r@v.1.2.2
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 URL: https://pandora-isomemo.github.io/llmModule/
