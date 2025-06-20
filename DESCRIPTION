@@ -28,7 +28,7 @@ Suggests:
     knitr,
     rmarkdown
 Remotes:
-    hauselin/ollama-r@v.1.2.2
+    hauselin/ollama-r@v1.2.2
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 URL: https://pandora-isomemo.github.io/llmModule/
