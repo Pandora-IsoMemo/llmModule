@@ -14,6 +14,12 @@ new_LocalLlmApi <- function(
     base_url = Sys.getenv("OLLAMA_BASE_URL", unset = "http://localhost:11434"),
     exclude_pattern = ""
 ) {
+  if (!requireNamespace("ollamar", quietly = TRUE)) {
+    api <- list()
+    attr(api, "error") <- "The 'ollamar' package is required for this function, but is not installed."
+    return(api)
+  }
+
   if (!is_ollama_running(url = base_url)) {
     api <- list()
     attr(api, "error") <- sprintf("Ollama server does not appear to be running at the specified base URL: '%s%'.", base_url)

@@ -38,8 +38,13 @@ print.OllamaModelManager <- function(x, ...) {
 #' @return Updated OllamaModelManager object
 #' @export
 update.OllamaModelManager <- function(x, ...) {
+  if (!requireNamespace("ollamar", quietly = TRUE)) {
+    warning("The 'ollamar' package is required for this function, but is not installed.")
+    return(data.frame())
+  }
+
   models <- tryCatch(
-    list_models(host = Sys.getenv("OLLAMA_BASE_URL")),
+    ollamar::list_models(host = Sys.getenv("OLLAMA_BASE_URL")),
     error = function(e) {
       warning("Could not fetch local models. Is the Ollama server running?")
       return(data.frame())

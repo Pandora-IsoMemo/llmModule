@@ -77,6 +77,10 @@ is_model_available <- function(manager, model_name) {
 # @param model_name Character string of the model name
 # @return An OllamaModel object
 pull_model_if_needed <- function(manager, model_name) {
+  if (!requireNamespace("ollamar", quietly = TRUE)) {
+    warning("The 'ollamar' package is required for this function, but is not installed.")
+    return(list())
+  }
 
   available <- is_model_available(manager, model_name)
 
@@ -93,7 +97,7 @@ pull_model_if_needed <- function(manager, model_name) {
 
   # Try pulling the model
   pull_result <- tryCatch(
-    pull(model_name, host = Sys.getenv("OLLAMA_BASE_URL")),
+    ollamar::pull(model_name, host = Sys.getenv("OLLAMA_BASE_URL")),
     error = function(e) e
   )
 
