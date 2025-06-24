@@ -1,3 +1,10 @@
+# llmModule 25.06.5
+
+## Updates
+- remove ollamar package from required imports but keep it in _Suggests_
+- hide ollamar features from the user interface if ollamar is not installed
+- return warning when functions that require ollamar are called without ollamar installed
+
 # llmModule 25.06.2
 
 ## Bug Fixes
