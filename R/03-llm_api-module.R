@@ -35,9 +35,10 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
     ns <- session$ns
     # Reactive values
     api <- reactiveVal(NULL)
-    ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" &&
-      is_ollama_running() &&
-      requireNamespace("ollamar", quietly = TRUE)
+    ollama_available <- requireNamespace("ollamar", quietly = TRUE) &&
+      tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" &&
+      is_ollama_running()
+
 
     # Initialize manager
     manager <- reactiveVal(NULL)
