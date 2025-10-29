@@ -17,6 +17,7 @@ Imports:
     data.table,
     futile.logger,
     httr2,
+    rlang,
     shiny,
     shinyAce,
     shinyjs,
