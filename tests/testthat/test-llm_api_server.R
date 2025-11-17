@@ -45,11 +45,11 @@ testthat::test_that("Test llm_api_server with OpenAI key", {
                           row.names = c(NA, -1L)
                         )
                       )
-                      
+
                       testthat::expect_length(api(), 0)
                       testthat::expect_equal(
-                        substr(attr(api(), "error"), 1, 65),
-                        "API request failed: Unauthorized: API key is invalid or expired.\n"
+                        substr(attr(api(), "error"), 1, 64),
+                        "API request failed: Unauthorized: API key is invalid or expired."
                       )
                     })
 })
