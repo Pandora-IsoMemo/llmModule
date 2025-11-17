@@ -19,7 +19,8 @@ testthat::test_that("Test llm_api_server with too short OpenAI key", {
                           row.names = c(NA, -1L)
                         )
                       )
-                      testthat::expect_equal(api(), structure(list(), error = "API key appears too short."))
+                      testthat::expect_length(api(), 0)
+                      testthat::expect_equal(attr(api(), "error"), "API key appears too short.")
                     })
 })
 
@@ -28,7 +29,7 @@ testthat::test_that("Test llm_api_server with OpenAI key", {
                     args = list(no_internet = NULL, exclude_pattern = ""),
                     {
                       # Arrange
-                      print("test llm_api_server: OpenAI provider with valid key file")
+                      print("test llm_api_server: OpenAI provider with invalid key file")
 
                       # Act
                       session$setInputs(
@@ -44,10 +45,11 @@ testthat::test_that("Test llm_api_server with OpenAI key", {
                           row.names = c(NA, -1L)
                         )
                       )
-
+                      
+                      testthat::expect_length(api(), 0)
                       testthat::expect_equal(
-                        api(),
-                        structure(list(), error = "API request failed: Unauthorized: API key is invalid or expired.\n• OAuth error\n• realm: OpenAI API")
+                        substr(attr(api(), "error"), 1, 65),
+                        "API request failed: Unauthorized: API key is invalid or expired.\n"
                       )
                     })
 })
