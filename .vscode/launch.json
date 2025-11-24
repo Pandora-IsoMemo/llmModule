@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Active R Script",
+            "type": "R-Debugger",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "console": "integratedTerminal"
+        },
+    ]
+}

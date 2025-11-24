@@ -22,7 +22,7 @@ new_LocalLlmApi <- function(
 
   if (!is_ollama_running(url = base_url)) {
     api <- list()
-    attr(api, "error") <- sprintf("Ollama server does not appear to be running at the specified base URL: '%s%'.", base_url)
+    attr(api, "error") <- sprintf("Ollama server does not appear to be running at the specified base URL: '%s'.", base_url)
     return(api)
   }
 
