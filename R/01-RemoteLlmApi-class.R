@@ -96,7 +96,9 @@ new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude
 
   if (inherits(is_valid, "error")) {
     # set error message
-    err_msg <- is_valid$message |> clean_error_message()
+    err_msg <- is_valid$message |> clean_error_message(
+      replace_text = c("HTTP 401 Unauthorized" = "Unauthorized: API key is invalid or expired")
+    )
 
     # test the other provider
     other_provider <- ifelse(provider == "OpenAI", "DeepSeek", "OpenAI")
@@ -238,8 +240,10 @@ try_send_request <- function(request) {
   response <- tryCatch(
     req_perform(request),
     error = function(e) {
-      return(structure(list(), error = paste("API request failed:",
-                                             clean_error_message(e$message))))
+      msg <- e$message |> clean_error_message(
+        replace_text = c("HTTP 401 Unauthorized" = "Unauthorized: API key is invalid or expired")
+      )
+      return(structure(list(), error = paste("API request failed:", msg)))
     }
   )
 
@@ -259,9 +263,10 @@ try_send_request <- function(request) {
   if (!is.null(response$status_code) && response$status_code != 200) {
     warning(sprintf("API returned HTTP %s: %s", response$status_code,
                     parsed$error$message %||% "Unknown error"))
-    attr(parsed, "error") <- clean_error_message(
-      parsed$error$message %||% paste("HTTP", response$status_code)
-    )
+    attr(parsed, "error") <- parsed$error$message %||% paste("HTTP", response$status_code) |>
+      clean_error_message(
+        replace_text = c("HTTP 401 Unauthorized" = "Unauthorized: API key is invalid or expired")
+      )
   }
 
   return(parsed)
@@ -284,12 +289,16 @@ validate_api_key <- function(api_key, url_models) {
 }
 
 
-clean_error_message <- function(msg) {
+clean_error_message <- function(msg, replace_text = c()) {
   # Remove ANSI escape sequences
   msg <- gsub("\033\\[[0-9;]*m", "", msg)
 
-  # Replace known HTTP codes with friendly text
-  msg <- gsub("HTTP 401 Unauthorized", "Unauthorized: API key is invalid or expired", msg)
+  # Replace specified patterns
+  if (length(replace_text) > 0) {
+    for (pattern in names(replace_text)) {
+      msg <- gsub(pattern, replace_text[[pattern]], msg)
+    }
+  }
 
   return(trimws(msg))
 }

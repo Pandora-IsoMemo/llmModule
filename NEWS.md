@@ -1,3 +1,8 @@
+# llmModule 25.11.0
+
+## Bug Fixes
+- Fixed an issue with the error message in the `LocalLlmApi` class which would have thrown an error itself.
+
 # llmModule 25.06.5
 
 ## Updates
