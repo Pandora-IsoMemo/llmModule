@@ -5,10 +5,9 @@
             "name": "Debug Active R Script",
             "type": "R-Debugger",
             "request": "launch",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "env": {},
-            "console": "integratedTerminal"
-        },
+            "env": {
+                "R_PROFILE_USER": "${workspaceFolder}/.Rprofile"
+            }
+        }
     ]
 }
