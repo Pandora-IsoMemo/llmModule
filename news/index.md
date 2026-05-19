@@ -1,5 +1,12 @@
 # Changelog
 
+## llmModule 26.05.0
+
+### Updates
+
+- Added Export of `is_ollama_running` function for extraction of shiny
+  modules into a separate package (#12)
+
 ## llmModule 25.11.0
 
 ### Bug Fixes

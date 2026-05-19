@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>R Interface for Large Language Model APIs • llmModule</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R Interface for Large Language Model APIs">
 <meta name="description" content="Provides a structured interface for interacting with Large Language Model (LLM) APIs such as OpenAI and DeepSeek. Includes functions for sending requests and extracting structured responses. This package simplifies API interactions and ensures validation of API keys and request formats.">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">25.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.05.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 <li>Extracting responses</li>
 </ul>
 <div class="section level2">
-<h2 id="id_-features">🚀 Features<a class="anchor" aria-label="anchor" href="#id_-features"></a>
+<h2 id="rocket-features">🚀 Features<a class="anchor" aria-label="anchor" href="#rocket-features"></a>
 </h2>
 <ul>
 <li>Modular, object-oriented interface using S3 classes:
@@ -101,7 +101,7 @@
 <hr>
 </div>
 <div class="section level2">
-<h2 id="id_-quick-example">🧪 Quick Example<a class="anchor" aria-label="anchor" href="#id_-quick-example"></a>
+<h2 id="test_tube-quick-example">🧪 Quick Example<a class="anchor" aria-label="anchor" href="#test_tube-quick-example"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create an LLM API object</span></span>
@@ -121,11 +121,11 @@
 <hr>
 </div>
 <div class="section level2">
-<h2 id="id_-docker-installation-recommended">📦 Docker Installation (recommended)<a class="anchor" aria-label="anchor" href="#id_-docker-installation-recommended"></a>
+<h2 id="package-docker-installation-recommended">📦 Docker Installation (recommended)<a class="anchor" aria-label="anchor" href="#package-docker-installation-recommended"></a>
 </h2>
 <p>Run this app in your browser with just one command! The Docker setup includes all components — the <code>llmModule</code> Shiny frontend and the <code>ollama</code> backend for local LLM model serving — no manual setup required.</p>
 <div class="section level3">
-<h3 id="id_-1-install-the-software-docker">✅ 1. Install the software Docker<a class="anchor" aria-label="anchor" href="#id_-1-install-the-software-docker"></a>
+<h3 id="white_check_mark-1-install-the-software-docker">✅ 1. Install the software Docker<a class="anchor" aria-label="anchor" href="#white_check_mark-1-install-the-software-docker"></a>
 </h3>
 <p>Download installation files from one of the links below and follow installation instructions:</p>
 <ul>
@@ -136,7 +136,7 @@
 <p>After Docker is installed you can pull &amp; run the app manually.</p>
 </div>
 <div class="section level3">
-<h3 id="id_-2-run-the-app-with-docker-compose">🚀 2. Run the App with Docker Compose<a class="anchor" aria-label="anchor" href="#id_-2-run-the-app-with-docker-compose"></a>
+<h3 id="rocket-2-run-the-app-with-docker-compose">🚀 2. Run the App with Docker Compose<a class="anchor" aria-label="anchor" href="#rocket-2-run-the-app-with-docker-compose"></a>
 </h3>
 <p><strong>Open a terminal (command line):</strong></p>
 <ul>
@@ -172,7 +172,7 @@ docker compose up</code></pre>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="id_-3-run-the-app-with-a-custom-ollama-models-path-optional">🚀 3. Run the app with a custom Ollama models path (optional)<a class="anchor" aria-label="anchor" href="#id_-3-run-the-app-with-a-custom-ollama-models-path-optional"></a>
+<h3 id="rocket-3-run-the-app-with-a-custom-ollama-models-path-optional">🚀 3. Run the app with a custom Ollama models path (optional)<a class="anchor" aria-label="anchor" href="#rocket-3-run-the-app-with-a-custom-ollama-models-path-optional"></a>
 </h3>
 <p>To use your own pre-downloaded Ollama models, specify a custom path by setting the <code>OLLAMA_LOCAL_MODELS_PATH</code> environment variable.</p>
 <p>This requires cloning the repository and running Docker Compose from the project directory.</p>

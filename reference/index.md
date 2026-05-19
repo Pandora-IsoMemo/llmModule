@@ -14,6 +14,8 @@
   : Retrieve Available LLM Models
 - [`has_internet()`](https://pandora-isomemo.github.io/llmModule/reference/has_internet.md)
   : Has Internet
+- [`is_ollama_running()`](https://pandora-isomemo.github.io/llmModule/reference/is_ollama_running.md)
+  : Test Ollama Server Connection
 - [`llm_generate_prompt_server()`](https://pandora-isomemo.github.io/llmModule/reference/llm_generate_prompt_server.md)
   : LLM Prompt Generator Server Module
 - [`llm_generate_prompt_ui()`](https://pandora-isomemo.github.io/llmModule/reference/llm_generate_prompt_ui.md)

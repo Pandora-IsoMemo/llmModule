@@ -47,6 +47,7 @@ S3 classes for:
 ## 🧪 Quick Example
 
 ``` r
+
 # Create an LLM API object
 api <- new_RemoteLlmApi("~/.secrets/openai.txt", provider = "OpenAI")
 
