@@ -1,11 +1,11 @@
-# Test Ollama Server Connection
-#
-# Checks if the local Ollama server is running and reachable.
-#
-# @return Logical TRUE if server is running, FALSE otherwise.
-#
-# @keywords internal
-# @export
+#' Test Ollama Server Connection
+#'
+#' Checks if the local Ollama server is running and reachable.
+#'
+#' @param url Character string of the Ollama server URL.
+#'  Defaults to the value of the OLLAMA_BASE_URL environment variable.
+#' @return Logical TRUE if server is running, FALSE otherwise.
+#' @export
 is_ollama_running <- function(url = Sys.getenv("OLLAMA_BASE_URL")) {
   req <- request(url)
   tryCatch({
