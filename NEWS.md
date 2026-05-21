@@ -1,6 +1,7 @@
 # llmModule 26.05.1
 
 # Updates
+- Fixed output format of `llm_generate_prompt` for easier integration into `llmModuleS`
 - deprecated shiny module `llm_generate_prompt` which now should be replaced by `llm_generate_prompt` from `llmModuleS`
 
 # llmModule 26.05.0
