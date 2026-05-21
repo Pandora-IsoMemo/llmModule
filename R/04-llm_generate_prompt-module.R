@@ -73,8 +73,7 @@ llm_generate_prompt_ui <- function(id,
 #' @param exclude_pattern character, a regex pattern to exclude certain models from the list of
 #'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
-#' @return A reactive value (`reactiveVal`) containing the generated response tables, which
-#'  can be used for further processing in the app.
+#' @return A reactive value (`reactiveVal`) containing the `LlmResponse` object returned from the LLM API.
 #'
 #' @details
 #' The server module:
@@ -97,7 +96,13 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     lifecycle::deprecate_warn(
       when = "26.05.1",
       what = "llmModule::llm_generate_prompt_server()",
-      with = "llmModuleS::llm_generate_prompt_server()"
+      with = "llmModuleS::llm_generate_prompt_server()",
+      details = paste(
+        "Please switch to llmModuleS for improved functionality and support. Please note:",
+        "The output of llm_generate_prompt_server() in llmModuleS is a reactive Value",
+        "that returns a list containing the core and meta outputs, whereas in llmModule it is",
+        "a reactiveVal containing the `LlmResponse` object. Please update your code accordingly."
+      )
     )
 
     ns <- session$ns
@@ -105,7 +110,6 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
 
     llm_response <- reactiveVal()
-    llm_response_tables <- reactiveVal()
 
     # disable generate button if no API key is available
     observe({
@@ -156,13 +160,11 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
     output$generated_text <- renderPrint({
       validate(need(inherits(llm_response(), "LlmResponse"), "No response available."))
 
-      response_tables <- llm_response() |> as_table(output_type = "complete")
-      llm_response_tables(response_tables)
-
-      response_tables$core_output$content |> cat()
+      response_table <- llm_response() |> as_table(output_type = "text")
+      response_table$core_output$content |> cat()
     })
 
-    return(llm_response_tables)
+    return(llm_response)
   })
 }
 
