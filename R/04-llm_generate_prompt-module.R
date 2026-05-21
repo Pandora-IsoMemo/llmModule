@@ -99,9 +99,9 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
       with = "llmModuleS::llm_generate_prompt_server()",
       details = paste(
         "Please switch to llmModuleS for improved functionality and support. Please note:",
-        "The output of llm_generate_prompt_server() in llmModuleS is a reactive Value",
-        "that returns a list containing the core and meta outputs, whereas in llmModule it is",
-        "a reactiveVal containing the `LlmResponse` object. Please update your code accordingly."
+        "The output of llm_generate_prompt_server() in llmModuleS is a reactiveVal that",
+        "returns a list containing the core and meta outputs, whereas in llmModule it is a",
+        "reactiveVal containing the `LlmResponse` object. Please update your code accordingly."
       )
     )
 
