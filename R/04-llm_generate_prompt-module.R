@@ -26,6 +26,11 @@ llm_generate_prompt_ui <- function(id,
                                    prompt_placeholder = "Ask me anything...",
                                    theme = "xcode",
                                    output_response = FALSE) {
+  lifecycle::deprecate_warn(
+    when = "26.05.1",
+    what = "llmModule::llm_generate_prompt_ui()",
+    with = "llmModuleS::llm_generate_prompt_ui()"
+  )
   ns <- NS(id)
 
   tagList(
@@ -88,6 +93,18 @@ llm_generate_prompt_ui <- function(id,
 #' @export
 llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
+    lifecycle::deprecate_warn(
+      when = "26.05.1",
+      what = "llmModule::llm_generate_prompt_server()",
+      with = "llmModuleS::llm_generate_prompt_server()",
+      details = paste(
+        "Please switch to llmModuleS for improved functionality and support. Please note:",
+        "The output of llm_generate_prompt_server() in llmModuleS is a reactiveVal that",
+        "returns a list containing the core and meta outputs, whereas in llmModule it is a",
+        "reactiveVal containing the `LlmResponse` object. Please update your code accordingly."
+      )
+    )
+
     ns <- session$ns
     llm_api_reactive <- llm_api_server("api", no_internet = no_internet, exclude_pattern = exclude_pattern)
     prompt_config_reactive <- llm_prompt_config_server("prompt_config", llm_api_reactive, reactive(input$prompt))
