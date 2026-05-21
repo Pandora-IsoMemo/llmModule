@@ -2,6 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/pkgdown.yaml)
+[![docker-publish](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Pandora-IsoMemo/llmModule/actions/workflows/docker-publish.yml)
 <!-- badges: end -->
 
 `llmModule` provides a structured and extensible R interface to interact with both remote 
