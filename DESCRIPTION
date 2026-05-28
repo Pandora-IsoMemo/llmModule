@@ -16,6 +16,7 @@ LazyData: true
 Depends: R (>= 3.5.0)
 Imports:
     data.table,
+    ellmer,
     futile.logger,
     httr2,
     lifecycle,
