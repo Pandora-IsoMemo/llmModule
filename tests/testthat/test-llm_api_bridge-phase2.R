@@ -15,7 +15,10 @@ testthat::test_that("send_prompt.EllmerLlmApi normalizes bridge output", {
     .package = "llmModule"
   )
 
-  result <- send_prompt(api, prompt)
+  testthat::expect_warning(
+    result <- send_prompt(api, prompt),
+    "ignored for provider 'Anthropic'"
+  )
 
   testthat::expect_equal(result$choices[[1]]$message$role, "assistant")
   testthat::expect_equal(result$choices[[1]]$message$content, "Bridge says hello")
@@ -38,7 +41,10 @@ testthat::test_that("new_LlmResponse works with normalized Ellmer bridge respons
     .package = "llmModule"
   )
 
-  response <- new_LlmResponse(api, prompt)
+  testthat::expect_warning(
+    response <- new_LlmResponse(api, prompt),
+    "ignored for provider 'Anthropic'"
+  )
 
   testthat::expect_s3_class(response, "LlmResponse")
   testthat::expect_equal(response$generated_text, "Normalized content")
@@ -52,7 +58,10 @@ testthat::test_that("send_prompt.EllmerLlmApi returns structured error when mode
   prompt <- new_LlmPromptConfig(prompt_content = "Hello bridge", model = "placeholder")
   prompt$model <- NULL
 
-  result <- send_prompt(api, prompt)
+  testthat::expect_warning(
+    result <- send_prompt(api, prompt),
+    "ignored for provider 'Gemini'"
+  )
   testthat::expect_equal(attr(result, "error"), "No model specified for Ellmer bridge request.")
 })
 

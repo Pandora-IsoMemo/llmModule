@@ -53,16 +53,8 @@ extract_named_model_list <- function(models, categories) {
 }
 
 llm_filter_config <- function(api, config) {
-  provider <- api$provider  # e.g., "OpenAI", "DeepSeek", "Ollama"
-
-  supported <- switch(
-    provider,
-    "OpenAI" = c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed",
-                 "presence_penalty", "frequency_penalty", "logprobs"),
-    "DeepSeek" = c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed"),
-    "Ollama" = c("model", "messages", "max_tokens", "temperature", "top_p", "stop", "seed"),
-    character(0)
-  )
+  provider <- api$provider  # e.g., "OpenAI", "DeepSeek", "Ollama", or bridged providers
+  supported <- llm_supported_fields(api)
 
   all_fields <- names(config)
   unsupported <- setdiff(all_fields, supported)
@@ -78,6 +70,40 @@ llm_filter_config <- function(api, config) {
   }
 
   return(result)
+}
+
+llm_supported_fields <- function(api) {
+  provider <- api$provider
+
+  if (inherits(api, "EllmerLlmApi") || identical(api$bridge, "ellmer")) {
+    return(llm_bridge_supported_fields(provider))
+  }
+
+  switch(
+    provider,
+    "OpenAI" = c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed",
+                 "presence_penalty", "frequency_penalty", "logprobs"),
+    "DeepSeek" = c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed"),
+    "Ollama" = c("model", "messages", "max_tokens", "temperature", "top_p", "stop", "seed"),
+    character(0)
+  )
+}
+
+llm_bridge_supported_fields <- function(provider) {
+  # Common bridged fields that map well across multiple ellmer providers.
+  common <- c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed")
+
+  provider_specific <- switch(
+    provider,
+    # Keep place for future provider-specific capability extensions.
+    "Anthropic" = common,
+    "OpenRouter" = common,
+    "Groq" = common,
+    "Mistral" = common,
+    common
+  )
+
+  provider_specific
 }
 
 # Append attribute to object

@@ -203,6 +203,8 @@ get_llm_models.EllmerLlmApi <- function(x, ...) {
 #' @return Normalized response with OpenAI-like `choices[[1]]$message$content`
 #' @export
 send_prompt.EllmerLlmApi <- function(api, prompt_config) {
+  prompt_config <- llm_filter_config(api, prompt_config)
+
   model <- prompt_config$model %||% api$model
   if (is.null(model) || identical(model, "")) {
     response <- list()
