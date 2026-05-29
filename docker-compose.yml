@@ -9,10 +9,10 @@ services:
     restart: unless-stopped
 
   shinyapp:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
-    image: ghcr.io/pandora-isomemo/llmmodule:main
+    build:       # Build the Shiny app image from the Dockerfile in the current directory, OR use the pre-built image from GitHub Container Registry for faster startup
+      context: .
+      dockerfile: Dockerfile
+    #image: ghcr.io/pandora-isomemo/llmmodule:main  # Uncomment this line to use the pre-built image from GitHub Container Registry for faster startup
     container_name: shiny-llm-app
     ports:
       - "3838:3838"

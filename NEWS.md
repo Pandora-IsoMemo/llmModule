@@ -1,6 +1,6 @@
 # llmModule 26.05.1
 
-# Updates
+## Updates
 - deprecated shiny module `llm_generate_prompt` which now should be replaced by `llm_generate_prompt` from `llmModuleS`
 
 # llmModule 26.05.0
