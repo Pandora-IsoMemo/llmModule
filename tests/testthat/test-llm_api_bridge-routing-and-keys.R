@@ -1,17 +1,43 @@
 testthat::test_that("new_BridgedLlmApi routes OpenAI and DeepSeek to legacy RemoteLlmApi path", {
+  key_file <- tempfile(fileext = ".txt")
+  writeLines("sk-validkey12345678901234567890", key_file)
+
   openai_api <- llmModule:::new_BridgedLlmApi(
     provider = "OpenAI",
-    api_key_path = "dummy.txt",
+    api_key_path = key_file,
     no_internet = TRUE
   )
-  testthat::expect_equal(attr(openai_api, "error"), "No connection! Check you internet connection.")
+  testthat::expect_s3_class(openai_api, "RemoteLlmApi")
+  testthat::expect_s3_class(openai_api, "LlmApi")
 
   deepseek_api <- llmModule:::new_BridgedLlmApi(
     provider = "DeepSeek",
-    api_key_path = "dummy.txt",
+    api_key_path = key_file,
     no_internet = TRUE
   )
-  testthat::expect_equal(attr(deepseek_api, "error"), "No connection! Check you internet connection.")
+  testthat::expect_s3_class(deepseek_api, "RemoteLlmApi")
+  testthat::expect_s3_class(deepseek_api, "LlmApi")
+})
+
+testthat::test_that("legacy remote bridge checks connectivity at runtime", {
+  key_file <- tempfile(fileext = ".txt")
+  writeLines("sk-validkey12345678901234567890", key_file)
+
+  openai_api <- llmModule:::new_BridgedLlmApi(
+    provider = "OpenAI",
+    api_key_path = key_file,
+    no_internet = TRUE
+  )
+
+  testthat::expect_warning(
+    models <- get_llm_models(openai_api),
+    "No connection! Check your internet connection."
+  )
+  testthat::expect_equal(models, list())
+
+  prompt <- new_LlmPromptConfig(prompt_content = "hello", model = "gpt-4.1")
+  result <- send_prompt(openai_api, prompt)
+  testthat::expect_equal(attr(result, "error"), "No connection! Check your internet connection.")
 })
 
 testthat::test_that("new_BridgedLlmApi routes non-legacy providers to Ellmer bridge", {
