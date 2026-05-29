@@ -20,7 +20,10 @@ new_BridgedLlmApi <- function(
   exclude_pattern = "",
   model = NULL
 ) {
-  if (missing(provider) || !is.character(provider) || nchar(trimws(provider)) == 0) {
+  if (missing(provider) ||
+        !is.character(provider) ||
+        length(provider) != 1 ||
+        !nzchar(trimws(provider))) {
     api <- list()
     attr(api, "error") <- "No valid provider supplied."
     return(api)
@@ -61,7 +64,10 @@ new_EllmerLlmApi <- function(
   model = NULL,
   exclude_pattern = ""
 ) {
-  if (missing(provider) || !is.character(provider) || nchar(trimws(provider)) == 0) {
+  if (missing(provider) ||
+        !is.character(provider) ||
+        length(provider) != 1 ||
+        !nzchar(trimws(provider))) {
     api <- list()
     attr(api, "error") <- "No valid provider supplied."
     return(api)
@@ -93,7 +99,10 @@ new_EllmerLlmApi <- function(
 }
 
 read_bridge_api_key <- function(api_key_path) {
-  if (missing(api_key_path) || !is.character(api_key_path) || nchar(trimws(api_key_path)) == 0) {
+  if (missing(api_key_path) ||
+        !is.character(api_key_path) ||
+        length(api_key_path) != 1 ||
+        !nzchar(trimws(api_key_path))) {
     api <- list()
     attr(api, "error") <- "No valid API key path."
     return(api)

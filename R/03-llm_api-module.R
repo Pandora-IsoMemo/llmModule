@@ -61,7 +61,7 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
 
     # Trigger remote/bridge API creation when file is uploaded
     remote_api <- reactive({
-      req(!is.null(input$provider), input$provider != "Ollama")
+      req(length(input$provider) == 1, input$provider != "Ollama")
 
       api_key_path <- NULL
       if (!is.null(input$api_key_file)) {
