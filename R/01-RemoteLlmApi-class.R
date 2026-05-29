@@ -2,13 +2,14 @@
 #'
 #' The new_RemoteLlmApi() function constructs an S3 object that stores API credentials for interacting
 #' with Large Language Models (LLMs) such as OpenAI's GPT models and DeepSeek models.
-#' It reads the API key from a specified file, validates its format, ensures it matches the correct provider,
-#' and checks if the key is valid by performing a test request.
+#' It reads the API key from a specified file and validates local key structure.
+#' Network availability and credential checks are performed later when models are listed
+#' or prompts are sent.
 #'
 #' @param api_key_path Character string specifying the path to a file containing the API key.
 #' @param provider Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
-#' @param no_internet Logical, indicating whether to skip internet checks. If `TRUE`,
-#'   the function will not attempt to validate the API key via a network request.
+#' @param no_internet Logical override for runtime request checks. If `TRUE`,
+#'   internet-dependent operations return a connection error without making requests.
 #' @param exclude_pattern Character, a regex pattern to exclude certain models from the list of
 #'   available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"
 #'
@@ -18,10 +19,8 @@
 #' @details
 #' This function includes multiple validation steps:
 #' - Reads the API key from the specified file.
-#' - Ensures the API key format is correct (e.g., OpenAI keys start with "sk-" and DeepSeek keys contain alphanumeric characters).
-#' - Matches the API key to the correct provider.
-#' - Prevents incorrect combinations of API keys and providers.
-#' - Sends a test request to verify that the API key is active and functional.
+#' - Ensures the API key file has a valid one-line format and sufficient length.
+#' - Stores provider endpoints and optional runtime connectivity override settings.
 #'
 #' If any of these checks fail, an error is returned with details about the issue.
 #'
@@ -39,16 +38,6 @@
 #' @export
 new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude_pattern = "") {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
-
-  if (is.null(no_internet)) {
-    no_internet <- !isTRUE(has_internet())
-  }
-
-  if (no_internet) {
-    api <- list()
-    attr(api, "error") <- "No connection! Check you internet connection."
-    return(api)
-  }
 
   if (missing(api_key_path) || !is.character(api_key_path) || nchar(api_key_path) == 0) {
     api <- list()
@@ -88,49 +77,12 @@ new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude
     "DeepSeek" = "https://api.deepseek.com/v1/models"
   )
 
-  # Validate the key for selected provider with a request to the models endpoint
-  is_valid <- tryCatch(
-    validate_api_key(api_key, url_models[provider]),
-    error = function(e) e
-  )
-
-  if (inherits(is_valid, "error")) {
-    # set error message
-    err_msg <- is_valid$message |> clean_error_message(
-      replace_text = c("HTTP 401 Unauthorized" = "Unauthorized: API key is invalid or expired")
-    )
-
-    # test the other provider
-    other_provider <- ifelse(provider == "OpenAI", "DeepSeek", "OpenAI")
-
-    is_valid_other <- tryCatch(
-      validate_api_key(api_key, url_models[other_provider]),
-      error = function(e) e
-    )
-
-    if (!inherits(is_valid_other, "error")) {
-      # update error message
-      err_msg <-
-        sprintf("API key does not match the selected provider. It appears to be for '%s'.", other_provider)
-    }
-
-    api <- list()
-    attr(api, "error") <- err_msg
-    return(api)
-  }
-
-  if (!is_valid) {
-    # if invalid but error message is missing
-    api <- list()
-    attr(api, "error") <- "API key failed validation request."
-    return(api)
-  }
-
   api_obj <- structure(
     list(api_key = api_key,
          provider = provider,
          url = url[provider],
          url_models = url_models[provider],
+         no_internet = no_internet,
          exclude_pattern = exclude_pattern),
     class = c("RemoteLlmApi", "LlmApi")
   )
@@ -184,6 +136,12 @@ print.RemoteLlmApi <- function(x, ...) {
 get_llm_models.RemoteLlmApi <- function(x, ...) {
   exclude_pattern <- x$exclude_pattern
 
+  connectivity_error <- check_remote_connectivity(x$no_internet)
+  if (!is.null(connectivity_error)) {
+    warning(paste("Error retrieving models:", connectivity_error), call. = FALSE)
+    return(list())
+  }
+
   req <- request(x$url_models) |>
     req_headers(Authorization = paste("Bearer", x$api_key),
                 `Content-Type` = "application/json")
@@ -220,6 +178,18 @@ get_llm_models.RemoteLlmApi <- function(x, ...) {
 send_prompt.RemoteLlmApi <- function(api, prompt_config) {
   # Filter the prompt configuration
   prompt_config <- llm_filter_config(api, prompt_config)
+
+  connectivity_error <- check_remote_connectivity(api$no_internet)
+  if (!is.null(connectivity_error)) {
+    result <- list()
+    attr(result, "error") <- connectivity_error
+
+    if (!is.null(attr(prompt_config, "message"))) {
+      result <- append_attr(result, attr(prompt_config, "message"), "message")
+    }
+
+    return(result)
+  }
 
   req <- request(api$url) |>
     req_headers(Authorization = paste("Bearer", api$api_key),
@@ -272,22 +242,17 @@ try_send_request <- function(request) {
   return(parsed)
 }
 
-# Function to validate API key via a test request
-validate_api_key <- function(api_key, url_models) {
-  test_req <- request(url_models) |>
-    req_headers(Authorization = paste("Bearer", api_key))
-
-  res <- try_send_request(test_req)
-
-  # Return FALSE or error if invalid
-  if (!is.null(attr(res, "error"))) {
-    stop(attr(res, "error"))
+check_remote_connectivity <- function(no_internet = NULL) {
+  if (is.null(no_internet)) {
+    no_internet <- !isTRUE(has_internet())
   }
 
-  # Additional safety check
-  return(TRUE)
-}
+  if (isTRUE(no_internet)) {
+    return("No connection! Check your internet connection.")
+  }
 
+  NULL
+}
 
 clean_error_message <- function(msg, replace_text = c()) {
   # Remove ANSI escape sequences

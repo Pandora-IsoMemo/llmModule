@@ -1,7 +1,16 @@
+# llmModule 26.05.2
+
+## New Features
+- Added `new_BridgedLlmApi()` routing and a new `EllmerLlmApi` S3 implementation (`get_llm_models()` / `send_prompt()`).
+- Added tests covering bridge routing, key validation, and offline behavior
+
+## Updates
+- Updated `RemoteLlmApi` to defer connectivity handling to `get_llm_models()` / `send_prompt()` via a runtime connectivity check
+
 # llmModule 26.05.1
 
-# Updates
-- deprecated shiny module `llm_generate_prompt` which now should be replaced by `llm_generate_prompt` from `llmModuleS`
+## Updates
+- Deprecated shiny module `llm_generate_prompt` which now should be replaced by `llm_generate_prompt` from `llmModuleS`
 
 # llmModule 26.05.0
 

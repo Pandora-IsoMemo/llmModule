@@ -37,6 +37,9 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
 
     fields_advanced_provider <- list(
       Ollama = list(),
+      Bridge = list(
+        list(fun = numericInput, args = list(ns("n"), "No. of Completions (n)", value = 1, min = 1))
+      ),
       DeepSeek = list(
         list(fun = numericInput, args = list(ns("n"), "No. of Completions (n)", value = 1, min = 1))
       ),
@@ -50,12 +53,18 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
 
     output$advancedInputs <- renderUI({
       req(llm_api(), llm_api()$provider)
+
+      provider_fields <- fields_advanced_provider[[llm_api()$provider]]
+      if (is.null(provider_fields)) {
+        provider_fields <- fields_advanced_provider$Bridge
+      }
+
       tagList(
         fluidRow(
           lapply(fields_advanced_all, function(f) column(3, do.call(f$fun, f$args)))
         ),
         fluidRow(
-          lapply(fields_advanced_provider[[llm_api()$provider]], function(f) column(3, do.call(f$fun, f$args)))
+          lapply(provider_fields, function(f) column(3, do.call(f$fun, f$args)))
         )
       )
     })

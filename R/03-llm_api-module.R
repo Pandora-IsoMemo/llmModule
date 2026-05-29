@@ -4,7 +4,15 @@ llm_api_ui <- function(id, title = NULL) {
 
   ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
 
-  provider_choices <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+  provider_choices <- c(
+    "OpenAI" = "OpenAI",
+    "DeepSeek" = "DeepSeek",
+    "Anthropic" = "Anthropic",
+    "Google Gemini" = "Gemini",
+    "Groq" = "Groq",
+    "Mistral" = "Mistral",
+    "OpenRouter" = "OpenRouter"
+  )
   if (ollama_available) {
     provider_choices <- c(provider_choices, "Ollama (Local)" = "Ollama")
   }
@@ -32,7 +40,6 @@ llm_api_ui <- function(id, title = NULL) {
 # ---- Server Function ----
 llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
     # Reactive values
     api <- reactiveVal(NULL)
     ollama_available <- requireNamespace("ollamar", quietly = TRUE) &&
@@ -52,25 +59,22 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
       input$api_key_file$datapath
     })
 
-    # Trigger remote API creation when file is uploaded
+    # Trigger remote/bridge API creation when file is uploaded
     remote_api <- reactive({
-      req(input$provider %in% c("OpenAI", "DeepSeek"))
+      req(length(input$provider) == 1, input$provider != "Ollama")
+
+      api_key_path <- NULL
       if (!is.null(input$api_key_file)) {
-        new_RemoteLlmApi(
-          api_key_path = input$api_key_file$datapath,
-          provider = input$provider,
-          no_internet = no_internet,
-          exclude_pattern = exclude_pattern
-        ) |>
-          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
-      } else {
-        new_RemoteLlmApi(
-          provider = input$provider,
-          no_internet = no_internet,
-          exclude_pattern = exclude_pattern
-        ) |>
-          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
+        api_key_path <- input$api_key_file$datapath
       }
+
+      new_BridgedLlmApi(
+        api_key_path = api_key_path,
+        provider = input$provider,
+        no_internet = no_internet,
+        exclude_pattern = exclude_pattern
+      ) |>
+        shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
     })
 
     # Trigger local API creation when pull button is clicked
