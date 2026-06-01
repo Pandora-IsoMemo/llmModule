@@ -27,6 +27,7 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     provider_default_model_sentinel <- "__provider_default_model__"
 
     llm_prompt_config <- reactiveVal()
+    model_choices_cache <- reactiveValues(entries = list())
 
     # possibly load default values from config later ...
     fields_advanced_all <- list(
@@ -52,6 +53,34 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
       )
     )
 
+    fingerprint_text <- function(value) {
+      if (is.null(value)) {
+        return("")
+      }
+
+      text <- paste(value, collapse = "")
+      paste0(sprintf("%02x", as.integer(charToRaw(text))), collapse = "")
+    }
+
+    model_cache_key <- function(api) {
+      provider <- if (!is.null(api$provider)) api$provider else "unknown"
+      auth_key <- fingerprint_text(if (!is.null(api$api_key)) api$api_key else "")
+      paste(class(api)[1], provider, auth_key, sep = "|")
+    }
+
+    get_cached_model_choices <- function(api) {
+      key <- model_cache_key(api)
+      model_choices_cache$entries[[key]]
+    }
+
+    set_cached_model_choices <- function(api, choices) {
+      key <- model_cache_key(api)
+      entries <- model_choices_cache$entries
+      entries[[key]] <- choices
+      model_choices_cache$entries <- entries
+      choices
+    }
+
     output$advancedInputs <- renderUI({
       req(llm_api(), llm_api()$provider)
       logDebug("%s: Rendering advanced inputs for provider '%s'", id, llm_api()$provider)
@@ -74,11 +103,19 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     observe({
       logDebug("%s: Updating model choices", id)
       api <- llm_api()
-      if (inherits(api, "EllmerLlmApi") && !ellmer_provider_can_list_models_with_credentials(api$provider)) {
+
+      cached_models <- if (inherits(api, "LlmApi")) get_cached_model_choices(api) else NULL
+
+      if (!is.null(cached_models)) {
+        logDebug("%s: Using cached model choices for provider '%s'", id, api$provider)
+        models <- cached_models
+      } else if (inherits(api, "EllmerLlmApi") && !ellmer_provider_can_list_models_with_credentials(api$provider)) {
         models <- list()
+        set_cached_model_choices(api, models)
       } else if (inherits(api, "LlmApi")) {
         models <- get_llm_models(api) |>
           shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
+        set_cached_model_choices(api, models)
       } else {
         models <- list()
       }

@@ -1,8 +1,5 @@
 testthat::test_that("send_prompt.EllmerLlmApi normalizes bridge output", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-ant-validkey123456789012345", key_file)
-
-  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key_path = key_file)
+  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key = "sk-ant-validkey123456789012345")
   prompt <- new_LlmPromptConfig(prompt_content = "Hello bridge", model = "claude-3-haiku")
 
   fake_chat_obj <- new.env(parent = emptyenv())
@@ -25,10 +22,7 @@ testthat::test_that("send_prompt.EllmerLlmApi normalizes bridge output", {
 })
 
 testthat::test_that("new_LlmResponse works with normalized Ellmer bridge response", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-ant-validkey123456789012345", key_file)
-
-  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key_path = key_file)
+  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key = "sk-ant-validkey123456789012345")
   prompt <- new_LlmPromptConfig(prompt_content = "Hello bridge", model = "claude-3-haiku")
 
   fake_chat_obj <- new.env(parent = emptyenv())
@@ -51,10 +45,7 @@ testthat::test_that("new_LlmResponse works with normalized Ellmer bridge respons
 })
 
 testthat::test_that("send_prompt.EllmerLlmApi returns structured error when model missing", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("token.alpha-1234:provider_key_567890", key_file)
-
-  api <- llmModule:::new_EllmerLlmApi(provider = "Gemini", api_key_path = key_file)
+  api <- llmModule:::new_EllmerLlmApi(provider = "Gemini", api_key = "token.alpha-1234:provider_key_567890")
   prompt <- new_LlmPromptConfig(prompt_content = "Hello bridge", model = "placeholder")
   prompt$model <- NULL
 
@@ -66,10 +57,7 @@ testthat::test_that("send_prompt.EllmerLlmApi returns structured error when mode
 })
 
 testthat::test_that("get_llm_models.EllmerLlmApi categorizes extracted ids", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-ant-validkey123456789012345", key_file)
-
-  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key_path = key_file)
+  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key = "sk-ant-validkey123456789012345")
 
   testthat::local_mocked_bindings(
     bridge_models_list = function(api) list(
@@ -88,12 +76,9 @@ testthat::test_that("get_llm_models.EllmerLlmApi categorizes extracted ids", {
 })
 
 testthat::test_that("get_llm_models.EllmerLlmApi falls back to api$model when listing fails", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-ant-validkey123456789012345", key_file)
-
   api <- llmModule:::new_EllmerLlmApi(
     provider = "Anthropic",
-    api_key_path = key_file,
+    api_key = "sk-ant-validkey123456789012345",
     model = "claude-3-haiku"
   )
 

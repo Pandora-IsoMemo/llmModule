@@ -6,7 +6,8 @@
 #' Network availability and credential checks are performed later when models are listed
 #' or prompts are sent.
 #'
-#' @param api_key_path Character string specifying the path to a file containing the API key.
+#' @param api_key Character string containing the API key.
+#' @param api_key_path Deprecated path to a file containing the API key.
 #' @param provider Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
 #' @param no_internet Logical override for runtime request checks. If `TRUE`,
 #'   internet-dependent operations return a connection error without making requests.
@@ -36,27 +37,35 @@
 #' print(api)
 #' }
 #' @export
-new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude_pattern = "") {
+new_RemoteLlmApi <- function(api_key = NULL, provider, api_key_path = NULL, no_internet = NULL, exclude_pattern = "", ...) {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 
-  if (!is_valid_character(api_key_path)) {
+  if (is_valid_character(api_key)) {
+    api_key <- trimws(api_key)
+  } else if (is_valid_character(api_key_path)) {
+    lifecycle::deprecate_warn(
+      when = "26.05.2",
+      what = "llmModule::new_RemoteLlmApi(api_key_path)",
+      with = "llmModule::new_RemoteLlmApi(api_key)",
+      details = "Passing auth via file path is deprecated; pass the key string directly instead."
+    )
+
+    if (!file.exists(api_key_path)) {
+      api <- list()
+      attr(api, "error") <- "API key file does not exist."
+      return(api)
+    }
+
+    api_key <- trimws(readLines(api_key_path, warn = FALSE))
+  } else {
     api <- list()
-    attr(api, "error") <- "No valid API key path."
+    attr(api, "error") <- "No valid API key supplied."
     return(api)
   }
 
-  # Early checks
-  if (!file.exists(api_key_path)) {
+  if (length(api_key) != 1) {
     api <- list()
-    attr(api, "error") <- "API key file does not exist."
-    return(api)
-  }
-
-  api_key <- trimws(readLines(api_key_path, warn = FALSE))
-
-  if (!(length(api_key) == 1)) {
-    api <- list()
-    attr(api, "error") <- "Wrong format. The file should only contain one line with the key."
+    attr(api, "error") <- "Wrong format. The API key should only contain one value."
     return(api)
   }
 

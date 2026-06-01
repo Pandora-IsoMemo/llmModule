@@ -18,9 +18,7 @@ testthat::test_that("llm_filter_config keeps legacy provider behavior for OpenAI
 })
 
 testthat::test_that("llm_filter_config uses bridge capability set for Ellmer providers", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-ant-validkey123456789012345", key_file)
-  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key_path = key_file)
+  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key = "sk-ant-validkey123456789012345")
 
   config <- new_LlmPromptConfig(
     prompt_content = "hello",
@@ -44,10 +42,7 @@ testthat::test_that("llm_filter_config uses bridge capability set for Ellmer pro
 })
 
 testthat::test_that("send_prompt.EllmerLlmApi emits unsupported-field warning from filter", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-ant-validkey123456789012345", key_file)
-
-  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key_path = key_file)
+  api <- llmModule:::new_EllmerLlmApi(provider = "Anthropic", api_key = "sk-ant-validkey123456789012345")
   prompt <- new_LlmPromptConfig(
     prompt_content = "Hello bridge",
     model = "claude-3-haiku",

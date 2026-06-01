@@ -6,16 +6,20 @@
 \usage{
 new_BridgedLlmApi(
   provider,
-  api_key_path,
+  api_key = NULL,
+  api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = "",
-  model = NULL
+  model = NULL,
+  ...
 )
 }
 \arguments{
 \item{provider}{Character provider name.}
 
-\item{api_key_path}{Character path to API key file.}
+\item{api_key}{Character API key string.}
+
+\item{api_key_path}{Deprecated file path to API key file.}
 
 \item{no_internet}{Logical, passed through to `new_RemoteLlmApi()` for legacy providers.}
 

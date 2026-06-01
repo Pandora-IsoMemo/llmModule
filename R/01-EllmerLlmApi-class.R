@@ -5,7 +5,8 @@
 #' for all other providers.
 #'
 #' @param provider Character provider name.
-#' @param api_key_path Character path to API key file.
+#' @param api_key Character API key string.
+#' @param api_key_path Deprecated file path to API key file.
 #' @param no_internet Logical, passed through to `new_RemoteLlmApi()` for legacy providers.
 #' @param exclude_pattern Character regex for model exclusion.
 #' @param model Character optional default model for bridged providers.
@@ -15,10 +16,12 @@
 #' @export
 new_BridgedLlmApi <- function(
   provider,
-  api_key_path,
+  api_key = NULL,
+  api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = "",
-  model = NULL
+  model = NULL,
+  ...
 ) {
   if (!is_valid_character(provider)) {
     api <- list()
@@ -29,26 +32,29 @@ new_BridgedLlmApi <- function(
   provider <- trimws(provider)
 
   if (provider %in% c("OpenAI", "DeepSeek")) {
-    return(new_RemoteLlmApi(
+    return(do.call(new_RemoteLlmApi, list(
+      api_key = api_key,
       api_key_path = api_key_path,
       provider = provider,
       no_internet = no_internet,
       exclude_pattern = exclude_pattern
-    ))
+    )))
   }
 
-  new_EllmerLlmApi(
+  do.call(new_EllmerLlmApi, list(
     provider = provider,
+    api_key = api_key,
     api_key_path = api_key_path,
     model = model,
     exclude_pattern = exclude_pattern
-  )
+  ))
 }
 
 #' Create an Ellmer bridge API object
 #'
 #' @param provider Character provider name.
-#' @param api_key_path Character path to API key file.
+#' @param api_key Character API key string.
+#' @param api_key_path Deprecated file path to API key file.
 #' @param model Character optional default model.
 #' @param exclude_pattern Character regex for model exclusion.
 #'
@@ -57,17 +63,26 @@ new_BridgedLlmApi <- function(
 #' @export
 new_EllmerLlmApi <- function(
   provider,
-  api_key_path,
+  api_key = NULL,
+  api_key_path = NULL,
   model = NULL,
-  exclude_pattern = ""
+  exclude_pattern = "",
+  ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "26.05.2",
+    what = "llmModule::new_EllmerLlmApi(api_key_path)",
+    with = "llmModule::new_EllmerLlmApi(api_key)",
+    details = "Passing auth via file path is deprecated; pass the key string directly instead."
+  )
+
   if (!is_valid_character(provider)) {
     api <- list()
     attr(api, "error") <- "No valid provider supplied."
     return(api)
   }
 
-  key_data <- read_bridge_api_key(api_key_path)
+  key_data <- resolve_api_key(api_key = api_key, api_key_path = api_key_path)
   if (!is.null(attr(key_data, "error"))) {
     return(key_data)
   }
@@ -113,6 +128,33 @@ read_bridge_api_key <- function(api_key_path) {
   }
 
   list(api_key = api_key)
+}
+
+resolve_api_key <- function(api_key = NULL, api_key_path = NULL) {
+  if (is_valid_character(api_key)) {
+    return(list(api_key = trimws(api_key)))
+  }
+
+  if (is_valid_character(api_key_path)) {
+    if (!file.exists(api_key_path)) {
+      api <- list()
+      attr(api, "error") <- "API key file does not exist."
+      return(api)
+    }
+
+    api_key_file <- trimws(readLines(api_key_path, warn = FALSE))
+    if (length(api_key_file) != 1) {
+      api <- list()
+      attr(api, "error") <- "Wrong format. The file should only contain one line with the key."
+      return(api)
+    }
+
+    return(list(api_key = api_key_file))
+  }
+
+  api <- list()
+  attr(api, "error") <- "No valid API key supplied."
+  api
 }
 
 validate_bridge_api_key <- function(api_key, provider) {

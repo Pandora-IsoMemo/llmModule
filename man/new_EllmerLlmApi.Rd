@@ -4,12 +4,21 @@
 \alias{new_EllmerLlmApi}
 \title{Create an Ellmer bridge API object}
 \usage{
-new_EllmerLlmApi(provider, api_key_path, model = NULL, exclude_pattern = "")
+new_EllmerLlmApi(
+  provider,
+  api_key = NULL,
+  api_key_path = NULL,
+  model = NULL,
+  exclude_pattern = "",
+  ...
+)
 }
 \arguments{
 \item{provider}{Character provider name.}
 
-\item{api_key_path}{Character path to API key file.}
+\item{api_key}{Character API key string.}
+
+\item{api_key_path}{Deprecated file path to API key file.}
 
 \item{model}{Character optional default model.}
 

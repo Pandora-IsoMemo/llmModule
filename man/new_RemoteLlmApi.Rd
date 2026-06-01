@@ -5,16 +5,20 @@
 \title{Create and Validate Remote LLM API Credentials}
 \usage{
 new_RemoteLlmApi(
-  api_key_path,
+  api_key = NULL,
   provider,
+  api_key_path = NULL,
   no_internet = NULL,
-  exclude_pattern = ""
+  exclude_pattern = "",
+  ...
 )
 }
 \arguments{
-\item{api_key_path}{Character string specifying the path to a file containing the API key.}
+\item{api_key}{Character string containing the API key.}
 
 \item{provider}{Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".}
+
+\item{api_key_path}{Deprecated path to a file containing the API key.}
 
 \item{no_internet}{Logical override for runtime request checks. If `TRUE`,
 internet-dependent operations return a connection error without making requests.}

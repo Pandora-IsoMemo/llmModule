@@ -1,9 +1,6 @@
 testthat::test_that("new_RemoteLlmApi defers connectivity checks to runtime", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-validkey12345678901234567890", key_file)
-
   api <- new_RemoteLlmApi(
-    api_key_path = key_file,
+    api_key = "sk-validkey12345678901234567890",
     provider = "OpenAI",
     no_internet = TRUE
   )
@@ -14,11 +11,8 @@ testthat::test_that("new_RemoteLlmApi defers connectivity checks to runtime", {
 })
 
 testthat::test_that("get_llm_models.RemoteLlmApi returns empty list when offline", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-validkey12345678901234567890", key_file)
-
   api <- new_RemoteLlmApi(
-    api_key_path = key_file,
+    api_key = "sk-validkey12345678901234567890",
     provider = "OpenAI",
     no_internet = TRUE
   )
@@ -32,11 +26,8 @@ testthat::test_that("get_llm_models.RemoteLlmApi returns empty list when offline
 })
 
 testthat::test_that("send_prompt.RemoteLlmApi returns connection error when offline", {
-  key_file <- tempfile(fileext = ".txt")
-  writeLines("sk-validkey12345678901234567890", key_file)
-
   api <- new_RemoteLlmApi(
-    api_key_path = key_file,
+    api_key = "sk-validkey12345678901234567890",
     provider = "OpenAI",
     no_internet = TRUE
   )
