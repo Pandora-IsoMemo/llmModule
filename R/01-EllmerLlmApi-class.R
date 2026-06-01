@@ -69,12 +69,14 @@ new_EllmerLlmApi <- function(
   exclude_pattern = "",
   ...
 ) {
-  lifecycle::deprecate_warn(
-    when = "26.05.2",
-    what = "llmModule::new_EllmerLlmApi(api_key_path)",
-    with = "llmModule::new_EllmerLlmApi(api_key)",
-    details = "Passing auth via file path is deprecated; pass the key string directly instead."
-  )
+  if (is_valid_character(api_key_path)) {
+    lifecycle::deprecate_warn(
+      when = "26.05.2",
+      what = "llmModule::new_EllmerLlmApi(api_key_path)",
+      with = "llmModule::new_EllmerLlmApi(api_key)",
+      details = "Passing auth via file path is deprecated; pass the key string directly instead."
+    )
+  }
 
   if (!is_valid_character(provider)) {
     api <- list()
@@ -465,10 +467,25 @@ bridge_chat_create <- function(api, model, system_prompt, params) {
 }
 
 bridge_chat_send <- function(chat_obj, prompt) {
-  chat_obj$chat(prompt)
+  output <- chat_obj$chat(prompt)
+
+  last_turn <- tryCatch(
+    chat_obj$last_turn(),
+    error = function(e) NULL
+  )
+
+  if (!is.null(last_turn)) {
+    return(last_turn)
+  }
+
+  output
 }
 
 bridge_extract_text <- function(turn) {
+  if (is.character(turn)) {
+    return(as.character(turn))
+  }
+
   text <- ellmer::contents_text(turn)
   if (is.null(text)) {
     return(character(0))

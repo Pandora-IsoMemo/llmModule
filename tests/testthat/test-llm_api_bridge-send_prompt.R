@@ -90,3 +90,19 @@ testthat::test_that("get_llm_models.EllmerLlmApi falls back to api$model when li
   models <- get_llm_models(api)
   testthat::expect_equal(models, "claude-3-haiku")
 })
+
+testthat::test_that("bridge_chat_send returns last turn when available", {
+  fake_chat_obj <- new.env(parent = emptyenv())
+  fake_chat_obj$chat <- function(prompt) "stream output"
+  fake_chat_obj$last_turn <- function() "last turn text"
+
+  result <- llmModule:::bridge_chat_send(fake_chat_obj, "hello")
+
+  testthat::expect_equal(result, "last turn text")
+})
+
+testthat::test_that("bridge_extract_text accepts plain character output", {
+  result <- llmModule:::bridge_extract_text("OK")
+
+  testthat::expect_equal(result, "OK")
+})

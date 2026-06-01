@@ -67,9 +67,11 @@ testthat::test_that("Ellmer bridge enforces one-line key file structure", {
   key_file <- tempfile(fileext = ".txt")
   writeLines(c("line1", "line2"), key_file)
 
-  api <- llmModule:::new_EllmerLlmApi(
-    provider = "Gemini",
-    api_key_path = key_file
+  api <- lifecycle::expect_deprecated(
+    llmModule:::new_EllmerLlmApi(
+      provider = "Gemini",
+      api_key_path = key_file
+    )
   )
 
   testthat::expect_equal(
