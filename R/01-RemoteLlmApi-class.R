@@ -39,7 +39,7 @@
 new_RemoteLlmApi <- function(api_key_path, provider, no_internet = NULL, exclude_pattern = "") {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 
-  if (missing(api_key_path) || !is.character(api_key_path) || nchar(api_key_path) == 0) {
+  if (!is_valid_character(api_key_path)) {
     api <- list()
     attr(api, "error") <- "No valid API key path."
     return(api)

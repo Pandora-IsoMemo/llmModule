@@ -4,23 +4,26 @@ llm_api_ui <- function(id, title = NULL) {
 
   ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
 
-  provider_choices <- c(
-    "OpenAI" = "OpenAI",
-    "DeepSeek" = "DeepSeek",
-    "Anthropic" = "Anthropic",
-    "Google Gemini" = "Gemini",
-    "Groq" = "Groq",
-    "Mistral" = "Mistral",
-    "OpenRouter" = "OpenRouter"
-  )
+  providers_legacy <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+
+  providers_ellmer <- eligible_ellmer_providers()
+
+  provider_choices <- providers_ellmer[["provider_key"]]
+  names(provider_choices) <- providers_ellmer[["provider_name"]]
+
+  # remove providers that are already in legacy list
+  provider_choices <- provider_choices[!names(provider_choices) %in% names(providers_legacy)]
+
+  provider_choices <- c(providers_legacy, provider_choices)
+
   if (ollama_available) {
-    provider_choices <- c(provider_choices, "Ollama (Local)" = "Ollama")
+    provider_choices <- c("Ollama (Local)" = "Ollama", provider_choices)
   }
 
   tagList(
     if (!is.null(title)) h3(title) else NULL,
     fluidRow(
-      column(3, radioButtons(ns("provider"), "Choose Provider", choices = provider_choices, selected = character(0))),
+      column(3, selectInput(ns("provider"), "Choose Provider", choices = provider_choices, selected = character(0))),
       conditionalPanel(
         ns = ns,
         condition = "input.provider != 'Ollama'",

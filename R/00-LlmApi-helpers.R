@@ -1,5 +1,156 @@
+is_valid_character <- function(string) {
+  !missing(string) &&
+    is.character(string) &&
+    length(string) == 1 &&
+    nzchar(trimws(string))
+}
+
+inspect_ellmer_chat_model_rules <- function() {
+  ns <- asNamespace("ellmer")
+  exports <- getNamespaceExports("ellmer")
+
+  chat_fns <- grep("^chat_", exports, value = TRUE)
+  chat_fns <- setdiff(chat_fns, "chat")
+  chat_fns <- sort(chat_fns)
+
+  required_model_sentinel <- alist(model = )
+
+  inspect_one <- function(fn_name) {
+    fn <- get(fn_name, envir = ns, inherits = FALSE)
+    fm <- formals(fn)
+
+    if (!("model" %in% names(fm))) {
+      return(data.frame(
+        chat_function = fn_name,
+        provider_key = sub("^chat_", "", fn_name),
+        model_rule = "no model argument",
+        model_default = NA_character_,
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    # Keep as pairlist to avoid forcing a missing-arg object
+    model_formal <- fm["model"]
+
+    if (identical(model_formal, required_model_sentinel)) {
+      rule <- "required"
+      def <- NA_character_
+    } else {
+      default_expr <- model_formal[[1]]
+
+      if (is.null(default_expr)) {
+        rule <- "optional with internal provider default"
+        def <- "NULL"
+      } else {
+        rule <- "optional with explicit formal default"
+        def <- paste(deparse(default_expr), collapse = " ")
+      }
+    }
+
+    data.frame(
+      chat_function = fn_name,
+      provider_key = sub("^chat_", "", fn_name),
+      model_rule = rule,
+      model_default = def,
+      stringsAsFactors = FALSE
+    )
+  }
+
+  out <- do.call(rbind, lapply(chat_fns, inspect_one))
+  rownames(out) <- NULL
+  out
+}
+
+inspect_ellmer_models_helpers <- function() {
+  exports <- getNamespaceExports("ellmer")
+  model_fns <- sort(grep("^models_", exports, value = TRUE))
+  data.frame(
+    models_function = model_fns,
+    provider_key = sub("^models_", "", model_fns),
+    stringsAsFactors = FALSE
+  )
+}
+
+prettify_provider_key <- function(provider_key) {
+  key <- tolower(trimws(provider_key))
+
+  # Known brand spellings and acronyms
+  known <- c(
+    "openai" = "OpenAI",
+    "azure_openai" = "Azure OpenAI",
+    "aws_bedrock" = "AWS Bedrock",
+    "google_gemini" = "Google Gemini",
+    "google_vertex" = "Google Vertex",
+    "huggingface" = "Hugging Face",
+    "deepseek" = "DeepSeek",
+    "openrouter" = "OpenRouter",
+    "github" = "GitHub",
+    "lmstudio" = "LM Studio",
+    "vllm" = "vLLM",
+    "anthropic" = "Anthropic",
+    "claude" = "Claude",
+    "groq" = "Groq",
+    "mistral" = "Mistral",
+    "ollama" = "Ollama",
+    "databricks" = "Databricks",
+    "cloudflare" = "Cloudflare",
+    "perplexity" = "Perplexity",
+    "portkey" = "Portkey",
+    "snowflake" = "Snowflake"
+  )
+
+  if (key %in% names(known)) {
+    return(unname(known[[key]]))
+  }
+
+  # Fallback: foo_bar -> Foo Bar
+  key <- gsub("_+", "_", key)
+  parts <- strsplit(key, "_", fixed = TRUE)[[1]]
+  parts <- parts[nzchar(parts)]
+
+  if (!length(parts)) {
+    return(provider_key)
+  }
+
+  parts <- paste0(toupper(substr(parts, 1, 1)), substr(parts, 2, nchar(parts)))
+  paste(parts, collapse = " ")
+}
+
+#' Get eligible ellmer providers
+#'
+#' Returns a data frame of providers with their chat function, models helper
+#' function (if available), and model argument rules. Only providers that have a
+#' models helper function when required are included.
+#'
+#' @return A data frame with columns: provider_key, chat_function, models_function,
+#'  model_rule, has_models_helper
+#' @export
+eligible_ellmer_providers <- function() {
+  chat_tbl <- inspect_ellmer_chat_model_rules()
+  models_tbl <- inspect_ellmer_models_helpers()
+
+  models_lookup <- stats::setNames(models_tbl$models_function, models_tbl$provider_key)
+
+  chat_tbl$models_function <- unname(models_lookup[chat_tbl$provider_key])
+  chat_tbl$has_models_helper <- !is.na(chat_tbl$models_function)
+
+  chat_tbl$eligible <- (chat_tbl$model_rule != "required") |
+    (chat_tbl$model_rule == "required" & chat_tbl$has_models_helper)
+
+  chat_tbl$provider_name <- vapply(chat_tbl$provider_key, prettify_provider_key, character(1))
+
+  chat_tbl[chat_tbl$eligible, c(
+    "provider_name",
+    "provider_key",
+    "chat_function",
+    "models_function",
+    "model_rule",
+    "has_models_helper"
+  )]
+}
+
 filter_model_list <- function(models, exclude_pattern) {
-  if (!missing(exclude_pattern) && length(exclude_pattern) > 0 && exclude_pattern != "") {
+  if (is_valid_character(exclude_pattern)) {
     models <- models[!grepl(exclude_pattern, models)]
   }
 
