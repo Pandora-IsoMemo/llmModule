@@ -206,10 +206,19 @@ send_prompt.EllmerLlmApi <- function(api, prompt_config) {
   prompt_config <- llm_filter_config(api, prompt_config)
 
   model <- prompt_config$model %||% api$model
-  if (is.null(model) || identical(model, "")) {
+  if ((is.null(model) || identical(model, "")) && !ellmer_model_can_fallback(api$provider)) {
     response <- list()
     attr(response, "error") <- "No model specified for Ellmer bridge request."
     return(response)
+  }
+
+  if (is.null(model) || identical(model, "")) {
+    fallback_msg <- sprintf("No explicit model selected; using the provider default model for '%s'.", api$provider)
+    existing_msg <- attr(prompt_config, "message")
+    if (is.null(existing_msg) || !fallback_msg %in% existing_msg) {
+      prompt_config <- append_attr(prompt_config, fallback_msg, "message")
+    }
+    model <- NULL
   }
 
   prompt_parts <- bridge_prompt_parts(prompt_config)
@@ -376,14 +385,19 @@ bridge_chat_create <- function(api, model, system_prompt, params) {
     stop(sprintf("No chat bridge available for provider '%s'.", api$provider))
   }
 
+  call_args <- list(
+    system_prompt = system_prompt,
+    params = params,
+    api_key = api$api_key,
+    echo = "none"
+  )
+
+  if (!is.null(model) && !identical(model, "")) {
+    call_args$model <- model
+  }
+
   suppressWarnings(
-    do.call(chat_fun, list(
-      model = model,
-      system_prompt = system_prompt,
-      params = params,
-      api_key = api$api_key,
-      echo = "none"
-    ))
+    do.call(chat_fun, call_args)
   )
 }
 

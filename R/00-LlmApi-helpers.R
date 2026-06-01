@@ -243,8 +243,7 @@ llm_supported_fields <- function(api) {
 llm_bridge_supported_fields <- function(provider) {
   # Normalize to ellmer bridge key style, e.g. "OpenRouter" -> "openrouter",
   # "Google Gemini" -> "google_gemini"
-  key <- tolower(gsub("[^A-Za-z0-9]+", "_", trimws(provider)))
-  key <- gsub("^_+|_+$", "", key)
+  key <- normalize_provider_key(provider)
 
   # Baseline that is widely safe across bridged ellmer providers
   base <- c("model", "messages", "max_tokens", "temperature", "top_p", "stop", "seed")
@@ -273,6 +272,34 @@ llm_bridge_supported_fields <- function(provider) {
   }
 
   unique(c(base, extra))
+}
+
+normalize_provider_key <- function(provider) {
+  key <- tolower(gsub("[^A-Za-z0-9]+", "_", trimws(provider)))
+  gsub("^_+|_+$", "", key)
+}
+
+ellmer_provider_model_rule <- function(provider) {
+  key <- normalize_provider_key(provider)
+
+  rules <- inspect_ellmer_chat_model_rules()
+  idx <- match(key, rules$provider_key)
+
+  if (is.na(idx)) {
+    return("required")
+  }
+
+  rules$model_rule[[idx]]
+}
+
+ellmer_provider_has_models_helper <- function(provider) {
+  key <- normalize_provider_key(provider)
+  models <- inspect_ellmer_models_helpers()
+  key %in% models$provider_key
+}
+
+ellmer_model_can_fallback <- function(provider) {
+  !identical(ellmer_provider_model_rule(provider), "required")
 }
 
 # Append attribute to object

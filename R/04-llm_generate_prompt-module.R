@@ -113,6 +113,7 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
 
     # disable generate button if no API key is available
     observe({
+      logDebug("%s: Checking API and prompt config readiness", id)
       if (!inherits(llm_api_reactive(), "LlmApi") || !inherits(prompt_config_reactive(), "LlmPromptConfig")) {
         shinyjs::disable(ns("generate"), asis = TRUE)
       } else {
@@ -135,6 +136,7 @@ llm_generate_prompt_server <- function(id, auto_complete_list = reactive(NULL), 
                 ignoreInit = TRUE)
 
     observe({
+      logDebug("%s: Generating new response", id)
       new_response <- new_LlmResponse(llm_api_reactive(), prompt_config_reactive()) |>
         withProgress(
           message = "Generating response...",

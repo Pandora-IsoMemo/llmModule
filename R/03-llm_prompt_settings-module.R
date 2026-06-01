@@ -24,6 +24,7 @@ llm_prompt_config_ui <- function(id) {
 llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal("")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    provider_default_model_sentinel <- "__provider_default_model__"
 
     llm_prompt_config <- reactiveVal()
 
@@ -53,6 +54,7 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
 
     output$advancedInputs <- renderUI({
       req(llm_api(), llm_api()$provider)
+      logDebug("%s: Rendering advanced inputs for provider '%s'", id, llm_api()$provider)
 
       provider_fields <- fields_advanced_provider[[llm_api()$provider]]
       if (is.null(provider_fields)) {
@@ -70,6 +72,7 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     })
 
     observe({
+      logDebug("%s: Updating model choices", id)
       api <- llm_api()
       if (inherits(api, "LlmApi")) {
         models <- get_llm_models(api) |>
@@ -79,7 +82,11 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
       }
 
       choices <- if (length(models) == 0) {
-        c("No models found..." = "")
+        if (inherits(api, "EllmerLlmApi") && ellmer_model_can_fallback(api$provider)) {
+          c("Use provider default model" = provider_default_model_sentinel)
+        } else {
+          c("No models found..." = "")
+        }
       } else {
         models
       }
@@ -88,10 +95,16 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
 
     observe({
       req(prompt_reactive())
+      logDebug("%s: Updating prompt configuration", id)
+
+      selected_model <- input$model
+      using_provider_default <- identical(selected_model, provider_default_model_sentinel) || identical(selected_model, "")
+      selected_model <- if (using_provider_default) NULL else selected_model
+
       new_settings <- new_LlmPromptConfig(
         # all providers:
         prompt_content = prompt_reactive(),
-        model = input$model,
+        model = selected_model,
         max_tokens = input$max_tokens,
         temperature = input$temperature,
         prompt_role = input$prompt_role,
@@ -106,6 +119,12 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         logprobs = input$logprobs
       ) |>
         shinyTryCatch(errorTitle = "Prompt inputs setup failed", alertStyle = "shinyalert")
+
+      if (inherits(new_settings, "LlmPromptConfig") && using_provider_default) {
+        provider <- if (inherits(llm_api(), "LlmApi") && !is.null(llm_api()$provider)) llm_api()$provider else "selected provider"
+        default_msg <- sprintf("No explicit model selected; using the provider default model for '%s'.", provider)
+        new_settings <- append_attr(new_settings, default_msg, "message")
+      }
 
       llm_prompt_config(new_settings)
     })
