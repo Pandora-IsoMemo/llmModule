@@ -241,20 +241,38 @@ llm_supported_fields <- function(api) {
 }
 
 llm_bridge_supported_fields <- function(provider) {
-  # Common bridged fields that map well across multiple ellmer providers.
-  common <- c("model", "messages", "max_tokens", "temperature", "top_p", "n", "stop", "seed")
+  # Normalize to ellmer bridge key style, e.g. "OpenRouter" -> "openrouter",
+  # "Google Gemini" -> "google_gemini"
+  key <- tolower(gsub("[^A-Za-z0-9]+", "_", trimws(provider)))
+  key <- gsub("^_+|_+$", "", key)
 
-  provider_specific <- switch(
-    provider,
-    # Keep place for future provider-specific capability extensions.
-    "Anthropic" = common,
-    "OpenRouter" = common,
-    "Groq" = common,
-    "Mistral" = common,
-    common
+  # Baseline that is widely safe across bridged ellmer providers
+  base <- c("model", "messages", "max_tokens", "temperature", "top_p", "stop", "seed")
+
+  # Additive capability hints by provider key
+  # Keep this conservative; extend only when verified
+  add_by_key <- list(
+    anthropic = "n",
+    openrouter = "n",
+    groq = "n",
+    mistral = "n",
+    github = "n",
+    google_gemini = "n",
+    google_vertex = "n",
+    aws_bedrock = "n",
+    lmstudio = "n",
+    vllm = "n",
+    portkey = "n",
+    ollama = character(0)
   )
 
-  provider_specific
+  extra <- add_by_key[[key]]
+  if (is.null(extra)) {
+    # Unknown bridged provider: keep permissive default currently used in app
+    extra <- "n"
+  }
+
+  unique(c(base, extra))
 }
 
 # Append attribute to object
