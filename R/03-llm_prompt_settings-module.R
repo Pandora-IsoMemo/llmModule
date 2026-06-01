@@ -74,7 +74,9 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
     observe({
       logDebug("%s: Updating model choices", id)
       api <- llm_api()
-      if (inherits(api, "LlmApi")) {
+      if (inherits(api, "EllmerLlmApi") && !ellmer_provider_can_list_models_with_credentials(api$provider)) {
+        models <- list()
+      } else if (inherits(api, "LlmApi")) {
         models <- get_llm_models(api) |>
           shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
       } else {

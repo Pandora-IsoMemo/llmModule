@@ -17,6 +17,10 @@ llm_api_ui <- function(id, title = NULL) {
   provider_choices <- c(providers_legacy, provider_choices)
 
   if (ollama_available) {
+    # remove Ollama from provider choices if available, since it gets its own special UI treatment
+    # and is the default when running in Docker
+    provider_choices <- provider_choices[!names(provider_choices) == "Ollama"]
+
     provider_choices <- c("Ollama (Local)" = "Ollama", provider_choices)
   }
 

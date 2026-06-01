@@ -12,6 +12,7 @@ A data frame with columns: provider_key, chat_function, models_function,
 }
 \description{
 Returns a data frame of providers with their chat function, models helper
-function (if available), and model argument rules. Only providers that have a
-models helper function when required are included.
+function (if available), auth argument capabilities, and model argument rules.
+Only providers with a chat `credentials` argument are included. Providers that
+require an explicit model must also provide a models helper.
 }

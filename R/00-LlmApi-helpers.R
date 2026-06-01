@@ -71,6 +71,89 @@ inspect_ellmer_models_helpers <- function() {
   )
 }
 
+inspect_ellmer_auth_rules <- function() {
+  ns <- asNamespace("ellmer")
+  exports <- getNamespaceExports("ellmer")
+
+  chat_fns <- sort(setdiff(grep("^chat_", exports, value = TRUE), "chat"))
+  model_fns <- sort(grep("^models_", exports, value = TRUE))
+
+  inspect_formals <- function(fn_name) {
+    fn <- get(fn_name, envir = ns, inherits = FALSE)
+    fm_names <- names(formals(fn))
+
+    list(
+      has_credentials = "credentials" %in% fm_names,
+      has_api_key = "api_key" %in% fm_names
+    )
+  }
+
+  chat_rows <- lapply(chat_fns, function(fn_name) {
+    auth <- inspect_formals(fn_name)
+    data.frame(
+      provider_key = sub("^chat_", "", fn_name),
+      chat_function = fn_name,
+      chat_has_credentials_arg = auth$has_credentials,
+      chat_has_api_key_arg = auth$has_api_key,
+      stringsAsFactors = FALSE
+    )
+  })
+
+  model_rows <- lapply(model_fns, function(fn_name) {
+    auth <- inspect_formals(fn_name)
+    data.frame(
+      provider_key = sub("^models_", "", fn_name),
+      models_function = fn_name,
+      models_has_credentials_arg = auth$has_credentials,
+      models_has_api_key_arg = auth$has_api_key,
+      stringsAsFactors = FALSE
+    )
+  })
+
+  chat_tbl <- if (length(chat_rows) > 0) {
+    do.call(rbind, chat_rows)
+  } else {
+    data.frame(
+      provider_key = character(0),
+      chat_function = character(0),
+      chat_has_credentials_arg = logical(0),
+      chat_has_api_key_arg = logical(0),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  model_tbl <- if (length(model_rows) > 0) {
+    do.call(rbind, model_rows)
+  } else {
+    data.frame(
+      provider_key = character(0),
+      models_function = character(0),
+      models_has_credentials_arg = logical(0),
+      models_has_api_key_arg = logical(0),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  out <- merge(chat_tbl, model_tbl, by = "provider_key", all = TRUE)
+
+  out$chat_has_credentials_arg[is.na(out$chat_has_credentials_arg)] <- FALSE
+  out$chat_has_api_key_arg[is.na(out$chat_has_api_key_arg)] <- FALSE
+  out$models_has_credentials_arg[is.na(out$models_has_credentials_arg)] <- FALSE
+  out$models_has_api_key_arg[is.na(out$models_has_api_key_arg)] <- FALSE
+
+  out$auth_mode <- ifelse(
+    out$chat_has_credentials_arg & out$chat_has_api_key_arg,
+    "both",
+    ifelse(
+      out$chat_has_credentials_arg,
+      "credentials_only",
+      ifelse(out$chat_has_api_key_arg, "api_key_only", "ambient_or_provider_specific")
+    )
+  )
+
+  out[order(out$provider_key), ]
+}
+
 prettify_provider_key <- function(provider_key) {
   key <- tolower(trimws(provider_key))
 
@@ -119,8 +202,9 @@ prettify_provider_key <- function(provider_key) {
 #' Get eligible ellmer providers
 #'
 #' Returns a data frame of providers with their chat function, models helper
-#' function (if available), and model argument rules. Only providers that have a
-#' models helper function when required are included.
+#' function (if available), auth argument capabilities, and model argument rules.
+#' Only providers with a chat `credentials` argument are included. Providers that
+#' require an explicit model must also provide a models helper.
 #'
 #' @return A data frame with columns: provider_key, chat_function, models_function,
 #'  model_rule, has_models_helper
@@ -128,6 +212,7 @@ prettify_provider_key <- function(provider_key) {
 eligible_ellmer_providers <- function() {
   chat_tbl <- inspect_ellmer_chat_model_rules()
   models_tbl <- inspect_ellmer_models_helpers()
+  auth_tbl <- inspect_ellmer_auth_rules()
 
   models_lookup <- stats::setNames(models_tbl$models_function, models_tbl$provider_key)
 
@@ -139,13 +224,32 @@ eligible_ellmer_providers <- function() {
 
   chat_tbl$provider_name <- vapply(chat_tbl$provider_key, prettify_provider_key, character(1))
 
+  chat_tbl <- merge(chat_tbl, auth_tbl, by = c("provider_key", "chat_function", "models_function"), all.x = TRUE)
+
+  chat_tbl$chat_has_credentials_arg[is.na(chat_tbl$chat_has_credentials_arg)] <- FALSE
+  chat_tbl$chat_has_api_key_arg[is.na(chat_tbl$chat_has_api_key_arg)] <- FALSE
+  chat_tbl$models_has_credentials_arg[is.na(chat_tbl$models_has_credentials_arg)] <- FALSE
+  chat_tbl$models_has_api_key_arg[is.na(chat_tbl$models_has_api_key_arg)] <- FALSE
+  chat_tbl$auth_mode[is.na(chat_tbl$auth_mode)] <- "ambient_or_provider_specific"
+
+  # Hard allowlist policy: chat must support explicit credentials.
+  chat_tbl$eligible <- chat_tbl$eligible & chat_tbl$chat_has_credentials_arg
+
+  # Set provider_name as row names for easy lookup and return only relevant columns
+  rownames(chat_tbl) <- chat_tbl$provider_name
+
   chat_tbl[chat_tbl$eligible, c(
     "provider_name",
     "provider_key",
     "chat_function",
     "models_function",
     "model_rule",
-    "has_models_helper"
+    "has_models_helper",
+    "auth_mode",
+    "chat_has_credentials_arg",
+    "chat_has_api_key_arg",
+    "models_has_credentials_arg",
+    "models_has_api_key_arg"
   )]
 }
 
@@ -296,6 +400,23 @@ ellmer_provider_has_models_helper <- function(provider) {
   key <- normalize_provider_key(provider)
   models <- inspect_ellmer_models_helpers()
   key %in% models$provider_key
+}
+
+ellmer_provider_models_support_credentials <- function(provider) {
+  key <- normalize_provider_key(provider)
+  auth <- inspect_ellmer_auth_rules()
+  idx <- match(key, auth$provider_key)
+
+  if (is.na(idx)) {
+    return(FALSE)
+  }
+
+  isTRUE(auth$models_has_credentials_arg[[idx]])
+}
+
+ellmer_provider_can_list_models_with_credentials <- function(provider) {
+  ellmer_provider_has_models_helper(provider) &&
+    ellmer_provider_models_support_credentials(provider)
 }
 
 ellmer_model_can_fallback <- function(provider) {
