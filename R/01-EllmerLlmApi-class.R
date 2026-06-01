@@ -288,13 +288,33 @@ bridge_provider_function <- function(prefix, provider) {
   get0(fn_name, envir = asNamespace("ellmer"), mode = "function", inherits = FALSE)
 }
 
+bridge_credentials_fn <- function(api) {
+  key <- api$api_key
+  function() key
+}
+
+bridge_auth_args <- function(fn, api) {
+  fn_args <- names(formals(fn))
+
+  if ("credentials" %in% fn_args) {
+    return(list(credentials = bridge_credentials_fn(api)))
+  }
+
+  if ("api_key" %in% fn_args) {
+    return(list(api_key = api$api_key))
+  }
+
+  list()
+}
+
 bridge_models_list <- function(api) {
   models_fun <- bridge_provider_function("models_", api$provider)
   if (is.null(models_fun)) {
     stop(sprintf("No model-listing bridge available for provider '%s'.", api$provider))
   }
 
-  do.call(models_fun, list(api_key = api$api_key))
+  call_args <- bridge_auth_args(models_fun, api)
+  do.call(models_fun, call_args)
 }
 
 extract_bridge_model_ids <- function(model_data) {
@@ -388,9 +408,10 @@ bridge_chat_create <- function(api, model, system_prompt, params) {
   call_args <- list(
     system_prompt = system_prompt,
     params = params,
-    api_key = api$api_key,
     echo = "none"
   )
+
+  call_args <- c(call_args, bridge_auth_args(chat_fun, api))
 
   if (!is.null(model) && !identical(model, "")) {
     call_args$model <- model
