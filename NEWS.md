@@ -1,7 +1,7 @@
 # llmModule 26.05.2
 
 ## New Features
-- Added `new_BridgedLlmApi()` routing and a new `EllmerLlmApi` S3 implementation (`get_llm_models()` / `send_prompt()`).
+- Added `new_BridgedLlmApi()` routing and a new `EllmerLlmApi` S3 implementation (`get_llm_models()` / `send_prompt()`) (#16).
 - Added tests covering bridge routing, key validation, and offline behavior
 
 ## Updates
