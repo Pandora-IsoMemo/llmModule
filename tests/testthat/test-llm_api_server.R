@@ -21,7 +21,7 @@ testthat::test_that("Test llm_api_server with too short OpenAI key", {
                       )
                       testthat::expect_length(api(), 0)
                       testthat::expect_equal(attr(api(), "error"), "API key appears too short.")
-                    })
+                    }) |> suppressWarnings()
 })
 
 testthat::test_that("Test llm_api_server with OpenAI key", {
@@ -49,5 +49,5 @@ testthat::test_that("Test llm_api_server with OpenAI key", {
                       testthat::expect_s3_class(api(), "RemoteLlmApi")
                       testthat::expect_s3_class(api(), "LlmApi")
                       testthat::expect_null(attr(api(), "error"))
-                    })
+                    }) |> suppressWarnings()
 })
