@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.05.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.06.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,24 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="26.06.0" id="llmmodule-26060">llmModule 26.06.0<a class="anchor" aria-label="anchor" href="#llmmodule-26060"></a></h2>
+<div class="section level3">
+<h3 id="new-features-26-06-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-26-06-0"></a></h3>
+<ul><li>Added provider routing via <code><a href="../reference/new_BridgedLlmApi.html">new_BridgedLlmApi()</a></code> and introduced the <code>EllmerLlmApi</code> S3 implementation with <code><a href="../reference/get_llm_models.html">get_llm_models()</a></code> and <code><a href="../reference/send_prompt.html">send_prompt()</a></code> methods (#16).</li>
+<li>Added tests for bridge routing, API key validation, and offline/runtime behavior.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="updates-26-06-0">Updates<a class="anchor" aria-label="anchor" href="#updates-26-06-0"></a></h3>
+<ul><li>Changed <code>new_RemoteLlmApi</code> to defer connectivity checks to runtime; internet/auth errors are now handled in <code><a href="../reference/get_llm_models.html">get_llm_models()</a></code> and <code><a href="../reference/send_prompt.html">send_prompt()</a></code>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="26.05.1" id="llmmodule-26051">llmModule 26.05.1<a class="anchor" aria-label="anchor" href="#llmmodule-26051"></a></h2>
+<div class="section level3">
+<h3 id="updates-26-05-1">Updates<a class="anchor" aria-label="anchor" href="#updates-26-05-1"></a></h3>
+<ul><li>Deprecated shiny module <code>llm_generate_prompt</code> which now should be replaced by <code>llm_generate_prompt</code> from <code>llmModuleS</code>
+</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="26.05.0" id="llmmodule-26050">llmModule 26.05.0<a class="anchor" aria-label="anchor" href="#llmmodule-26050"></a></h2>

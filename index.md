@@ -1,36 +1,42 @@
 # llmModule (development version)
 
-`llmModule` provides a structured and extensible R interface to interact
-with both remote (e.g., OpenAI, DeepSeek) and local (via Ollama) Large
-Language Model (LLM) APIs. It simplifies key workflows such as model
-selection, prompt configuration, and request handling through a
-consistent object-oriented interface.
+`llmModule` provides a structured R interface for working with remote
+and local Large Language Model (LLM) APIs through a consistent S3-based
+workflow.
 
-`llmModule` provides a structured R interface for working with Large
-Language Model (LLM) APIs, including
-[OpenAI](https://platform.openai.com) and
-[DeepSeek](https://platform.deepseek.com).
+It is designed for script and package usage (without requiring Shiny),
+with support for:
 
-It simplifies interactions with chat-based LLMs by offering methods and
-S3 classes for:
+- Remote providers through `RemoteLlmApi` and bridge-based providers
+- Local Ollama models through `LocalLlmApi`
+- Prompt configuration via `LlmPromptConfig`
+- Structured response handling via `LlmResponse`
 
-- API key management and validation
-- Prompt configuration
-- Sending chat prompts
-- Extracting responses
+> Note: `llmModule` still exports Shiny-facing helpers for compatibility
+> (e.g. [`startApplication()`](https://pandora-isomemo.github.io/llmModule/reference/startApplication.md)),
+> but for actively maintained Shiny workflows prefer the separate
+> package `llmModuleS`.
 
 ## 🚀 Features
 
 - Modular, object-oriented interface using S3 classes:
-  - `RemoteLlmApi` for remote providers (OpenAI, DeepSeek)
+  - `RemoteLlmApi` for legacy remote providers (OpenAI, DeepSeek)
+  - Bridge routing via
+    [`new_BridgedLlmApi()`](https://pandora-isomemo.github.io/llmModule/reference/new_BridgedLlmApi.md)
+    for additional providers, returning `EllmerLlmApi` (or
+    `RemoteLlmApi` for legacy providers) (e.g., Anthropic, Gemini, Groq,
+    Mistral, OpenRouter)
   - `LocalLlmApi` for local Ollama servers
   - `LlmPromptConfig` to configure prompt messages and parameters
   - `LlmResponse` for structured handling of responses
-- Comprehensive API validation:
-  - Validates API key format, provider match, and key functionality via
-    test request
-  - Clear error reporting with automatic suggestion of likely provider
-    mismatches
+- Validation model aligned with runtime API behavior:
+  - Constructor-time checks validate credentials (preferred: `api_key`
+    string; deprecated fallback: `api_key_path` file path)
+  - Internet and credential validity checks occur at runtime when
+    calling
+    [`get_llm_models()`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.md)
+    or
+    [`send_prompt()`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.md)
 - Local model support (via [Ollama](https://ollama.com)):
   - Allows to pull new models
   - Allows exclusion of deprecated or irrelevant models via
@@ -48,29 +54,70 @@ S3 classes for:
 
 ``` r
 
+library(llmModule)
+
 # Create an LLM API object
-api <- new_RemoteLlmApi("~/.secrets/openai.txt", provider = "OpenAI")
+api <- new_RemoteLlmApi(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_API_KEY")
+)
 
 # Set up a prompt
 prompt <- new_LlmPromptConfig(
-      model = "gpt-4.1",
-      prompt_content = "What's the capital of Italy?"
+  model = "gpt-4.1",
+  prompt_content = "What's the capital of Italy?"
 )
 
 # Send the prompt
 result <- send_prompt(api, prompt)
 
-# Extract the assistant's reply
-result$choices[[1]]$message$content
+# Handle runtime validation/network errors
+if (!is.null(attr(result, "error"))) {
+  message(attr(result, "error"))
+} else {
+  result$choices[[1]]$message$content
+}
+```
+
+### Local Ollama Example
+
+``` r
+
+library(llmModule)
+
+manager <- new_OllamaModelManager()
+manager <- update(manager)
+
+api <- new_LocalLlmApi(manager, "tinyllama")
+prompt <- new_LlmPromptConfig(
+  prompt_content = "Summarize entropy in one sentence.",
+  model = "tinyllama:latest"
+)
+
+response <- new_LlmResponse(api, prompt)
+response$generated_text
+```
+
+### Bridge Provider Example
+
+``` r
+
+library(llmModule)
+
+api <- new_BridgedLlmApi(
+  provider = "Anthropic",
+  api_key = Sys.getenv("ANTHROPIC_API_KEY")
+)
+
+models <- get_llm_models(api)
 ```
 
 ------------------------------------------------------------------------
 
-## 📦 Docker Installation (recommended)
+## 📦 Docker Setup (optional)
 
-Run this app in your browser with just one command! The Docker setup
-includes all components — the `llmModule` Shiny frontend and the
-`ollama` backend for local LLM model serving — no manual setup required.
+This Docker setup is mainly for legacy app workflows. For Shiny-based UI
+usage, please use `llmModuleS`.
 
 ### ✅ 1. Install the software Docker
 
@@ -83,7 +130,7 @@ installation instructions:
 
 After Docker is installed you can pull & run the app manually.
 
-### 🚀 2. Run the App with Docker Compose
+### 🚀 2. Run the Docker stack with Compose
 
 **Open a terminal (command line):**
 
@@ -95,7 +142,7 @@ After Docker is installed you can pull & run the app manually.
 - Linux: most Linux systems use the same default keyboard shortcut to
   start the command line: `Ctrl`-`Alt`-`T` or `Super`-`T`
 
-To start the app you need the
+To start the stack you need the
 [docker-compose.yaml](https://github.com/Pandora-IsoMemo/llmModule/blob/main/docker-compose.yml)
 of this Repository. You can either:
 
@@ -114,14 +161,13 @@ These commands will:
 1.  The first time you run this, it will download the necessary Docker
     images for
     - `ollama` (for model serving and its REST API) and
-    - the `llm-module` (the Shiny web frontend that controls Ollama and
-      can also interact with other LLM APIs like OpenAI, Deepseek).
+    - the `llm-module` container image used in this repository’s Docker
+      workflow.
 2.  After images are pulled, a Docker network and a Docker volume will
     be created, and both container will start.
-3.  The `llm-module` container hosts the application, which you can
-    access in your web browser at `http://127.0.0.1:3838/`.
+3.  For an actively maintained Shiny frontend, use `llmModuleS`.
 
-### 🚀 3. Run the app with a custom Ollama models path (optional)
+### 🚀 3. Run the stack with a custom Ollama models path (optional)
 
 To use your own pre-downloaded Ollama models, specify a custom path by
 setting the `OLLAMA_LOCAL_MODELS_PATH` environment variable.
@@ -144,7 +190,22 @@ and persistent access.
 
 ------------------------------------------------------------------------
 
-## Notes for developers — local testing
+## Notes for developers
+
+### Documentation
+
+When adding information to the *help* sites, *docstrings* or the
+*vignette* of this package, please update documentation locally as
+follows. The documentation of the main branch is build automatically via
+github action.
+
+``` r
+
+devtools::document() # or CTRL + SHIFT + D in RStudio
+devtools::build_site()
+```
+
+### Local testing
 
 To build and run the app locally:
 

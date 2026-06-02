@@ -6,6 +6,10 @@
   : Extract and format LLM response as a table
 - [`as_table()`](https://pandora-isomemo.github.io/llmModule/reference/as_table.md)
   : Generic extractor for LlmResponse outputs
+- [`eligible_ellmer_providers()`](https://pandora-isomemo.github.io/llmModule/reference/eligible_ellmer_providers.md)
+  : Get eligible ellmer providers
+- [`get_llm_models(`*`<EllmerLlmApi>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.EllmerLlmApi.md)
+  : Retrieve Available LLM Models via Ellmer bridge
 - [`get_llm_models(`*`<LocalLlmApi>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.LocalLlmApi.md)
   : Retrieve Available LLM Models
 - [`get_llm_models()`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.md)
@@ -20,6 +24,10 @@
   : LLM Prompt Generator Server Module
 - [`llm_generate_prompt_ui()`](https://pandora-isomemo.github.io/llmModule/reference/llm_generate_prompt_ui.md)
   : LLM Prompt Generator UI Module
+- [`new_BridgedLlmApi()`](https://pandora-isomemo.github.io/llmModule/reference/new_BridgedLlmApi.md)
+  : Create a provider-routed LLM API object
+- [`new_EllmerLlmApi()`](https://pandora-isomemo.github.io/llmModule/reference/new_EllmerLlmApi.md)
+  : Create an Ellmer bridge API object
 - [`new_LlmPromptConfig()`](https://pandora-isomemo.github.io/llmModule/reference/new_LlmPromptConfig.md)
   : Create and Manage LLM Prompt Settings
 - [`new_LlmResponse()`](https://pandora-isomemo.github.io/llmModule/reference/new_LlmResponse.md)
@@ -32,6 +40,8 @@
   : Ollama Model Manager
 - [`new_RemoteLlmApi()`](https://pandora-isomemo.github.io/llmModule/reference/new_RemoteLlmApi.md)
   : Create and Validate Remote LLM API Credentials
+- [`print(`*`<EllmerLlmApi>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/print.EllmerLlmApi.md)
+  : Print method for EllmerLlmApi
 - [`print(`*`<LlmPromptConfig>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/print.LlmPromptConfig.md)
   : Print method for better readability
 - [`print(`*`<LlmResponse>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/print.LlmResponse.md)
@@ -44,6 +54,8 @@
   : Print method for OllamaModelManager
 - [`print(`*`<RemoteLlmApi>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/print.RemoteLlmApi.md)
   : Print method for RemoteLlmApi
+- [`send_prompt(`*`<EllmerLlmApi>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.EllmerLlmApi.md)
+  : Send a prompt through the Ellmer bridge
 - [`send_prompt(`*`<LocalLlmApi>`*`)`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.LocalLlmApi.md)
   : Send a prompt to a local llm API (e.g., Ollama)
 - [`send_prompt()`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.md)

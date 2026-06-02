@@ -44,6 +44,11 @@ is returned with an error attribute containing the error message.
 
 ``` r
 api <- new_RemoteLlmApi(api_key_path = "path/to/key.txt", provider = "OpenAI")
+#> Warning: The `api_key_path` argument of `new_RemoteLlmApi()` is deprecated as of
+#> llmModule 26.05.2.
+#> ℹ Please use the `api_key` argument instead.
+#> ℹ Passing auth via file path is deprecated; pass the key string directly
+#>   instead.
 prompt <- new_LlmPromptConfig(
   prompt_content = "Explain entropy in simple terms.",
   model = "gpt-3.5-turbo",

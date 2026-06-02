@@ -1,6 +1,33 @@
 # Changelog
 
+## llmModule 26.06.0
+
+### New Features
+
+- Added provider routing via
+  [`new_BridgedLlmApi()`](https://pandora-isomemo.github.io/llmModule/reference/new_BridgedLlmApi.md)
+  and introduced the `EllmerLlmApi` S3 implementation with
+  [`get_llm_models()`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.md)
+  and
+  [`send_prompt()`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.md)
+  methods (#16).
+- Added tests for bridge routing, API key validation, and
+  offline/runtime behavior.
+
+### Updates
+
+- Changed `new_RemoteLlmApi` to defer connectivity checks to runtime;
+  internet/auth errors are now handled in
+  [`get_llm_models()`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.md)
+  and
+  [`send_prompt()`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.md).
+
 ## llmModule 26.05.1
+
+### Updates
+
+- Deprecated shiny module `llm_generate_prompt` which now should be
+  replaced by `llm_generate_prompt` from `llmModuleS`
 
 ## llmModule 26.05.0
 

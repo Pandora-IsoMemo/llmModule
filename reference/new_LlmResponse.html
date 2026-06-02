@@ -11,7 +11,7 @@ handles request errors gracefully, and returns the model-generated content along
 
     <a class="navbar-brand me-2" href="../index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.05.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.06.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,6 +77,11 @@ handles request errors gracefully, and returns the model-generated content along
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="new_RemoteLlmApi.html">new_RemoteLlmApi</a></span><span class="op">(</span>api_key_path <span class="op">=</span> <span class="st">"path/to/key.txt"</span>, provider <span class="op">=</span> <span class="st">"OpenAI"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The `api_key_path` argument of `new_RemoteLlmApi()` is deprecated as of</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> llmModule 26.05.2.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Please use the `api_key` argument instead.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Passing auth via file path is deprecated; pass the key string directly</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   instead.</span>
 <span class="r-in"><span><span class="va">prompt</span> <span class="op">&lt;-</span> <span class="fu"><a href="new_LlmPromptConfig.html">new_LlmPromptConfig</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  prompt_content <span class="op">=</span> <span class="st">"Explain entropy in simple terms."</span>,</span></span>
 <span class="r-in"><span>  model <span class="op">=</span> <span class="st">"gpt-3.5-turbo"</span>,</span></span>
