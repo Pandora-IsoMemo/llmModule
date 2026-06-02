@@ -17,20 +17,23 @@ support for:
 - Prompt configuration via `LlmPromptConfig`
 - Structured response handling via `LlmResponse`
 
-> Note: Shiny modules were extracted into the separate package `llmModuleS` and
-> are deprecated in `llmModule`.
+> Note: `llmModule` still exports Shiny-facing helpers for compatibility
+> (e.g. `startApplication()`), but for actively maintained Shiny workflows
+> prefer the separate package `llmModuleS`.
 
 ## 🚀 Features
 
 - Modular, object-oriented interface using S3 classes:
   - `RemoteLlmApi` for legacy remote providers (OpenAI, DeepSeek)
-  - `BridgedLlmApi` routing via `new_BridgedLlmApi()` for additional providers
+  - Bridge routing via `new_BridgedLlmApi()` for additional providers, returning
+    `EllmerLlmApi` (or `RemoteLlmApi` for legacy providers)
     (e.g., Anthropic, Gemini, Groq, Mistral, OpenRouter)
   - `LocalLlmApi` for local Ollama servers
   - `LlmPromptConfig` to configure prompt messages and parameters
   - `LlmResponse` for structured handling of responses
 - Validation model aligned with runtime API behavior:
-  - Constructor-time checks validate local key file structure (path, one-line format, minimum length)
+  - Constructor-time checks validate credentials (preferred: `api_key` string;
+    deprecated fallback: `api_key_path` file path)
   - Internet and credential validity checks occur at runtime when calling
     `get_llm_models()` or `send_prompt()`
 - Local model support (via [Ollama](https://ollama.com)):
@@ -49,7 +52,10 @@ support for:
 library(llmModule)
 
 # Create an LLM API object
-api <- new_RemoteLlmApi("~/.secrets/openai.txt", provider = "OpenAI")
+api <- new_RemoteLlmApi(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_API_KEY")
+)
 
 # Set up a prompt
 prompt <- new_LlmPromptConfig(
@@ -93,7 +99,7 @@ library(llmModule)
 
 api <- new_BridgedLlmApi(
   provider = "Anthropic",
-  api_key_path = "~/.secrets/anthropic.txt"
+  api_key = Sys.getenv("ANTHROPIC_API_KEY")
 )
 
 models <- get_llm_models(api)
@@ -177,7 +183,20 @@ This will mount your local models into the container for faster startup and pers
 
 ----
 
-## Notes for developers — local testing
+## Notes for developers
+
+### Documentation
+
+When adding information to the _help_ sites, _docstrings_ or the _vignette_ of this 
+package, please update documentation locally as follows. The documentation of
+the main branch is build automatically via github action.
+
+```R
+devtools::document() # or CTRL + SHIFT + D in RStudio
+devtools::build_site()
+```
+
+### Local testing
 
 To build and run the app locally:
 
