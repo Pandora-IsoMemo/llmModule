@@ -1,4 +1,4 @@
-# llmModule 26.05.2
+# llmModule 26.06.0
 
 ## New Features
 - Added provider routing via `new_BridgedLlmApi()` and introduced the `EllmerLlmApi` S3 implementation with `get_llm_models()` and `send_prompt()` methods (#16).
