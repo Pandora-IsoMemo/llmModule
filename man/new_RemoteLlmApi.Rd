@@ -5,19 +5,22 @@
 \title{Create and Validate Remote LLM API Credentials}
 \usage{
 new_RemoteLlmApi(
-  api_key_path,
   provider,
+  api_key = NULL,
+  api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = ""
 )
 }
 \arguments{
-\item{api_key_path}{Character string specifying the path to a file containing the API key.}
-
 \item{provider}{Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".}
 
-\item{no_internet}{Logical, indicating whether to skip internet checks. If `TRUE`,
-the function will not attempt to validate the API key via a network request.}
+\item{api_key}{Character string containing the API key.}
+
+\item{api_key_path}{Deprecated path to a file containing the API key.}
+
+\item{no_internet}{Logical override for runtime request checks. If `TRUE`,
+internet-dependent operations return a connection error without making requests.}
 
 \item{exclude_pattern}{Character, a regex pattern to exclude certain models from the list of
 available models, e.g. "babbage|curie|dall-e|davinci|text-embedding|tts|whisper"}
@@ -29,16 +32,15 @@ An object of class RemoteLlmApi, containing the API key, URL, and provider name
 \description{
 The new_RemoteLlmApi() function constructs an S3 object that stores API credentials for interacting
 with Large Language Models (LLMs) such as OpenAI's GPT models and DeepSeek models.
-It reads the API key from a specified file, validates its format, ensures it matches the correct provider,
-and checks if the key is valid by performing a test request.
+It reads the API key from a specified file and validates local key structure.
+Network availability and credential checks are performed later when models are listed
+or prompts are sent.
 }
 \details{
 This function includes multiple validation steps:
 - Reads the API key from the specified file.
-- Ensures the API key format is correct (e.g., OpenAI keys start with "sk-" and DeepSeek keys contain alphanumeric characters).
-- Matches the API key to the correct provider.
-- Prevents incorrect combinations of API keys and providers.
-- Sends a test request to verify that the API key is active and functional.
+- Ensures the API key file has a valid one-line format and sufficient length.
+- Stores provider endpoints and optional runtime connectivity override settings.
 
 If any of these checks fail, an error is returned with details about the issue.
 }

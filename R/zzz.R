@@ -7,6 +7,8 @@ running_in_shinyproxy <- function() {
 }
 
 .onLoad <- function(libname, pkgname) {
+  llmModule:::init_logging()
+
   if (running_in_docker() && !running_in_shinyproxy()) {
     ollama_url <- Sys.getenv("OLLAMA_API_URL", unset = "http://localhost:11434")
   } else {

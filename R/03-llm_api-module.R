@@ -4,15 +4,30 @@ llm_api_ui <- function(id, title = NULL) {
 
   ollama_available <- tolower(Sys.getenv("IS_SHINYPROXY", "false")) == "false" && is_ollama_running()
 
-  provider_choices <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+  providers_legacy <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+
+  providers_ellmer <- eligible_ellmer_providers()
+
+  provider_choices <- providers_ellmer[["provider_key"]]
+  names(provider_choices) <- providers_ellmer[["provider_name"]]
+
+  # remove providers that are already in legacy list
+  provider_choices <- provider_choices[!names(provider_choices) %in% names(providers_legacy)]
+
+  provider_choices <- c(providers_legacy, provider_choices)
+
   if (ollama_available) {
-    provider_choices <- c(provider_choices, "Ollama (Local)" = "Ollama")
+    # remove Ollama from provider choices if available, since it gets its own special UI treatment
+    # and is the default when running in Docker
+    provider_choices <- provider_choices[!names(provider_choices) == "Ollama"]
+
+    provider_choices <- c("Ollama (Local)" = "Ollama", provider_choices)
   }
 
   tagList(
     if (!is.null(title)) h3(title) else NULL,
     fluidRow(
-      column(3, radioButtons(ns("provider"), "Choose Provider", choices = provider_choices, selected = character(0))),
+      column(3, selectInput(ns("provider"), "Choose Provider", choices = provider_choices, selected = character(0))),
       conditionalPanel(
         ns = ns,
         condition = "input.provider != 'Ollama'",
@@ -32,7 +47,6 @@ llm_api_ui <- function(id, title = NULL) {
 # ---- Server Function ----
 llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
     # Reactive values
     api <- reactiveVal(NULL)
     ollama_available <- requireNamespace("ollamar", quietly = TRUE) &&
@@ -43,6 +57,7 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
     # Initialize manager
     manager <- reactiveVal(NULL)
     if (ollama_available) {
+      logDebug("%s: Initializing Ollama Model Manager", id)
       manager(update(new_OllamaModelManager()))
     }
 
@@ -52,25 +67,23 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
       input$api_key_file$datapath
     })
 
-    # Trigger remote API creation when file is uploaded
+    # Trigger remote/bridge API creation when file is uploaded
     remote_api <- reactive({
-      req(input$provider %in% c("OpenAI", "DeepSeek"))
+      req(length(input$provider) == 1, input$provider != "Ollama")
+      logDebug("%s: Initializing remote API", id)
+
+      api_key_path <- NULL
       if (!is.null(input$api_key_file)) {
-        new_RemoteLlmApi(
-          api_key_path = input$api_key_file$datapath,
-          provider = input$provider,
-          no_internet = no_internet,
-          exclude_pattern = exclude_pattern
-        ) |>
-          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
-      } else {
-        new_RemoteLlmApi(
-          provider = input$provider,
-          no_internet = no_internet,
-          exclude_pattern = exclude_pattern
-        ) |>
-          shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
+        api_key_path <- input$api_key_file$datapath
       }
+
+      new_BridgedLlmApi(
+        api_key_path = api_key_path,
+        provider = input$provider,
+        no_internet = no_internet,
+        exclude_pattern = exclude_pattern
+      ) |>
+        shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
     })
 
     # Trigger local API creation when pull button is clicked
@@ -82,6 +95,7 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
     # Default to initializing Ollama if selected (no pull)
     observeEvent(input$provider, {
       if (ollama_available && input$provider == "Ollama") {
+        logDebug("%s: Initializing Ollama API", id)
         new_api <- new_LocalLlmApi(manager()) |>
           shinyTryCatch(errorTitle = "API setup failed", alertStyle = "shinyalert")
         api(new_api)
@@ -90,10 +104,12 @@ llm_api_server <- function(id, no_internet = NULL, exclude_pattern = "") {
 
     # Watch the remote and local API creators and update the shared reactiveVal
     observeEvent(remote_api(), {
+      logDebug("%s: Updating API with remote API", id)
       api(remote_api())
     })
 
     observeEvent(local_api(), {
+      logDebug("%s: Updating API with local API", id)
       api(local_api())
     })
 
