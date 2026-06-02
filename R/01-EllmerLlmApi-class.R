@@ -20,8 +20,7 @@ new_BridgedLlmApi <- function(
   api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = "",
-  model = NULL,
-  ...
+  model = NULL
 ) {
   if (!is_valid_character(provider)) {
     api <- list()
@@ -66,8 +65,7 @@ new_EllmerLlmApi <- function(
   api_key = NULL,
   api_key_path = NULL,
   model = NULL,
-  exclude_pattern = "",
-  ...
+  exclude_pattern = ""
 ) {
   if (is_valid_character(api_key_path)) {
     lifecycle::deprecate_warn(
@@ -402,17 +400,36 @@ extract_bridge_model_ids <- function(model_data) {
 }
 
 bridge_params_from_config <- function(prompt_config) {
-  param_names <- c("temperature", "max_tokens", "top_p", "n", "stop", "seed")
-  params <- list()
-
-  for (name in param_names) {
-    value <- prompt_config[[name]]
-    if (!is.null(value) && !(is.character(value) && identical(value, "")) && !(length(value) == 1 && is.na(value))) {
-      params[[name]] <- value
-    }
+  is_empty_value <- function(value) {
+    is.null(value) ||
+      (is.character(value) && identical(value, "")) ||
+      (length(value) == 1 && is.na(value))
   }
 
-  params
+  # Map llmModule config fields to ellmer::params names
+  params_raw <- list(
+    temperature = prompt_config$temperature,
+    max_tokens = prompt_config$max_tokens,
+    top_p = prompt_config$top_p,
+    seed = prompt_config$seed,
+    stop_sequences = prompt_config$stop,
+    presence_penalty = prompt_config$presence_penalty,
+    frequency_penalty = prompt_config$frequency_penalty,
+    log_probs = prompt_config$logprobs,
+    n = prompt_config$n
+  )
+
+  params_raw <- params_raw[!vapply(params_raw, is_empty_value, logical(1))]
+
+  if (length(params_raw) == 0) {
+    return(NULL)
+  }
+
+  # Prefer standardized ellmer params object; fallback to raw list if needed.
+  tryCatch(
+    do.call(ellmer::params, params_raw),
+    error = function(e) params_raw
+  )
 }
 
 bridge_prompt_parts <- function(prompt_config) {
@@ -449,15 +466,20 @@ bridge_chat_create <- function(api, model, system_prompt, params) {
     stop(sprintf("No chat bridge available for provider '%s'.", api$provider))
   }
 
+  fn_args <- names(formals(chat_fun))
+
   call_args <- list(
     system_prompt = system_prompt,
-    params = params,
     echo = "none"
   )
 
+  if ("params" %in% fn_args && !is.null(params)) {
+    call_args$params <- params
+  }
+
   call_args <- c(call_args, bridge_auth_args(chat_fun, api))
 
-  if (!is.null(model) && !identical(model, "")) {
+  if ("model" %in% fn_args && !is.null(model) && !identical(model, "")) {
     call_args$model <- model
   }
 

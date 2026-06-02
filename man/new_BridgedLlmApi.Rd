@@ -10,8 +10,7 @@ new_BridgedLlmApi(
   api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = "",
-  model = NULL,
-  ...
+  model = NULL
 )
 }
 \arguments{

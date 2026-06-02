@@ -9,8 +9,7 @@ new_EllmerLlmApi(
   api_key = NULL,
   api_key_path = NULL,
   model = NULL,
-  exclude_pattern = "",
-  ...
+  exclude_pattern = ""
 )
 }
 \arguments{

@@ -6,9 +6,9 @@
 #' Network availability and credential checks are performed later when models are listed
 #' or prompts are sent.
 #'
+#' @param provider Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
 #' @param api_key Character string containing the API key.
 #' @param api_key_path Deprecated path to a file containing the API key.
-#' @param provider Character string specifying the provider for the API key. Must be either "OpenAI" or "DeepSeek".
 #' @param no_internet Logical override for runtime request checks. If `TRUE`,
 #'   internet-dependent operations return a connection error without making requests.
 #' @param exclude_pattern Character, a regex pattern to exclude certain models from the list of
@@ -37,7 +37,13 @@
 #' print(api)
 #' }
 #' @export
-new_RemoteLlmApi <- function(api_key = NULL, provider, api_key_path = NULL, no_internet = NULL, exclude_pattern = "", ...) {
+new_RemoteLlmApi <- function(
+  provider,
+  api_key = NULL,
+  api_key_path = NULL,
+  no_internet = NULL,
+  exclude_pattern = ""
+) {
   provider <- match.arg(provider, c("OpenAI", "DeepSeek"))
 
   if (is_valid_character(api_key)) {
