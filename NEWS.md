@@ -1,11 +1,11 @@
 # llmModule 26.05.2
 
 ## New Features
-- Added `new_BridgedLlmApi()` routing and a new `EllmerLlmApi` S3 implementation (`get_llm_models()` / `send_prompt()`) (#16).
-- Added tests covering bridge routing, key validation, and offline behavior
+- Added provider routing via `new_BridgedLlmApi()` and introduced the `EllmerLlmApi` S3 implementation with `get_llm_models()` and `send_prompt()` methods (#16).
+- Added tests for bridge routing, API key validation, and offline/runtime behavior.
 
 ## Updates
-- Updated `RemoteLlmApi` to defer connectivity handling to `get_llm_models()` / `send_prompt()` via a runtime connectivity check
+- Changed `new_RemoteLlmApi` to defer connectivity checks to runtime; internet/auth errors are now handled in `get_llm_models()` and `send_prompt()`.
 
 # llmModule 26.05.1
 
