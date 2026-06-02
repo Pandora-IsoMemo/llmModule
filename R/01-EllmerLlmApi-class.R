@@ -327,7 +327,10 @@ bridge_provider_key <- function(provider) {
 
 bridge_provider_function <- function(prefix, provider) {
   fn_name <- paste0(prefix, bridge_provider_key(provider))
-  get0(fn_name, envir = asNamespace("ellmer"), mode = "function", inherits = FALSE)
+  tryCatch(
+    getExportedValue("ellmer", fn_name),
+    error = function(e) NULL
+  )
 }
 
 bridge_credentials_fn <- function(api) {
