@@ -24,6 +24,11 @@ new_LlmModelsInfo <- function(models = list(),
   )
 }
 
+#' Check if an object is of class LlmModelsInfo
+#'
+#' @param x An object to check.
+#' @return Logical scalar indicating if the object is an LlmModelsInfo.
+#' @export
 is_LlmModelsInfo <- function(x) {
   inherits(x, "LlmModelsInfo")
 }
@@ -52,6 +57,14 @@ validate_LlmModelsInfo <- function(x) {
   invisible(TRUE)
 }
 
+#' Create an empty LlmModelsInfo object
+#'
+#' This function creates an LlmModelsInfo object with an empty model list and specified provider and listing status.
+#'
+#' @param provider Character name of the provider (optional).
+#' @param listing_status Character indicating the status of the model listing (default is "empty").
+#' @return An LlmModelsInfo object with no models and specified metadata.
+#' @export
 new_empty_LlmModelsInfo <- function(provider = NULL, listing_status = "empty") {
   new_LlmModelsInfo(
     models = list(),
