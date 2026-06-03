@@ -113,17 +113,17 @@ llm_prompt_config_server <- function(id, llm_api, prompt_reactive = reactiveVal(
         model_info <- get_llm_models_info(api, with_creds_only = TRUE) |>
           shinyTryCatch(errorTitle = "Getting models failed", alertStyle = "shinyalert")
 
-        if (!inherits(model_info, "LlmModelsInfo")) {
-          model_info <- new_LlmModelsInfo(models = list(), provider = api$provider)
+        if (!is_LlmModelsInfo(model_info)) {
+          model_info <- new_empty_LlmModelsInfo(provider = api$provider)
         }
 
         set_cached_model_info(api, model_info)
       } else {
-        model_info <- new_LlmModelsInfo(models = list())
+        model_info <- new_empty_LlmModelsInfo()
       }
 
-      models <- model_info$models
-      can_fallback_to_provider_default <- isTRUE(model_info$can_fallback_to_provider_default)
+      models <- as_model_choices(model_info)
+      can_fallback_to_provider_default <- llm_models_can_fallback(model_info)
 
       choices <- if (length(models) == 0) {
         if (can_fallback_to_provider_default) {

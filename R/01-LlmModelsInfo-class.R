@@ -1,3 +1,13 @@
+#' LlmModelsInfo class
+#' 
+#' This class encapsulates information about available LLM models from a provider, including metadata about model selection and fallback behavior.
+#' 
+#' @param models A character vector or named list of available models.
+#' @param can_fallback_to_provider_default Logical indicating if selecting no explicit model can fall back to a provider default.
+#' @param requires_explicit_model Logical indicating if an explicit model selection is required.
+#' @param listing_status Character indicating the status of the model listing (e.g., "ok", "empty", "error", "unavailable").
+#' @param provider Character name of the provider.
+#' @export
 new_LlmModelsInfo <- function(models = list(),
                               can_fallback_to_provider_default = FALSE,
                               requires_explicit_model = TRUE,
@@ -15,4 +25,68 @@ new_LlmModelsInfo <- function(models = list(),
     ),
     class = "LlmModelsInfo"
   )
+}
+
+is_LlmModelsInfo <- function(x) {
+  inherits(x, "LlmModelsInfo")
+}
+
+validate_LlmModelsInfo <- function(x) {
+  if (!is_LlmModelsInfo(x)) {
+    stop("Expected an LlmModelsInfo object.", call. = FALSE)
+  }
+
+  required_fields <- c(
+    "models",
+    "can_fallback_to_provider_default",
+    "requires_explicit_model",
+    "listing_status",
+    "provider"
+  )
+
+  if (!all(required_fields %in% names(x))) {
+    stop("LlmModelsInfo object is missing required fields.", call. = FALSE)
+  }
+
+  valid_status <- c("ok", "empty", "error", "unavailable")
+  if (!is.character(x$listing_status) || length(x$listing_status) != 1 || !(x$listing_status %in% valid_status)) {
+    stop("Invalid listing_status in LlmModelsInfo object.", call. = FALSE)
+  }
+
+  invisible(TRUE)
+}
+
+new_empty_LlmModelsInfo <- function(provider = NULL, listing_status = "empty") {
+  new_LlmModelsInfo(
+    models = list(),
+    can_fallback_to_provider_default = FALSE,
+    requires_explicit_model = TRUE,
+    listing_status = listing_status,
+    provider = provider
+  )
+}
+
+#' Extract model choices from LlmModelsInfo
+#'
+#' Returns the `models` element from an `LlmModelsInfo` object after validation.
+#'
+#' @param x An `LlmModelsInfo` object.
+#' @return Character vector or named list of model choices.
+#' @export
+as_model_choices <- function(x) {
+  validate_LlmModelsInfo(x)
+  x$models
+}
+
+#' Check whether provider-default model fallback is allowed
+#'
+#' Returns whether an `LlmModelsInfo` object indicates that selecting no explicit
+#' model can fall back to a provider default.
+#'
+#' @param x An `LlmModelsInfo` object.
+#' @return Logical scalar.
+#' @export
+llm_models_can_fallback <- function(x) {
+  validate_LlmModelsInfo(x)
+  isTRUE(x$can_fallback_to_provider_default)
 }

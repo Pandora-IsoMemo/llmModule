@@ -61,3 +61,22 @@ testthat::test_that("get_llm_models_info.EllmerLlmApi reports non-empty model st
   testthat::expect_true(info$requires_explicit_model)
   testthat::expect_equal(info$listing_status, "ok")
 })
+
+testthat::test_that("LlmModelsInfo helper accessors handle valid and empty objects", {
+  info <- llmModule:::new_LlmModelsInfo(
+    models = c("model-a"),
+    can_fallback_to_provider_default = TRUE,
+    requires_explicit_model = FALSE,
+    listing_status = "ok",
+    provider = "Anthropic"
+  )
+
+  testthat::expect_true(llmModule:::is_LlmModelsInfo(info))
+  testthat::expect_equal(llmModule:::as_model_choices(info), c("model-a"))
+  testthat::expect_true(llmModule:::llm_models_can_fallback(info))
+
+  empty <- llmModule:::new_empty_LlmModelsInfo(provider = "OpenAI")
+  testthat::expect_true(llmModule:::is_LlmModelsInfo(empty))
+  testthat::expect_equal(llmModule:::as_model_choices(empty), list())
+  testthat::expect_false(llmModule:::llm_models_can_fallback(empty))
+})
