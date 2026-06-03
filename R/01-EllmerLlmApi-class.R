@@ -204,10 +204,16 @@ print.EllmerLlmApi <- function(x, ...) {
 #' Retrieve Available LLM Models via Ellmer bridge
 #'
 #' @param x An EllmerLlmApi object
+#' @param with_creds_only Logical, whether to attempt retrieval only if provider
+#'  supports it with credentials.
 #' @param ... Additional arguments
 #' @return Character vector or named list of available models
 #' @export
-get_llm_models.EllmerLlmApi <- function(x, ...) {
+get_llm_models.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
+  if (with_creds_only && !ellmer_provider_can_list_models_with_credentials(x$provider)) {
+    return(list())
+  }
+
   model_data <- tryCatch(
     bridge_models_list(x),
     error = function(e) e
@@ -236,6 +242,41 @@ get_llm_models.EllmerLlmApi <- function(x, ...) {
 
   categories <- vapply(models, function(id) categorize_model(id), character(1))
   extract_named_model_list(models, categories)
+}
+
+#' Retrieve Available LLM Models plus metadata via Ellmer bridge
+#'
+#' @param x An EllmerLlmApi object
+#' @param with_creds_only Logical, whether to attempt retrieval only if provider
+#'  supports it with credentials.
+#' @param ... Additional arguments
+#' @return A `LlmModelsInfo` object with `models` and selection metadata.
+#' @export
+get_llm_models_info.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
+  can_fallback <- ellmer_model_can_fallback(x$provider)
+  requires_explicit_model <- !can_fallback
+  can_list_with_creds <- ellmer_provider_can_list_models_with_credentials(x$provider)
+
+  if (with_creds_only && !can_list_with_creds) {
+    return(new_LlmModelsInfo(
+      models = list(),
+      can_fallback_to_provider_default = can_fallback,
+      requires_explicit_model = requires_explicit_model,
+      listing_status = "unavailable",
+      provider = x$provider
+    ))
+  }
+
+  models <- get_llm_models.EllmerLlmApi(x, with_creds_only = with_creds_only, ...)
+  listing_status <- if (length(models) > 0) "ok" else "empty"
+
+  new_LlmModelsInfo(
+    models = models,
+    can_fallback_to_provider_default = can_fallback,
+    requires_explicit_model = requires_explicit_model,
+    listing_status = listing_status,
+    provider = x$provider
+  )
 }
 
 #' Send a prompt through the Ellmer bridge

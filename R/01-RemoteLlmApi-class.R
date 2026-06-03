@@ -182,6 +182,25 @@ get_llm_models.RemoteLlmApi <- function(x, ...) {
   return(models_list)
 }
 
+#' Retrieve Available LLM Models plus metadata
+#'
+#' @param x An object of class RemoteLlmApi
+#' @param ... Additional arguments
+#' @return A `LlmModelsInfo` object with `models` and selection metadata.
+#' @export
+get_llm_models_info.RemoteLlmApi <- function(x, ...) {
+  models <- get_llm_models.RemoteLlmApi(x, ...)
+  listing_status <- if (length(models) > 0) "ok" else "empty"
+
+  new_LlmModelsInfo(
+    models = models,
+    can_fallback_to_provider_default = FALSE,
+    requires_explicit_model = TRUE,
+    listing_status = listing_status,
+    provider = x$provider
+  )
+}
+
 #' Send a prompt to a remote LLM API (e.g., OpenAI, DeepSeek)
 #' This function sends a prompt to the remote LLM API and returns the response in a structured format.
 #'

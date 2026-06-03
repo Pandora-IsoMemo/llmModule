@@ -208,7 +208,6 @@ prettify_provider_key <- function(provider_key) {
 #'
 #' @return A data frame with columns: provider_key, chat_function, models_function,
 #'  model_rule, has_models_helper
-#' @export
 eligible_ellmer_providers <- function() {
   chat_tbl <- inspect_ellmer_chat_model_rules()
   models_tbl <- inspect_ellmer_models_helpers()
@@ -428,4 +427,37 @@ append_attr <- function(object, val, attr_name) {
   existing <- attr(object, attr_name)
   attr(object, attr_name) <- c(existing, val)
   object
+}
+
+#' Get providers for selection
+#'
+#' Returns a named character vector of provider keys with user-friendly names.
+#' The list is constructed based on legacy providers, eligible Ellmer providers,
+#' and whether Ollama is available.
+#'
+#' @param ollama_available Logical, whether Ollama is available in the current environment.
+#' @return Named character vector of provider keys with user-friendly names.
+#' @export
+get_providers <- function(ollama_available) {
+  providers_legacy <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+
+  providers_ellmer <- eligible_ellmer_providers()
+
+  providers_all <- providers_ellmer[["provider_key"]]
+  names(providers_all) <- providers_ellmer[["provider_name"]]
+
+  # remove providers that are already in legacy list
+  providers_all <- providers_all[!names(providers_all) %in% names(providers_legacy)]
+
+  providers_all <- c(providers_legacy, providers_all)
+
+  if (!isTRUE(ollama_available)) {
+    return(providers_all)
+  }
+
+  # remove Ollama from provider choices if available, since it gets its own special UI treatment
+  # and is the default when running in Docker
+  providers_all <- providers_all[!names(providers_all) == "Ollama"]
+
+  c("Ollama (Local)" = "Ollama", providers_all)
 }
