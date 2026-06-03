@@ -13,7 +13,6 @@ testthat::test_that("get_llm_models_info.RemoteLlmApi returns metadata with empt
   testthat::expect_s3_class(info, "LlmModelsInfo")
   testthat::expect_equal(info$models, list())
   testthat::expect_false(info$can_fallback_to_provider_default)
-  testthat::expect_true(info$requires_explicit_model)
   testthat::expect_equal(info$listing_status, "empty")
   testthat::expect_equal(info$provider, "OpenAI")
 })
@@ -35,7 +34,6 @@ testthat::test_that("get_llm_models_info.EllmerLlmApi marks unavailable listing 
   testthat::expect_s3_class(info, "LlmModelsInfo")
   testthat::expect_equal(info$models, list())
   testthat::expect_true(info$can_fallback_to_provider_default)
-  testthat::expect_false(info$requires_explicit_model)
   testthat::expect_equal(info$listing_status, "unavailable")
   testthat::expect_equal(info$provider, "Anthropic")
 })
@@ -58,7 +56,6 @@ testthat::test_that("get_llm_models_info.EllmerLlmApi reports non-empty model st
   testthat::expect_s3_class(info, "LlmModelsInfo")
   testthat::expect_equal(info$models, c("model-a", "model-b"))
   testthat::expect_false(info$can_fallback_to_provider_default)
-  testthat::expect_true(info$requires_explicit_model)
   testthat::expect_equal(info$listing_status, "ok")
 })
 
@@ -66,7 +63,6 @@ testthat::test_that("LlmModelsInfo helper accessors handle valid and empty objec
   info <- llmModule:::new_LlmModelsInfo(
     models = c("model-a"),
     can_fallback_to_provider_default = TRUE,
-    requires_explicit_model = FALSE,
     listing_status = "ok",
     provider = "Anthropic"
   )

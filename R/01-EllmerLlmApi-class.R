@@ -254,14 +254,12 @@ get_llm_models.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
 #' @export
 get_llm_models_info.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
   can_fallback <- ellmer_model_can_fallback(x$provider)
-  requires_explicit_model <- !can_fallback
   can_list_with_creds <- ellmer_provider_can_list_models_with_credentials(x$provider)
 
   if (with_creds_only && !can_list_with_creds) {
     return(new_LlmModelsInfo(
       models = list(),
       can_fallback_to_provider_default = can_fallback,
-      requires_explicit_model = requires_explicit_model,
       listing_status = "unavailable",
       provider = x$provider
     ))
@@ -273,7 +271,6 @@ get_llm_models_info.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
   new_LlmModelsInfo(
     models = models,
     can_fallback_to_provider_default = can_fallback,
-    requires_explicit_model = requires_explicit_model,
     listing_status = listing_status,
     provider = x$provider
   )

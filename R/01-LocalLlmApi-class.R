@@ -127,7 +127,6 @@ get_llm_models_info.LocalLlmApi <- function(x, ...) {
   new_LlmModelsInfo(
     models = models,
     can_fallback_to_provider_default = FALSE,
-    requires_explicit_model = TRUE,
     listing_status = listing_status,
     provider = x$provider
   )

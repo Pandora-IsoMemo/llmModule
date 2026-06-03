@@ -7,7 +7,6 @@
 new_LlmModelsInfo(
   models = list(),
   can_fallback_to_provider_default = FALSE,
-  requires_explicit_model = TRUE,
   listing_status = c("ok", "empty", "error", "unavailable"),
   provider = NULL
 )
@@ -16,8 +15,6 @@ new_LlmModelsInfo(
 \item{models}{A character vector or named list of available models.}
 
 \item{can_fallback_to_provider_default}{Logical indicating if selecting no explicit model can fall back to a provider default.}
-
-\item{requires_explicit_model}{Logical indicating if an explicit model selection is required.}
 
 \item{listing_status}{Character indicating the status of the model listing (e.g., "ok", "empty", "error", "unavailable").}
 

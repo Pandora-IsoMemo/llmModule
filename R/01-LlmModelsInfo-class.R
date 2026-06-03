@@ -4,13 +4,11 @@
 #' 
 #' @param models A character vector or named list of available models.
 #' @param can_fallback_to_provider_default Logical indicating if selecting no explicit model can fall back to a provider default.
-#' @param requires_explicit_model Logical indicating if an explicit model selection is required.
 #' @param listing_status Character indicating the status of the model listing (e.g., "ok", "empty", "error", "unavailable").
 #' @param provider Character name of the provider.
 #' @export
 new_LlmModelsInfo <- function(models = list(),
                               can_fallback_to_provider_default = FALSE,
-                              requires_explicit_model = TRUE,
                               listing_status = c("ok", "empty", "error", "unavailable"),
                               provider = NULL) {
   listing_status <- match.arg(listing_status)
@@ -19,7 +17,6 @@ new_LlmModelsInfo <- function(models = list(),
     list(
       models = models,
       can_fallback_to_provider_default = isTRUE(can_fallback_to_provider_default),
-      requires_explicit_model = isTRUE(requires_explicit_model),
       listing_status = listing_status,
       provider = provider
     ),
@@ -39,7 +36,6 @@ validate_LlmModelsInfo <- function(x) {
   required_fields <- c(
     "models",
     "can_fallback_to_provider_default",
-    "requires_explicit_model",
     "listing_status",
     "provider"
   )
@@ -60,7 +56,6 @@ new_empty_LlmModelsInfo <- function(provider = NULL, listing_status = "empty") {
   new_LlmModelsInfo(
     models = list(),
     can_fallback_to_provider_default = FALSE,
-    requires_explicit_model = TRUE,
     listing_status = listing_status,
     provider = provider
   )
