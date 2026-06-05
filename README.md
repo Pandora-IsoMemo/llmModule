@@ -118,6 +118,25 @@ if (!is.null(attr(result, "error"))) {
 }
 ```
 
+### Prompt arguments (quick orientation)
+
+`ask_llm()` forwards additional arguments to `new_LlmPromptConfig()`.
+Commonly used arguments are:
+
+- `temperature`
+- `max_tokens`
+- `top_p`
+- `n`
+- `stop`
+- `seed`
+- `presence_penalty`
+- `frequency_penalty`
+- `logprobs`
+
+For a full walkthrough (including provider/model discovery and argument details),
+see the vignette:
+<https://pandora-isomemo.github.io/llmModule/articles/prompt-configuration-and-wrapper.html>
+
 ### Discover Providers and Models First
 
 ```r
