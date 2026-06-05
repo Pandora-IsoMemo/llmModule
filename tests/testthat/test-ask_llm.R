@@ -176,6 +176,6 @@ testthat::test_that("ask_llm surfaces new_LlmPromptConfig argument errors", {
       prompt_content = "hello",
       unsupported_field = 1
     ),
-    "(unused|unbenutztes) Argument"
+    "(unused|unbenutztes).*(argument|Argument)"
   )
 })
