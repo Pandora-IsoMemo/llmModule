@@ -44,7 +44,6 @@ support for:
   - `send_prompt()` to submit prompts and retrieve responses
 - Optional Docker integration for local deployment (see below)
 
----
 ## 🧪 Quick Examples
 
 ### Cloud Provider Example
@@ -153,8 +152,6 @@ if (!is.null(attr(result, "error"))) {
 }
 ```
 
----
-
 ## 📦 Docker Setup (optional)
 
 This Docker setup is mainly for legacy app workflows. For Shiny-based UI usage,
@@ -228,8 +225,6 @@ Default locations for Ollama models:
 - windows: `C:\\Users\\<username>\\.ollama`
 
 This will mount your local models into the container for faster startup and persistent access.
-
-----
 
 ## Notes for developers
 
