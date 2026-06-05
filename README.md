@@ -9,7 +9,7 @@
 `llmModule` provides a structured R interface for working with remote and local
 Large Language Model (LLM) APIs through a consistent S3-based workflow.
 
-It is designed for script and package usage (soon without requiring Shiny), with
+It is designed for script and package usage (without requiring you to run Shiny), with
 support for:
 
 - Remote providers through `RemoteLlmApi` and bridge-based providers
