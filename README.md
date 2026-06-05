@@ -95,6 +95,40 @@ if (!is.null(attr(result, "error"))) {
 }
 ```
 
+### Discover Providers and Models First
+
+```r
+library(llmModule)
+
+# 1) List available providers (includes Ollama only if reachable)
+providers <- get_providers(ollama_available = is_ollama_running())
+providers
+
+# 2) Create the API object for your selected provider
+api <- new_BridgedLlmApi(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_API_KEY")
+)
+
+# 3) List models for this provider
+models <- get_llm_models(api)
+models
+
+# 4) Use one model in the one-call wrapper
+result <- ask_llm(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_API_KEY"),
+  model = "gpt-4.1",
+  prompt_content = "Summarize entropy in one sentence."
+)
+
+if (!is.null(attr(result, "error"))) {
+  message(attr(result, "error"))
+} else {
+  result$choices[[1]]$message$content
+}
+```
+
 ### Local Ollama Example
 
 ```r
