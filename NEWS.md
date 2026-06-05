@@ -1,3 +1,10 @@
+# llmModule 26.06.1
+
+## New Features
+- Added `ask_llm()` convenience wrapper that routes API construction, prompt config, and dispatch in one call.
+- Introduced `LlmModelsInfo` and `get_llm_models_info()` to return model lists with status and fallback metadata, and wired this into the prompt settings module cache.
+- Extracted provider-choice construction into `get_providers()` and refreshed README and vignette examples accordingly.
+
 # llmModule 26.06.0
 
 ## New Features
