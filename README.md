@@ -74,6 +74,27 @@ if (!is.null(attr(result, "error"))) {
 }
 ```
 
+### One-call Wrapper Example
+
+```r
+library(llmModule)
+
+result <- ask_llm(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_API_KEY"),
+  model = "gpt-4.1",
+  prompt_content = "What's the capital of Italy?",
+  temperature = 0.2,
+  max_tokens = 50
+)
+
+if (!is.null(attr(result, "error"))) {
+  message(attr(result, "error"))
+} else {
+  result$choices[[1]]$message$content
+}
+```
+
 ### Local Ollama Example
 
 ```r
