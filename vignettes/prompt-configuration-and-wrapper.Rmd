@@ -29,12 +29,12 @@ Use provider and model discovery before sending prompts.
 ```{r}
 library(llmModule)
 
-providers <- get_providers(ollama_available = is_ollama_running())
+providers <- get_providers()
 providers
 
 api <- new_BridgedLlmApi(
   provider = "OpenAI",
-  api_key = Sys.getenv("OPENAI_API_KEY")
+  api_key = Sys.getenv("OPENAI_TOKEN")
 )
 
 models <- get_llm_models(api)
@@ -75,14 +75,41 @@ Note:
 - Not every provider/model combination supports every argument.
 - If `temperature = 0` and `n > 1`, `n` is forced to `1` to avoid unnecessary token usage.
 
-## 3) One-call Usage with `ask_llm()`
+## 3) Authentication and Token Resolution
+
+For remote/bridge providers, `llmModule` resolves credentials in this order:
+
+1. `api_key` argument
+2. Provider token environment variable via internal `get_token_for_provider(provider)`
+
+Common provider token variables:
+
+- `OPENAI_TOKEN`
+- `DEEPSEEK_TOKEN`
+- `ANTHROPIC_TOKEN`
+- `GITHUB_TOKEN`
+- `OPENROUTER_TOKEN`
+- `GROQ_TOKEN`
+- `MISTRAL_TOKEN`
+
+Fallback pattern for other provider keys: `PROVIDER_KEY_TOKEN`.
+
+Example `.Renviron` setup:
+
+```{r}
+# OPENAI_TOKEN=your-openai-token
+# ANTHROPIC_TOKEN=your-anthropic-token
+# GITHUB_TOKEN=your-github-token
+```
+
+## 4) One-call Usage with `ask_llm()`
 
 `ask_llm()` is the fastest path for scripts and simple package workflows.
 
 ```{r}
 result <- ask_llm(
   provider = "OpenAI",
-  api_key = Sys.getenv("OPENAI_API_KEY"),
+  api_key = Sys.getenv("OPENAI_TOKEN"),
   model = "gpt-4.1",
   prompt_content = "Summarize entropy in one sentence.",
   temperature = 0.2,
@@ -109,14 +136,14 @@ local_result <- ask_llm(
 )
 ```
 
-## 4) Object-based Usage (Low-level Control)
+## 5) Object-based Usage (Low-level Control)
 
 Use this approach when you want explicit API and prompt objects.
 
 ```{r}
 api <- new_BridgedLlmApi(
   provider = "Anthropic",
-  api_key = Sys.getenv("ANTHROPIC_API_KEY")
+  api_key = Sys.getenv("ANTHROPIC_TOKEN")
 )
 
 prompt <- new_LlmPromptConfig(
@@ -127,9 +154,12 @@ prompt <- new_LlmPromptConfig(
 )
 
 result <- send_prompt(api, prompt)
+
+# or rely on token env var resolution directly
+api_auto <- new_BridgedLlmApi(provider = "Anthropic")
 ```
 
-## 5) Error Handling Pattern
+## 6) Error Handling Pattern
 
 Network, credential, and provider errors are attached via the `error` attribute.
 
@@ -148,7 +178,7 @@ if (!is.null(attr(result, "error"))) {
 }
 ```
 
-## 6) Recommended Workflow
+## 7) Recommended Workflow
 
 - Start with `get_providers()` to discover available providers in your environment.
 - Create an API object and call `get_llm_models()` to pick a valid model.

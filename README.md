@@ -32,8 +32,8 @@ support for:
   - `LlmPromptConfig` to configure prompt messages and parameters
   - `LlmResponse` for structured handling of responses
 - Validation model aligned with runtime API behavior:
-  - Constructor-time checks validate credentials (preferred: `api_key` string;
-    deprecated fallback: `api_key_path` file path)
+  - Constructor-time checks validate credentials (preferred: `api_key` string
+    or provider token environment variable)
   - Internet and credential validity checks occur at runtime when calling
     `get_llm_models()` or `send_prompt()`
 - Local model support (via [Ollama](https://ollama.com)):
@@ -54,7 +54,7 @@ library(llmModule)
 # Create an API object
 api <- new_BridgedLlmApi(
   provider = "Anthropic",
-  api_key = Sys.getenv("ANTHROPIC_API_KEY")
+  api_key = Sys.getenv("ANTHROPIC_TOKEN")
 )
 
 # Set up a prompt
@@ -103,7 +103,7 @@ library(llmModule)
 # Call a cloud provider in one step
 result <- ask_llm(
   provider = "OpenAI",
-  api_key = Sys.getenv("OPENAI_API_KEY"),
+  api_key = Sys.getenv("OPENAI_TOKEN"),
   model = "gpt-4.1",
   prompt_content = "What's the capital of Italy?",
   temperature = 0.2,
@@ -143,13 +143,13 @@ see the vignette:
 library(llmModule)
 
 # 1) List available providers (includes Ollama only if reachable)
-providers <- get_providers(ollama_available = is_ollama_running())
+providers <- get_providers()
 providers
 
 # 2) Create the API object for your selected provider
 api <- new_BridgedLlmApi(
   provider = "OpenAI",
-  api_key = Sys.getenv("OPENAI_API_KEY")
+  api_key = Sys.getenv("OPENAI_TOKEN")
 )
 
 # 3) List models for this provider
@@ -159,7 +159,7 @@ models
 # 4) Use one model in the one-call wrapper
 result <- ask_llm(
   provider = "OpenAI",
-  api_key = Sys.getenv("OPENAI_API_KEY"),
+  api_key = Sys.getenv("OPENAI_TOKEN"),
   model = "gpt-4.1",
   prompt_content = "Summarize entropy in one sentence."
 )
@@ -169,6 +169,41 @@ if (!is.null(attr(result, "error"))) {
 } else {
   result$choices[[1]]$message$content
 }
+```
+
+## Authentication and Token Resolution
+
+For remote/bridge providers, `llmModule` resolves credentials in this order:
+
+1. `api_key` argument (recommended for explicit programmatic control)
+2. Provider token environment variable via internal `get_token_for_provider(provider)`
+
+The token environment variable names are package-owned and currently use the
+`*_TOKEN` convention, for example:
+
+- `OPENAI_TOKEN`
+- `DEEPSEEK_TOKEN`
+- `ANTHROPIC_TOKEN`
+- `GITHUB_TOKEN`
+- `OPENROUTER_TOKEN`
+- `GROQ_TOKEN`
+- `MISTRAL_TOKEN`
+
+For other provider keys, the fallback pattern is `PROVIDER_KEY_TOKEN` (upper-case,
+non-alphanumeric characters replaced with `_`).
+
+Example setup in `.Renviron`:
+
+```bash
+OPENAI_TOKEN=your-openai-token
+ANTHROPIC_TOKEN=your-anthropic-token
+GITHUB_TOKEN=your-github-token
+```
+
+Then create API objects without repeating `api_key` in every call:
+
+```r
+api <- new_BridgedLlmApi(provider = "OpenAI")
 ```
 
 ## 📦 Docker Setup (optional)

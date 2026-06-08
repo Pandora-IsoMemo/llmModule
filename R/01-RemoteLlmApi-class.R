@@ -64,8 +64,16 @@ new_RemoteLlmApi <- function(
 
     api_key <- trimws(readLines(api_key_path, warn = FALSE))
   } else {
+    api_key <- get_token_for_provider(provider)
+  }
+
+  if (!is_valid_character(api_key)) {
+    env_name <- llm_token_env_var_for_provider(provider)
     api <- list()
-    attr(api, "error") <- "No valid API key supplied."
+    attr(api, "error") <- sprintf(
+      "No valid API key supplied. Set %s or pass api_key directly.",
+      env_name
+    )
     return(api)
   }
 

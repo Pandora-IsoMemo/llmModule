@@ -5,6 +5,48 @@ is_valid_character <- function(string) {
     nzchar(trimws(string))
 }
 
+llm_token_env_var_for_provider <- function(provider) {
+  key <- normalize_provider_key(provider)
+
+  known <- c(
+    openai = "OPENAI_TOKEN",
+    deepseek = "DEEPSEEK_TOKEN",
+    anthropic = "ANTHROPIC_TOKEN",
+    claude = "ANTHROPIC_TOKEN",
+    openrouter = "OPENROUTER_TOKEN",
+    groq = "GROQ_TOKEN",
+    mistral = "MISTRAL_TOKEN",
+    github = "GITHUB_TOKEN",
+    google_gemini = "GOOGLE_GEMINI_TOKEN",
+    google_vertex = "GOOGLE_VERTEX_TOKEN",
+    azure_openai = "AZURE_OPENAI_TOKEN",
+    cloudflare = "CLOUDFLARE_TOKEN",
+    databricks = "DATABRICKS_TOKEN",
+    huggingface = "HUGGINGFACE_TOKEN",
+    perplexity = "PERPLEXITY_TOKEN",
+    portkey = "PORTKEY_TOKEN",
+    vllm = "VLLM_TOKEN"
+  )
+
+  env_name <- unname(known[[key]])
+  if (!is_valid_character(env_name)) {
+    env_name <- paste0(toupper(gsub("[^A-Za-z0-9]+", "_", key)), "_TOKEN")
+  }
+
+  env_name
+}
+
+get_token_for_provider <- function(provider) {
+  env_name <- llm_token_env_var_for_provider(provider)
+  token <- Sys.getenv(env_name, unset = "")
+
+  if (!is_valid_character(token)) {
+    return(NULL)
+  }
+
+  trimws(token)
+}
+
 inspect_ellmer_chat_model_rules <- function() {
   ns <- asNamespace("ellmer")
   exports <- getNamespaceExports("ellmer")
@@ -438,7 +480,10 @@ append_attr <- function(object, val, attr_name) {
 #' @param ollama_available Logical, whether Ollama is available in the current environment.
 #' @return Named character vector of provider keys with user-friendly names.
 #' @export
-get_providers <- function(ollama_available) {
+get_providers <- function(ollama_available = NULL) {
+  if (is.null(ollama_available)) {
+    ollama_available <- is_ollama_running()
+  }
   providers_legacy <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
 
   providers_ellmer <- eligible_ellmer_providers()

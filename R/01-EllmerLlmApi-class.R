@@ -82,7 +82,11 @@ new_EllmerLlmApi <- function(
     return(api)
   }
 
-  key_data <- resolve_api_key(api_key = api_key, api_key_path = api_key_path)
+  key_data <- resolve_api_key(
+    api_key = api_key,
+    api_key_path = api_key_path,
+    provider = provider
+  )
   if (!is.null(attr(key_data, "error"))) {
     return(key_data)
   }
@@ -130,7 +134,7 @@ read_bridge_api_key <- function(api_key_path) {
   list(api_key = api_key)
 }
 
-resolve_api_key <- function(api_key = NULL, api_key_path = NULL) {
+resolve_api_key <- function(api_key = NULL, api_key_path = NULL, provider = NULL) {
   if (is_valid_character(api_key)) {
     return(list(api_key = trimws(api_key)))
   }
@@ -150,6 +154,21 @@ resolve_api_key <- function(api_key = NULL, api_key_path = NULL) {
     }
 
     return(list(api_key = api_key_file))
+  }
+
+  if (is_valid_character(provider)) {
+    api_key_env <- get_token_for_provider(provider)
+    if (is_valid_character(api_key_env)) {
+      return(list(api_key = api_key_env))
+    }
+
+    env_name <- llm_token_env_var_for_provider(provider)
+    api <- list()
+    attr(api, "error") <- sprintf(
+      "No valid API key supplied. Set %s or pass api_key directly.",
+      env_name
+    )
+    return(api)
   }
 
   api <- list()

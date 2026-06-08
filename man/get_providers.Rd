@@ -4,7 +4,7 @@
 \alias{get_providers}
 \title{Get providers for selection}
 \usage{
-get_providers(ollama_available)
+get_providers(ollama_available = NULL)
 }
 \arguments{
 \item{ollama_available}{Logical, whether Ollama is available in the current environment.}
