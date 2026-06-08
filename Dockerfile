@@ -6,6 +6,7 @@ ADD . .
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libuv1-dev \
+    pandoc \
     pkg-config \
  && rm -rf /var/lib/apt/lists/*
 
