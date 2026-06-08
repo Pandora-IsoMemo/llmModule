@@ -28,12 +28,11 @@ llm_token_env_var_for_provider <- function(provider) {
     vllm = "VLLM_TOKEN"
   )
 
-  env_name <- unname(known[[key]])
-  if (!is_valid_character(env_name)) {
-    env_name <- paste0(toupper(gsub("[^A-Za-z0-9]+", "_", key)), "_TOKEN")
+  if (key %in% names(known)) {
+    return(unname(known[[key]]))
   }
 
-  env_name
+  paste0(toupper(gsub("[^A-Za-z0-9]+", "_", key)), "_TOKEN")
 }
 
 get_token_for_provider <- function(provider) {
@@ -45,6 +44,34 @@ get_token_for_provider <- function(provider) {
   }
 
   trimws(token)
+}
+
+#' List supported provider token environment variables
+#'
+#' Returns the currently supported remote/bridge providers together with the
+#' token environment variable name that `llmModule` resolves for each provider.
+#'
+#' @return A data frame with columns: `provider`, `provider_key`, and
+#'   `token_env_var`.
+#' @export
+list_llm_token_env_vars <- function() {
+  p <- get_providers()
+
+  providers <- data.frame(
+    provider = names(p),
+    provider_key = tolower(unname(p)),
+    stringsAsFactors = FALSE
+  )
+
+  providers <- providers[providers$provider_key != "ollama", , drop = FALSE]
+
+  providers$token_env_var <- vapply(
+    providers$provider_key,
+    llm_token_env_var_for_provider,
+    character(1)
+  )
+
+  providers[order(providers$provider), c("provider", "provider_key", "token_env_var")]
 }
 
 inspect_ellmer_chat_model_rules <- function() {

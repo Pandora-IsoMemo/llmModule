@@ -179,3 +179,30 @@ testthat::test_that("ask_llm surfaces new_LlmPromptConfig argument errors", {
     "(unused|unbenutztes).*(argument|Argument)"
   )
 })
+
+
+testthat::test_that("ask_llm accepts optional model with prompt_content", {
+  captured_prompt_args <- NULL
+
+  testthat::local_mocked_bindings(
+    new_BridgedLlmApi = function(...) {
+      structure(list(path = "bridge"), class = c("EllmerLlmApi", "LlmApi"))
+    },
+    new_LlmPromptConfig = function(...) {
+      captured_prompt_args <<- list(...)
+      structure(captured_prompt_args, class = "LlmPromptConfig")
+    },
+    send_prompt = function(api, prompt_config) list(ok = TRUE),
+    .package = "llmModule"
+  )
+
+  result <- llmModule:::ask_llm(
+    provider = "GitHub",
+    api_key = "github_pat_12345678901234567890",
+    prompt_content = "What is the capital of France?"
+  )
+
+  testthat::expect_true(isTRUE(result$ok))
+  testthat::expect_equal(captured_prompt_args$prompt_content, "What is the capital of France?")
+  testthat::expect_null(captured_prompt_args$model)
+})

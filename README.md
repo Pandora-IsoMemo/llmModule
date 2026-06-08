@@ -189,6 +189,12 @@ The token environment variable names are package-owned and currently use the
 - `GROQ_TOKEN`
 - `MISTRAL_TOKEN`
 
+You can inspect the current provider-to-token mapping programmatically:
+
+```r
+list_llm_token_env_vars()
+```
+
 For other provider keys, the fallback pattern is `PROVIDER_KEY_TOKEN` (upper-case,
 non-alphanumeric characters replaced with `_`).
 

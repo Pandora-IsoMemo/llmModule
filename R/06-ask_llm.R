@@ -6,7 +6,7 @@
 #' @param provider Character provider name (e.g. "OpenAI", "DeepSeek",
 #'   "Anthropic", "Ollama").
 #' @param api_key Character API key string for remote/bridge providers.
-#' @param model Character model identifier.
+#' @param model Optional character model identifier.
 #' @param prompt_content Character prompt text.
 #' @param api_key_path Deprecated path to a file containing an API key.
 #' @param no_internet Logical runtime override for remote connectivity checks
@@ -22,8 +22,8 @@
 ask_llm <- function(
   provider,
   api_key = NULL,
-  model,
-  prompt_content,
+  model = NULL,
+  prompt_content = NULL,
   api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = "",
@@ -32,6 +32,12 @@ ask_llm <- function(
   new_model = "",
   ...
 ) {
+  if (!is_valid_character(prompt_content)) {
+    response <- list()
+    attr(response, "error") <- "No valid prompt supplied. Use 'prompt_content'."
+    return(response)
+  }
+
   if (!is_valid_character(provider)) {
     response <- list()
     attr(response, "error") <- "No valid provider supplied."

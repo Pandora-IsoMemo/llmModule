@@ -7,8 +7,8 @@
 ask_llm(
   provider,
   api_key = NULL,
-  model,
-  prompt_content,
+  model = NULL,
+  prompt_content = NULL,
   api_key_path = NULL,
   no_internet = NULL,
   exclude_pattern = "",
@@ -24,7 +24,7 @@ ask_llm(
 
 \item{api_key}{Character API key string for remote/bridge providers.}
 
-\item{model}{Character model identifier.}
+\item{model}{Optional character model identifier.}
 
 \item{prompt_content}{Character prompt text.}
 
