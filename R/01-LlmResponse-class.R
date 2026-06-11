@@ -56,12 +56,21 @@ new_LlmResponse <- function(api, prompt_config) {
     return(content)
   }
 
+  generated_text <- NULL
+  if (is.list(content) &&
+      !is.null(content$choices) &&
+      length(content$choices) > 0 &&
+      !is.null(content$choices[[1]]$message) &&
+      !is.null(content$choices[[1]]$message$content)) {
+    generated_text <- content$choices[[1]]$message$content
+  }
+
   response <- structure(
     list(
       content = content,
       provider = api$provider,
       prompt_config = unclass(prompt_config),
-      generated_text = content$choices[[1]]$message$content
+      generated_text = generated_text
     ),
     class = "LlmResponse"
   )
@@ -86,7 +95,11 @@ print.LlmResponse <- function(x, ...) {
   cat("Model:", x$prompt_config$model, "\n")
   cat("Temperature:", x$prompt_config$temperature, "\n")
   cat("Generated Text:\n")
-  cat(x$content$choices[[1]]$message$content, "\n")
+  if (!is.null(x$generated_text)) {
+    cat(x$generated_text, "\n")
+  } else {
+    cat("<no generated text available>\n")
+  }
 }
 
 #' Extract and format LLM response as a table

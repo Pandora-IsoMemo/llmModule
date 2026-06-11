@@ -13,7 +13,11 @@ testthat::test_that("ask_llm routes Ollama requests through new_LocalLlmApi", {
     },
     new_LlmPromptConfig = function(...) structure(list(...), class = "LlmPromptConfig"),
     send_prompt = function(api, prompt_config) {
-      list(api = api, prompt_config = prompt_config)
+      list(
+        api = api,
+        prompt_config = prompt_config,
+        choices = list(list(message = list(content = "local ok")))
+      )
     },
     .package = "llmModule"
   )
@@ -27,7 +31,7 @@ testthat::test_that("ask_llm routes Ollama requests through new_LocalLlmApi", {
 
   testthat::expect_false(bridged_called)
   testthat::expect_equal(local_args$new_model, "llama3.1")
-  testthat::expect_equal(result$api$path, "local")
+  testthat::expect_equal(result, "local ok")
 })
 
 
@@ -192,7 +196,12 @@ testthat::test_that("ask_llm accepts optional model with prompt_content", {
       captured_prompt_args <<- list(...)
       structure(captured_prompt_args, class = "LlmPromptConfig")
     },
-    send_prompt = function(api, prompt_config) list(ok = TRUE),
+    send_prompt = function(api, prompt_config) {
+      list(
+        ok = TRUE,
+        choices = list(list(message = list(content = "Paris")))
+      )
+    },
     .package = "llmModule"
   )
 
@@ -202,7 +211,30 @@ testthat::test_that("ask_llm accepts optional model with prompt_content", {
     prompt_content = "What is the capital of France?"
   )
 
-  testthat::expect_true(isTRUE(result$ok))
+  testthat::expect_equal(result, "Paris")
   testthat::expect_equal(captured_prompt_args$prompt_content, "What is the capital of France?")
   testthat::expect_null(captured_prompt_args$model)
+})
+
+
+testthat::test_that("ask_llm returns standardized error when provider returns no text", {
+  testthat::local_mocked_bindings(
+    new_BridgedLlmApi = function(...) {
+      structure(list(path = "bridge"), class = c("RemoteLlmApi", "LlmApi"))
+    },
+    new_LlmPromptConfig = function(...) {
+      structure(list(...), class = "LlmPromptConfig")
+    },
+    send_prompt = function(api, prompt_config) list(ok = TRUE),
+    .package = "llmModule"
+  )
+
+  result <- llmModule:::ask_llm(
+    provider = "OpenAI",
+    api_key = "sk-validkey12345678901234567890",
+    model = "gpt-4.1",
+    prompt_content = "hello"
+  )
+
+  testthat::expect_equal(attr(result, "error"), "No generated text returned by provider.")
 })

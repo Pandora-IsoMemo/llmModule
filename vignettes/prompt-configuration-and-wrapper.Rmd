@@ -121,7 +121,7 @@ result <- ask_llm(
 if (!is.null(attr(result, "error"))) {
   message(attr(result, "error"))
 } else {
-  result$choices[[1]]$message$content
+  result$generated_text
 }
 ```
 
@@ -174,7 +174,7 @@ result <- ask_llm(
 if (!is.null(attr(result, "error"))) {
   message("Request failed: ", attr(result, "error"))
 } else {
-  cat(result$choices[[1]]$message$content)
+  cat(result$generated_text)
 }
 ```
 

@@ -17,7 +17,8 @@
 #' @param new_model Optional local model name to pull when using `provider = "Ollama"`.
 #' @param ... Additional arguments forwarded to [new_LlmPromptConfig()].
 #'
-#' @return A normalized API response list as returned by [send_prompt()].
+#' @return Character generated text on success. If an error occurs, returns an
+#'   empty list with an `error` attribute containing the error message.
 #' @export
 ask_llm <- function(
   provider,
@@ -89,5 +90,18 @@ ask_llm <- function(
     return(prompt_config)
   }
 
-  send_prompt(api, prompt_config)
+  response <- new_LlmResponse(api, prompt_config)
+
+  if (!is.null(attr(response, "error"))) {
+    return(response)
+  }
+
+  if (!inherits(response, "LlmResponse") || !is_valid_character(response$generated_text)) {
+    error_response <- list()
+    attr(error_response, "error") <- "No generated text returned by provider."
+    return(error_response)
+  }
+
+  # only return generated text
+  response$generated_text
 }

@@ -44,7 +44,8 @@ ask_llm(
 \item{...}{Additional arguments forwarded to [new_LlmPromptConfig()].}
 }
 \value{
-A normalized API response list as returned by [send_prompt()].
+Character generated text on success. If an error occurs, returns an
+  empty list with an `error` attribute containing the error message.
 }
 \description{
 Convenience wrapper that routes provider setup, prompt configuration, and

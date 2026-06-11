@@ -70,7 +70,7 @@ result <- send_prompt(api, prompt)
 if (!is.null(attr(result, "error"))) {
   message(attr(result, "error"))
 } else {
-  result$choices[[1]]$message$content
+  result$generated_text
 }
 ```
 
@@ -114,7 +114,7 @@ result <- ask_llm(
 if (!is.null(attr(result, "error"))) {
   message(attr(result, "error"))
 } else {
-  result$choices[[1]]$message$content
+  result$generated_text
 }
 ```
 
@@ -167,7 +167,7 @@ result <- ask_llm(
 if (!is.null(attr(result, "error"))) {
   message(attr(result, "error"))
 } else {
-  result$choices[[1]]$message$content
+  result$generated_text
 }
 ```
 
