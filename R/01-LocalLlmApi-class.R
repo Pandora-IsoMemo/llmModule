@@ -114,6 +114,24 @@ get_llm_models.LocalLlmApi <- function(x, ...) {
   return(models_list)
 }
 
+#' Retrieve Available LLM Models plus metadata
+#'
+#' @param x An object of class LocalLlmApi
+#' @param ... Additional arguments
+#' @return A `LlmModelsInfo` object with `models` and selection metadata.
+#' @export
+get_llm_models_info.LocalLlmApi <- function(x, ...) {
+  models <- get_llm_models.LocalLlmApi(x, ...)
+  listing_status <- if (length(models) > 0) "ok" else "empty"
+
+  new_LlmModelsInfo(
+    models = models,
+    can_fallback_to_provider_default = FALSE,
+    listing_status = listing_status,
+    provider = x$provider
+  )
+}
+
 #' Send a prompt to a local llm API (e.g., Ollama)
 #'
 #' This function sends a prompt to the local LLM API (Ollama) and returns the response in a structured format.

@@ -18,6 +18,16 @@ get_llm_models <- function(x, ...) {
   UseMethod("get_llm_models", x)
 }
 
+#' Generic extractor for LLM model choices plus metadata
+#'
+#' @param x An LlmApi object
+#' @param ... Additional arguments
+#'
+#' @export
+get_llm_models_info <- function(x, ...) {
+  UseMethod("get_llm_models_info", x)
+}
+
 #' Generic LLM prompt sender
 #' This function is a generic method for sending prompts to a remote or local LLM API.
 #' It dispatches to the appropriate method based on the class of the `api` argument.

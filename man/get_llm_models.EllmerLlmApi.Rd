@@ -4,10 +4,13 @@
 \alias{get_llm_models.EllmerLlmApi}
 \title{Retrieve Available LLM Models via Ellmer bridge}
 \usage{
-\method{get_llm_models}{EllmerLlmApi}(x, ...)
+\method{get_llm_models}{EllmerLlmApi}(x, with_creds_only = TRUE, ...)
 }
 \arguments{
 \item{x}{An EllmerLlmApi object}
+
+\item{with_creds_only}{Logical, whether to attempt retrieval only if provider
+supports it with credentials.}
 
 \item{...}{Additional arguments}
 }

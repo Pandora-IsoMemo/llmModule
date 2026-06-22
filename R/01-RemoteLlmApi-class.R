@@ -64,8 +64,16 @@ new_RemoteLlmApi <- function(
 
     api_key <- trimws(readLines(api_key_path, warn = FALSE))
   } else {
+    api_key <- get_token_for_provider(provider)
+  }
+
+  if (!is_valid_character(api_key)) {
+    env_name <- llm_token_env_var_for_provider(provider)
     api <- list()
-    attr(api, "error") <- "No valid API key supplied."
+    attr(api, "error") <- sprintf(
+      "No valid API key supplied. Set %s or pass api_key directly.",
+      env_name
+    )
     return(api)
   }
 
@@ -180,6 +188,24 @@ get_llm_models.RemoteLlmApi <- function(x, ...) {
   models_list <- extract_named_model_list(models, categories)
 
   return(models_list)
+}
+
+#' Retrieve Available LLM Models plus metadata
+#'
+#' @param x An object of class RemoteLlmApi
+#' @param ... Additional arguments
+#' @return A `LlmModelsInfo` object with `models` and selection metadata.
+#' @export
+get_llm_models_info.RemoteLlmApi <- function(x, ...) {
+  models <- get_llm_models.RemoteLlmApi(x, ...)
+  listing_status <- if (length(models) > 0) "ok" else "empty"
+
+  new_LlmModelsInfo(
+    models = models,
+    can_fallback_to_provider_default = FALSE,
+    listing_status = listing_status,
+    provider = x$provider
+  )
 }
 
 #' Send a prompt to a remote LLM API (e.g., OpenAI, DeepSeek)

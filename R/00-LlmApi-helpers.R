@@ -5,6 +5,75 @@ is_valid_character <- function(string) {
     nzchar(trimws(string))
 }
 
+llm_token_env_var_for_provider <- function(provider) {
+  key <- normalize_provider_key(provider)
+
+  known <- c(
+    openai = "OPENAI_TOKEN",
+    deepseek = "DEEPSEEK_TOKEN",
+    anthropic = "ANTHROPIC_TOKEN",
+    claude = "ANTHROPIC_TOKEN",
+    openrouter = "OPENROUTER_TOKEN",
+    groq = "GROQ_TOKEN",
+    mistral = "MISTRAL_TOKEN",
+    github = "GITHUB_TOKEN",
+    google_gemini = "GOOGLE_GEMINI_TOKEN",
+    google_vertex = "GOOGLE_VERTEX_TOKEN",
+    azure_openai = "AZURE_OPENAI_TOKEN",
+    cloudflare = "CLOUDFLARE_TOKEN",
+    databricks = "DATABRICKS_TOKEN",
+    huggingface = "HUGGINGFACE_TOKEN",
+    perplexity = "PERPLEXITY_TOKEN",
+    portkey = "PORTKEY_TOKEN",
+    vllm = "VLLM_TOKEN"
+  )
+
+  if (key %in% names(known)) {
+    return(unname(known[[key]]))
+  }
+
+  paste0(toupper(gsub("[^A-Za-z0-9]+", "_", key)), "_TOKEN")
+}
+
+get_token_for_provider <- function(provider) {
+  env_name <- llm_token_env_var_for_provider(provider)
+  token <- Sys.getenv(env_name, unset = "")
+
+  if (!is_valid_character(token)) {
+    return(NULL)
+  }
+
+  trimws(token)
+}
+
+#' List supported provider token environment variables
+#'
+#' Returns the currently supported remote/bridge providers together with the
+#' token environment variable name that `llmModule` resolves for each provider.
+#'
+#' @return A data frame with columns: `provider`, `provider_key`, and
+#'   `token_env_var`.
+#' @export
+list_llm_token_env_vars <- function() {
+  p <- get_providers()
+
+  providers <- data.frame(
+    provider = names(p),
+    provider_key = tolower(unname(p)),
+    stringsAsFactors = FALSE
+  )
+
+  providers <- providers[providers$provider_key != "ollama", , drop = FALSE]
+
+  providers$token_env_var <- vapply(
+    providers$provider_key,
+    llm_token_env_var_for_provider,
+    character(1)
+  )
+
+  providers[order(providers$provider), c("provider", "provider_key", "token_env_var")]
+}
+
 inspect_ellmer_chat_model_rules <- function() {
   ns <- asNamespace("ellmer")
   exports <- getNamespaceExports("ellmer")
@@ -208,7 +277,6 @@ prettify_provider_key <- function(provider_key) {
 #'
 #' @return A data frame with columns: provider_key, chat_function, models_function,
 #'  model_rule, has_models_helper
-#' @export
 eligible_ellmer_providers <- function() {
   chat_tbl <- inspect_ellmer_chat_model_rules()
   models_tbl <- inspect_ellmer_models_helpers()
@@ -428,4 +496,40 @@ append_attr <- function(object, val, attr_name) {
   existing <- attr(object, attr_name)
   attr(object, attr_name) <- c(existing, val)
   object
+}
+
+#' Get providers for selection
+#'
+#' Returns a named character vector of provider keys with user-friendly names.
+#' The list is constructed based on legacy providers, eligible Ellmer providers,
+#' and whether Ollama is available.
+#'
+#' @param ollama_available Logical, whether Ollama is available in the current environment.
+#' @return Named character vector of provider keys with user-friendly names.
+#' @export
+get_providers <- function(ollama_available = NULL) {
+  if (is.null(ollama_available)) {
+    ollama_available <- is_ollama_running()
+  }
+  providers_legacy <- c("OpenAI" = "OpenAI", "DeepSeek" = "DeepSeek")
+
+  providers_ellmer <- eligible_ellmer_providers()
+
+  providers_all <- providers_ellmer[["provider_key"]]
+  names(providers_all) <- providers_ellmer[["provider_name"]]
+
+  # remove providers that are already in legacy list
+  providers_all <- providers_all[!names(providers_all) %in% names(providers_legacy)]
+
+  providers_all <- c(providers_legacy, providers_all)
+
+  if (!isTRUE(ollama_available)) {
+    return(providers_all)
+  }
+
+  # remove Ollama from provider choices if available, since it gets its own special UI treatment
+  # and is the default when running in Docker
+  providers_all <- providers_all[!names(providers_all) == "Ollama"]
+
+  c("Ollama (Local)" = "Ollama", providers_all)
 }

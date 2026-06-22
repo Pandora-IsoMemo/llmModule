@@ -82,7 +82,11 @@ new_EllmerLlmApi <- function(
     return(api)
   }
 
-  key_data <- resolve_api_key(api_key = api_key, api_key_path = api_key_path)
+  key_data <- resolve_api_key(
+    api_key = api_key,
+    api_key_path = api_key_path,
+    provider = provider
+  )
   if (!is.null(attr(key_data, "error"))) {
     return(key_data)
   }
@@ -130,7 +134,7 @@ read_bridge_api_key <- function(api_key_path) {
   list(api_key = api_key)
 }
 
-resolve_api_key <- function(api_key = NULL, api_key_path = NULL) {
+resolve_api_key <- function(api_key = NULL, api_key_path = NULL, provider = NULL) {
   if (is_valid_character(api_key)) {
     return(list(api_key = trimws(api_key)))
   }
@@ -150,6 +154,21 @@ resolve_api_key <- function(api_key = NULL, api_key_path = NULL) {
     }
 
     return(list(api_key = api_key_file))
+  }
+
+  if (is_valid_character(provider)) {
+    api_key_env <- get_token_for_provider(provider)
+    if (is_valid_character(api_key_env)) {
+      return(list(api_key = api_key_env))
+    }
+
+    env_name <- llm_token_env_var_for_provider(provider)
+    api <- list()
+    attr(api, "error") <- sprintf(
+      "No valid API key supplied. Set %s or pass api_key directly.",
+      env_name
+    )
+    return(api)
   }
 
   api <- list()
@@ -204,10 +223,16 @@ print.EllmerLlmApi <- function(x, ...) {
 #' Retrieve Available LLM Models via Ellmer bridge
 #'
 #' @param x An EllmerLlmApi object
+#' @param with_creds_only Logical, whether to attempt retrieval only if provider
+#'  supports it with credentials.
 #' @param ... Additional arguments
 #' @return Character vector or named list of available models
 #' @export
-get_llm_models.EllmerLlmApi <- function(x, ...) {
+get_llm_models.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
+  if (with_creds_only && !ellmer_provider_can_list_models_with_credentials(x$provider)) {
+    return(list())
+  }
+
   model_data <- tryCatch(
     bridge_models_list(x),
     error = function(e) e
@@ -236,6 +261,38 @@ get_llm_models.EllmerLlmApi <- function(x, ...) {
 
   categories <- vapply(models, function(id) categorize_model(id), character(1))
   extract_named_model_list(models, categories)
+}
+
+#' Retrieve Available LLM Models plus metadata via Ellmer bridge
+#'
+#' @param x An EllmerLlmApi object
+#' @param with_creds_only Logical, whether to attempt retrieval only if provider
+#'  supports it with credentials.
+#' @param ... Additional arguments
+#' @return A `LlmModelsInfo` object with `models` and selection metadata.
+#' @export
+get_llm_models_info.EllmerLlmApi <- function(x, with_creds_only = TRUE, ...) {
+  can_fallback <- ellmer_model_can_fallback(x$provider)
+  can_list_with_creds <- ellmer_provider_can_list_models_with_credentials(x$provider)
+
+  if (with_creds_only && !can_list_with_creds) {
+    return(new_LlmModelsInfo(
+      models = list(),
+      can_fallback_to_provider_default = can_fallback,
+      listing_status = "unavailable",
+      provider = x$provider
+    ))
+  }
+
+  models <- get_llm_models.EllmerLlmApi(x, with_creds_only = with_creds_only, ...)
+  listing_status <- if (length(models) > 0) "ok" else "empty"
+
+  new_LlmModelsInfo(
+    models = models,
+    can_fallback_to_provider_default = can_fallback,
+    listing_status = listing_status,
+    provider = x$provider
+  )
 }
 
 #' Send a prompt through the Ellmer bridge
