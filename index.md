@@ -1,11 +1,11 @@
-# llmModule (development version)
+# llmModule
 
 `llmModule` provides a structured R interface for working with remote
 and local Large Language Model (LLM) APIs through a consistent S3-based
 workflow.
 
-It is designed for script and package usage (without requiring Shiny),
-with support for:
+It is designed for script and package usage (without requiring you to
+run Shiny), with support for:
 
 - Remote providers through `RemoteLlmApi` and bridge-based providers
 - Local Ollama models through `LocalLlmApi`
@@ -31,7 +31,7 @@ with support for:
   - `LlmResponse` for structured handling of responses
 - Validation model aligned with runtime API behavior:
   - Constructor-time checks validate credentials (preferred: `api_key`
-    string; deprecated fallback: `api_key_path` file path)
+    string or provider token environment variable)
   - Internet and credential validity checks occur at runtime when
     calling
     [`get_llm_models()`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models.md)
@@ -48,18 +48,18 @@ with support for:
     to submit prompts and retrieve responses
 - Optional Docker integration for local deployment (see below)
 
-------------------------------------------------------------------------
+## 🧪 Quick Examples
 
-## 🧪 Quick Example
+### Cloud Provider Example
 
 ``` r
 
 library(llmModule)
 
-# Create an LLM API object
-api <- new_RemoteLlmApi(
-  provider = "OpenAI",
-  api_key = Sys.getenv("OPENAI_API_KEY")
+# Create an API object
+api <- new_BridgedLlmApi(
+  provider = "Anthropic",
+  api_key = Sys.getenv("ANTHROPIC_TOKEN")
 )
 
 # Set up a prompt
@@ -75,7 +75,7 @@ result <- send_prompt(api, prompt)
 if (!is.null(attr(result, "error"))) {
   message(attr(result, "error"))
 } else {
-  result$choices[[1]]$message$content
+  result$generated_text
 }
 ```
 
@@ -85,34 +85,146 @@ if (!is.null(attr(result, "error"))) {
 
 library(llmModule)
 
+# Initialize and refresh the local Ollama model manager
 manager <- new_OllamaModelManager()
 manager <- update(manager)
 
+# Create a local API object and select or pull the model if needed
 api <- new_LocalLlmApi(manager, "tinyllama")
 prompt <- new_LlmPromptConfig(
   prompt_content = "Summarize entropy in one sentence.",
   model = "tinyllama:latest"
 )
 
+# Send prompt and read the generated text
 response <- new_LlmResponse(api, prompt)
 response$generated_text
 ```
 
-### Bridge Provider Example
+### One-call Wrapper Example
 
 ``` r
 
 library(llmModule)
 
-api <- new_BridgedLlmApi(
-  provider = "Anthropic",
-  api_key = Sys.getenv("ANTHROPIC_API_KEY")
+# Call a cloud provider in one step
+result <- ask_llm(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_TOKEN"),
+  model = "gpt-4.1",
+  prompt_content = "What's the capital of Italy?",
+  temperature = 0.2,
+  max_tokens = 50
 )
 
-models <- get_llm_models(api)
+# Handle runtime validation and network errors
+if (!is.null(attr(result, "error"))) {
+  message(attr(result, "error"))
+} else {
+  result$generated_text
+}
 ```
 
-------------------------------------------------------------------------
+### Prompt arguments (quick orientation)
+
+[`ask_llm()`](https://pandora-isomemo.github.io/llmModule/reference/ask_llm.md)
+forwards additional arguments to
+[`new_LlmPromptConfig()`](https://pandora-isomemo.github.io/llmModule/reference/new_LlmPromptConfig.md).
+Commonly used arguments are:
+
+- `temperature`
+- `max_tokens`
+- `top_p`
+- `n`
+- `stop`
+- `seed`
+- `presence_penalty`
+- `frequency_penalty`
+- `logprobs`
+
+For a full walkthrough (including provider/model discovery and argument
+details), see the vignette:
+<https://pandora-isomemo.github.io/llmModule/articles/prompt-configuration-and-wrapper.html>
+
+### Discover Providers and Models First
+
+``` r
+
+library(llmModule)
+
+# 1) List available providers (includes Ollama only if reachable)
+providers <- get_providers()
+providers
+
+# 2) Create the API object for your selected provider
+api <- new_BridgedLlmApi(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_TOKEN")
+)
+
+# 3) List models for this provider
+models <- get_llm_models(api)
+models
+
+# 4) Use one model in the one-call wrapper
+result <- ask_llm(
+  provider = "OpenAI",
+  api_key = Sys.getenv("OPENAI_TOKEN"),
+  model = "gpt-4.1",
+  prompt_content = "Summarize entropy in one sentence."
+)
+
+if (!is.null(attr(result, "error"))) {
+  message(attr(result, "error"))
+} else {
+  result$generated_text
+}
+```
+
+## Authentication and Token Resolution
+
+For remote/bridge providers, `llmModule` resolves credentials in this
+order:
+
+1.  `api_key` argument (recommended for explicit programmatic control)
+2.  Provider token environment variable via internal
+    `get_token_for_provider(provider)`
+
+The token environment variable names are package-owned and currently use
+the `*_TOKEN` convention, for example:
+
+- `OPENAI_TOKEN`
+- `DEEPSEEK_TOKEN`
+- `ANTHROPIC_TOKEN`
+- `GITHUB_TOKEN`
+- `OPENROUTER_TOKEN`
+- `GROQ_TOKEN`
+- `MISTRAL_TOKEN`
+
+You can inspect the current provider-to-token mapping programmatically:
+
+``` r
+
+list_llm_token_env_vars()
+```
+
+For other provider keys, the fallback pattern is `PROVIDER_KEY_TOKEN`
+(upper-case, non-alphanumeric characters replaced with `_`).
+
+Example setup in `.Renviron`:
+
+``` bash
+OPENAI_TOKEN=your-openai-token
+ANTHROPIC_TOKEN=your-anthropic-token
+GITHUB_TOKEN=your-github-token
+```
+
+Then create API objects without repeating `api_key` in every call:
+
+``` r
+
+api <- new_BridgedLlmApi(provider = "OpenAI")
+```
 
 ## 📦 Docker Setup (optional)
 
@@ -187,8 +299,6 @@ Default locations for Ollama models:
 
 This will mount your local models into the container for faster startup
 and persistent access.
-
-------------------------------------------------------------------------
 
 ## Notes for developers
 

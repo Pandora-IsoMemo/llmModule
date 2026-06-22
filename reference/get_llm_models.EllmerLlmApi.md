@@ -6,7 +6,7 @@ Retrieve Available LLM Models via Ellmer bridge
 
 ``` r
 # S3 method for class 'EllmerLlmApi'
-get_llm_models(x, ...)
+get_llm_models(x, with_creds_only = TRUE, ...)
 ```
 
 ## Arguments
@@ -14,6 +14,11 @@ get_llm_models(x, ...)
 - x:
 
   An EllmerLlmApi object
+
+- with_creds_only:
+
+  Logical, whether to attempt retrieval only if provider supports it
+  with credentials.
 
 - ...:
 

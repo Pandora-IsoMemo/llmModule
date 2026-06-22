@@ -1,5 +1,21 @@
 # Changelog
 
+## llmModule 26.06.1
+
+### New Features
+
+- Added
+  [`ask_llm()`](https://pandora-isomemo.github.io/llmModule/reference/ask_llm.md)
+  convenience wrapper that routes API construction, prompt config, and
+  dispatch in one call (#17).
+- Introduced `LlmModelsInfo` and
+  [`get_llm_models_info()`](https://pandora-isomemo.github.io/llmModule/reference/get_llm_models_info.md)
+  to return model lists with status and fallback metadata, and wired
+  this into the prompt settings module cache.
+- Extracted provider-choice construction into
+  [`get_providers()`](https://pandora-isomemo.github.io/llmModule/reference/get_providers.md)
+  and refreshed README and vignette examples accordingly.
+
 ## llmModule 26.06.0
 
 ### New Features

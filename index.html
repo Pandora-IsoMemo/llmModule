@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">llmModule</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.06.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">26.06.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/prompt-configuration-and-wrapper.html">Prompt Configuration and Wrapper Usage</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -46,12 +52,12 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="llmmodule-development-version">llmModule (development version)<a class="anchor" aria-label="anchor" href="#llmmodule-development-version"></a>
+<div class="page-header"><h1 id="llmmodule">llmModule<a class="anchor" aria-label="anchor" href="#llmmodule"></a>
 </h1></div>
 <!-- badges: start -->
 
 <p><code>llmModule</code> provides a structured R interface for working with remote and local Large Language Model (LLM) APIs through a consistent S3-based workflow.</p>
-<p>It is designed for script and package usage (without requiring Shiny), with support for:</p>
+<p>It is designed for script and package usage (without requiring you to run Shiny), with support for:</p>
 <ul>
 <li>Remote providers through <code>RemoteLlmApi</code> and bridge-based providers</li>
 <li>Local Ollama models through <code>LocalLlmApi</code>
@@ -83,7 +89,7 @@
 </li>
 <li>Validation model aligned with runtime API behavior:
 <ul>
-<li>Constructor-time checks validate credentials (preferred: <code>api_key</code> string; deprecated fallback: <code>api_key_path</code> file path)</li>
+<li>Constructor-time checks validate credentials (preferred: <code>api_key</code> string or provider token environment variable)</li>
 <li>Internet and credential validity checks occur at runtime when calling <code><a href="reference/get_llm_models.html">get_llm_models()</a></code> or <code><a href="reference/send_prompt.html">send_prompt()</a></code>
 </li>
 </ul>
@@ -105,18 +111,20 @@
 </li>
 <li>Optional Docker integration for local deployment (see below)</li>
 </ul>
-<hr>
 </div>
 <div class="section level2">
-<h2 id="test_tube-quick-example">🧪 Quick Example<a class="anchor" aria-label="anchor" href="#test_tube-quick-example"></a>
+<h2 id="test_tube-quick-examples">🧪 Quick Examples<a class="anchor" aria-label="anchor" href="#test_tube-quick-examples"></a>
 </h2>
+<div class="section level3">
+<h3 id="cloud-provider-example">Cloud Provider Example<a class="anchor" aria-label="anchor" href="#cloud-provider-example"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pandora-isomemo.github.io/llmModule/">llmModule</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create an LLM API object</span></span>
-<span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_RemoteLlmApi.html">new_RemoteLlmApi</a></span><span class="op">(</span></span>
-<span>  provider <span class="op">=</span> <span class="st">"OpenAI"</span>,</span>
-<span>  api_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"OPENAI_API_KEY"</span><span class="op">)</span></span>
+<span><span class="co"># Create an API object</span></span>
+<span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_BridgedLlmApi.html">new_BridgedLlmApi</a></span><span class="op">(</span></span>
+<span>  provider <span class="op">=</span> <span class="st">"Anthropic"</span>,</span>
+<span>  api_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"ANTHROPIC_TOKEN"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Set up a prompt</span></span>
@@ -132,40 +140,136 @@
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"error"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"error"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>  <span class="va">result</span><span class="op">$</span><span class="va">choices</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">message</span><span class="op">$</span><span class="va">content</span></span>
+<span>  <span class="va">result</span><span class="op">$</span><span class="va">generated_text</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+</div>
 <div class="section level3">
 <h3 id="local-ollama-example">Local Ollama Example<a class="anchor" aria-label="anchor" href="#local-ollama-example"></a>
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pandora-isomemo.github.io/llmModule/">llmModule</a></span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Initialize and refresh the local Ollama model manager</span></span>
 <span><span class="va">manager</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_OllamaModelManager.html">new_OllamaModelManager</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">manager</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/update.html">update</a></span><span class="op">(</span><span class="va">manager</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Create a local API object and select or pull the model if needed</span></span>
 <span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_LocalLlmApi.html">new_LocalLlmApi</a></span><span class="op">(</span><span class="va">manager</span>, <span class="st">"tinyllama"</span><span class="op">)</span></span>
 <span><span class="va">prompt</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_LlmPromptConfig.html">new_LlmPromptConfig</a></span><span class="op">(</span></span>
 <span>  prompt_content <span class="op">=</span> <span class="st">"Summarize entropy in one sentence."</span>,</span>
 <span>  model <span class="op">=</span> <span class="st">"tinyllama:latest"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Send prompt and read the generated text</span></span>
 <span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_LlmResponse.html">new_LlmResponse</a></span><span class="op">(</span><span class="va">api</span>, <span class="va">prompt</span><span class="op">)</span></span>
 <span><span class="va">response</span><span class="op">$</span><span class="va">generated_text</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="bridge-provider-example">Bridge Provider Example<a class="anchor" aria-label="anchor" href="#bridge-provider-example"></a>
+<h3 id="one-call-wrapper-example">One-call Wrapper Example<a class="anchor" aria-label="anchor" href="#one-call-wrapper-example"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pandora-isomemo.github.io/llmModule/">llmModule</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_BridgedLlmApi.html">new_BridgedLlmApi</a></span><span class="op">(</span></span>
-<span>  provider <span class="op">=</span> <span class="st">"Anthropic"</span>,</span>
-<span>  api_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"ANTHROPIC_API_KEY"</span><span class="op">)</span></span>
+<span><span class="co"># Call a cloud provider in one step</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ask_llm.html">ask_llm</a></span><span class="op">(</span></span>
+<span>  provider <span class="op">=</span> <span class="st">"OpenAI"</span>,</span>
+<span>  api_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"OPENAI_TOKEN"</span><span class="op">)</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"gpt-4.1"</span>,</span>
+<span>  prompt_content <span class="op">=</span> <span class="st">"What's the capital of Italy?"</span>,</span>
+<span>  temperature <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  max_tokens <span class="op">=</span> <span class="fl">50</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_llm_models.html">get_llm_models</a></span><span class="op">(</span><span class="va">api</span><span class="op">)</span></span></code></pre></div>
-<hr>
+<span><span class="co"># Handle runtime validation and network errors</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"error"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"error"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="va">result</span><span class="op">$</span><span class="va">generated_text</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="prompt-arguments-quick-orientation">Prompt arguments (quick orientation)<a class="anchor" aria-label="anchor" href="#prompt-arguments-quick-orientation"></a>
+</h3>
+<p><code><a href="reference/ask_llm.html">ask_llm()</a></code> forwards additional arguments to <code><a href="reference/new_LlmPromptConfig.html">new_LlmPromptConfig()</a></code>. Commonly used arguments are:</p>
+<ul>
+<li><code>temperature</code></li>
+<li><code>max_tokens</code></li>
+<li><code>top_p</code></li>
+<li><code>n</code></li>
+<li><code>stop</code></li>
+<li><code>seed</code></li>
+<li><code>presence_penalty</code></li>
+<li><code>frequency_penalty</code></li>
+<li><code>logprobs</code></li>
+</ul>
+<p>For a full walkthrough (including provider/model discovery and argument details), see the vignette: <a href="https://pandora-isomemo.github.io/llmModule/articles/prompt-configuration-and-wrapper.html" class="uri">https://pandora-isomemo.github.io/llmModule/articles/prompt-configuration-and-wrapper.html</a></p>
+</div>
+<div class="section level3">
+<h3 id="discover-providers-and-models-first">Discover Providers and Models First<a class="anchor" aria-label="anchor" href="#discover-providers-and-models-first"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pandora-isomemo.github.io/llmModule/">llmModule</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 1) List available providers (includes Ollama only if reachable)</span></span>
+<span><span class="va">providers</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_providers.html">get_providers</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">providers</span></span>
+<span></span>
+<span><span class="co"># 2) Create the API object for your selected provider</span></span>
+<span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_BridgedLlmApi.html">new_BridgedLlmApi</a></span><span class="op">(</span></span>
+<span>  provider <span class="op">=</span> <span class="st">"OpenAI"</span>,</span>
+<span>  api_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"OPENAI_TOKEN"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3) List models for this provider</span></span>
+<span><span class="va">models</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_llm_models.html">get_llm_models</a></span><span class="op">(</span><span class="va">api</span><span class="op">)</span></span>
+<span><span class="va">models</span></span>
+<span></span>
+<span><span class="co"># 4) Use one model in the one-call wrapper</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/ask_llm.html">ask_llm</a></span><span class="op">(</span></span>
+<span>  provider <span class="op">=</span> <span class="st">"OpenAI"</span>,</span>
+<span>  api_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"OPENAI_TOKEN"</span><span class="op">)</span>,</span>
+<span>  model <span class="op">=</span> <span class="st">"gpt-4.1"</span>,</span>
+<span>  prompt_content <span class="op">=</span> <span class="st">"Summarize entropy in one sentence."</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"error"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"error"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="va">result</span><span class="op">$</span><span class="va">generated_text</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="authentication-and-token-resolution">Authentication and Token Resolution<a class="anchor" aria-label="anchor" href="#authentication-and-token-resolution"></a>
+</h2>
+<p>For remote/bridge providers, <code>llmModule</code> resolves credentials in this order:</p>
+<ol style="list-style-type: decimal">
+<li>
+<code>api_key</code> argument (recommended for explicit programmatic control)</li>
+<li>Provider token environment variable via internal <code>get_token_for_provider(provider)</code>
+</li>
+</ol>
+<p>The token environment variable names are package-owned and currently use the <code>*_TOKEN</code> convention, for example:</p>
+<ul>
+<li><code>OPENAI_TOKEN</code></li>
+<li><code>DEEPSEEK_TOKEN</code></li>
+<li><code>ANTHROPIC_TOKEN</code></li>
+<li><code>GITHUB_TOKEN</code></li>
+<li><code>OPENROUTER_TOKEN</code></li>
+<li><code>GROQ_TOKEN</code></li>
+<li><code>MISTRAL_TOKEN</code></li>
+</ul>
+<p>You can inspect the current provider-to-token mapping programmatically:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/list_llm_token_env_vars.html">list_llm_token_env_vars</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>For other provider keys, the fallback pattern is <code>PROVIDER_KEY_TOKEN</code> (upper-case, non-alphanumeric characters replaced with <code>_</code>).</p>
+<p>Example setup in <code>.Renviron</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">OPENAI_TOKEN</span><span class="op">=</span>your-openai-token</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="va">ANTHROPIC_TOKEN</span><span class="op">=</span>your-anthropic-token</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="va">GITHUB_TOKEN</span><span class="op">=</span>your-github-token</span></code></pre></div>
+<p>Then create API objects without repeating <code>api_key</code> in every call:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/new_BridgedLlmApi.html">new_BridgedLlmApi</a></span><span class="op">(</span>provider <span class="op">=</span> <span class="st">"OpenAI"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="package-docker-setup-optional">📦 Docker Setup (optional)<a class="anchor" aria-label="anchor" href="#package-docker-setup-optional"></a>
@@ -223,7 +327,7 @@ docker compose up</code></pre>
 </h3>
 <p>To use your own pre-downloaded Ollama models, specify a custom path by setting the <code>OLLAMA_LOCAL_MODELS_PATH</code> environment variable.</p>
 <p>This requires cloning the repository and running Docker Compose from the project directory.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=</span>/path/to/your/models <span class="ex">docker</span> compose up</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=</span>/path/to/your/models <span class="ex">docker</span> compose up</span></code></pre></div>
 <p>Default locations for Ollama models:</p>
 <ul>
 <li>linux: <code>/usr/share/ollama/.ollama</code>
@@ -234,7 +338,6 @@ docker compose up</code></pre>
 </li>
 </ul>
 <p>This will mount your local models into the container for faster startup and persistent access.</p>
-<hr>
 </div>
 </div>
 <div class="section level2">
@@ -244,7 +347,7 @@ docker compose up</code></pre>
 <h3 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h3>
 <p>When adding information to the <em>help</em> sites, <em>docstrings</em> or the <em>vignette</em> of this package, please update documentation locally as follows. The documentation of the main branch is build automatically via github action.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">document</span><span class="op">(</span><span class="op">)</span> <span class="co"># or CTRL + SHIFT + D in RStudio</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">build_site</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -252,14 +355,14 @@ docker compose up</code></pre>
 <h3 id="local-testing">Local testing<a class="anchor" aria-label="anchor" href="#local-testing"></a>
 </h3>
 <p>To build and run the app locally:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">--build</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">--build</span></span></code></pre></div>
 <p>Use <code>--build</code> if:</p>
 <ul>
 <li>You made changes to source code or Dockerfiles,</li>
 <li>Or you’re testing a fresh environment.</li>
 </ul>
 <p>To run with a custom models path:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=&lt;</span>/path/to/your/models<span class="op">&gt;</span> docker <span class="ex">compose</span> up <span class="at">--build</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="va">OLLAMA_LOCAL_MODELS_PATH</span><span class="op">=&lt;</span>/path/to/your/models<span class="op">&gt;</span> docker <span class="ex">compose</span> up <span class="at">--build</span></span></code></pre></div>
 <p><em>Tip:</em> Use <code>docker compose down</code> to stop and clean up the containers when done.</p>
 </div>
 </div>
