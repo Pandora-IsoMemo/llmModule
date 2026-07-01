@@ -220,6 +220,15 @@ send_prompt.RemoteLlmApi <- function(api, prompt_config) {
   # Filter the prompt configuration
   prompt_config <- llm_filter_config(api, prompt_config)
 
+  if (is.null(prompt_config$model) || identical(prompt_config$model, "")) {
+    result <- list()
+    attr(result, "error") <- sprintf(
+      "No model specified for provider '%s'. Provide a model via the 'model' argument.",
+      api$provider
+    )
+    return(result)
+  }
+
   connectivity_error <- check_remote_connectivity(api$no_internet)
   if (!is.null(connectivity_error)) {
     result <- list()

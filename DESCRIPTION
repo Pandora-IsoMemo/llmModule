@@ -1,8 +1,8 @@
 Package: llmModule
 Type: Package
 Title: R Interface for Large Language Model APIs
-Version: 26.06.1
-Date: 2026-06-05
+Version: 26.07.0
+Date: 2026-07-01
 Authors@R: c(
             person("Ricardo", "Fernandes", email = "ldv1452@gmail.com", role = c("aut", "cre")),
             person("Antonia", "Runge", email = "antonia.runge@inwt-statistics.de", role = c("aut"))
