@@ -1,5 +1,17 @@
 # Changelog
 
+## llmModule 26.07.0
+
+### Bug Fixes
+
+- Fixed
+  [`ask_llm()`](https://pandora-isomemo.github.io/llmModule/reference/ask_llm.md)
+  returning HTTP 400 for `RemoteLlmApi` providers (e.g. `DeepSeek`) when
+  no `model` argument was supplied;
+  [`send_prompt.RemoteLlmApi()`](https://pandora-isomemo.github.io/llmModule/reference/send_prompt.RemoteLlmApi.md)
+  now returns a clear error instead of forwarding a `NULL` model to the
+  API.
+
 ## llmModule 26.06.1
 
 ### New Features
