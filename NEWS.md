@@ -1,3 +1,8 @@
+# llmModule 26.07.0
+
+## Bug Fixes
+- Fixed `ask_llm()` returning HTTP 400 for `RemoteLlmApi` providers (e.g. `DeepSeek`) when no `model` argument was supplied; `send_prompt.RemoteLlmApi()` now returns a clear error instead of forwarding a `NULL` model to the API.
+
 # llmModule 26.06.1
 
 ## New Features
